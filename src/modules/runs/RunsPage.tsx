@@ -56,6 +56,13 @@ export function RunsPage() {
   return (
     <div className="tool-grid tool-grid-single">
       <Panel title="Run History" subtitle="Unified run registry from API endpoint with local fallback.">
+        <div className="edu-chip-row" aria-label="Status legend">
+          <span className="edu-chip">queued: accepted, waiting</span>
+          <span className="edu-chip">running: actively processing</span>
+          <span className="edu-chip">complete: result available</span>
+          <span className="edu-chip">failed: inspect detail or run record</span>
+        </div>
+
         {runsQuery.isLoading ? <p className="muted">Loading run history...</p> : null}
         {rows.length === 0 ? <p className="muted">No runs yet. Execute any module to populate history.</p> : null}
 

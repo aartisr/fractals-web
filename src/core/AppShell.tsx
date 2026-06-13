@@ -6,13 +6,17 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <header className="brand">
+      <header className="research-topbar">
+        <div className="brand">
           <p>Nexus Fractal Lab</p>
-          <h1>Research Workbench</h1>
-        </header>
+          <h1>Visual Research Workbench</h1>
+        </div>
 
-        <nav className="module-nav" aria-label="Workbench modules">
+        <p className="lab-strap">
+          Compact, figure-first environment for exploratory analysis, reproducible runs, and educational interpretation.
+        </p>
+
+        <nav className="module-ribbon" aria-label="Workbench modules">
           {workbenchModules.map((module) => {
             const active = pathname === module.path || pathname.startsWith(`${module.path}/`)
             return (
@@ -22,7 +26,7 @@ export function AppShell() {
                 className="module-link"
                 style={{
                   borderColor: active ? module.accent : 'transparent',
-                  boxShadow: active ? `inset 0 0 0 1px ${module.accent}` : 'none',
+                  boxShadow: active ? `inset 0 0 0 1px ${module.accent}, 0 8px 20px rgba(6, 26, 41, 0.18)` : 'none',
                 }}
               >
                 <strong>{module.title}</strong>
@@ -31,12 +35,9 @@ export function AppShell() {
             )
           })}
         </nav>
-      </aside>
+      </header>
 
       <main className="workspace">
-        <header className="workspace-header">
-          <p>Highly modular, route-driven and responsive scientific workspace.</p>
-        </header>
         <Outlet />
       </main>
     </div>

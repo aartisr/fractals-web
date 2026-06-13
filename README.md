@@ -1,7 +1,5 @@
 # Fractals TanStack Workbench
 
-> **Work in Progress** — This project is actively under development. Features, APIs, and UI are subject to change.
-
 Responsive, modular scientific workbench scaffolded as a sibling project to support fractal generation, box counting, image comparison, and tumor detection workflows.
 
 ## Stack
@@ -43,7 +41,8 @@ src/
 
 ## Notes
 
-- The frontend is wired to real HTTP endpoints through `src/core/services/api.ts`.
-- Configure backend origin with `VITE_API_BASE_URL` (default: `http://127.0.0.1:8000`).
+- The frontend is wired to real HTTP endpoints through `src/core/services/api.ts`, then falls back to browser-local computation when the API is not available.
+- Local fallback coverage includes Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, Sierpinski Triangle, ROI box counting, image comparison, tumor-candidate overlays, and run history.
+- Configure backend origin with `VITE_API_BASE_URL` (default: `http://127.0.0.1:8000`) when a Python/ONNX service is available.
 - Job responses with `jobId` are automatically polled through `/api/jobs/:jobId`.
 - Run history route (`/workbench/runs`) uses `/api/runs`, with localStorage fallback for resilience.

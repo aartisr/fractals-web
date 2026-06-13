@@ -21,6 +21,12 @@ export function RunDetailPage() {
 
         {run ? (
           <div className="detail-stack">
+            <div className="edu-note">
+              <p className="edu-note-title">How to read this record</p>
+              <p>Summary captures operational context, Parameters capture experiment setup, and Artifacts capture generated files.</p>
+              <p>Use Result as the final evidence block for interpretation and reproducibility checks.</p>
+            </div>
+
             <div className="metrics detail-grid">
               <span>Run ID: {run.id}</span>
               <span>Type: {run.type}</span>
