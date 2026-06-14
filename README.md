@@ -1,5 +1,8 @@
 # Fractals TanStack Workbench
 
+Author: Aarti S Ravikumar  
+Status: Work in Progress
+
 Responsive, modular scientific workbench scaffolded as a sibling project to support fractal generation, box counting, image comparison, and tumor detection workflows.
 
 ## Stack
@@ -38,6 +41,24 @@ src/
 - `npm run build` compiles and bundles production build
 - `npm run preview` serves built assets locally
 - `npm run lint` runs ESLint checks
+
+## Vercel Deployment
+
+- This repo is Vercel-ready for SPA routing via `vercel.json`.
+- Dynamic app routes like `/workbench/fractals`, `/workbench/runs`, and `/workbench/runs/:id` are rewritten to `index.html`.
+- Static files are still served directly first via filesystem handling.
+
+### Deploy Steps
+
+1. Import the repository in Vercel.
+2. Keep framework preset as `Vite` (or `Other` with defaults below).
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. (Optional) Set `VITE_API_BASE_URL` in project environment variables.
+
+### Local Preflight
+
+- Run `npm run build` before deploy to verify production bundle integrity.
 
 ## Notes
 

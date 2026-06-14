@@ -38,6 +38,15 @@ body {
   color: var(--ink-900);
   font: 14px/1.42 var(--font-ui);
   background: var(--bg-wave);
+  overflow-x: hidden;
+}
+
+img,
+canvas,
+svg,
+video {
+  max-width: 100%;
+  display: block;
 }
 
 .app-shell {
@@ -77,6 +86,14 @@ body {
   margin: 0;
   font: 700 1.18rem/1.1 var(--font-heading);
   letter-spacing: 0.01em;
+}
+
+.brand-meta {
+  margin: 0;
+  color: var(--ink-600);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .lab-strap {
@@ -180,6 +197,7 @@ body {
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   gap: 0.78rem;
   align-items: start;
+  min-width: 0;
 }
 
 .tool-grid-single {
@@ -256,6 +274,7 @@ body {
   box-shadow: var(--shadow-soft);
   padding: 0.82rem;
   animation: lift-in 0.34s ease;
+  min-width: 0;
 }
 
 .panel-header {
@@ -348,6 +367,8 @@ select {
   color: var(--ink-900);
   min-height: 2.14rem;
   padding: 0.3rem 0.56rem;
+  width: 100%;
+  min-width: 0;
 }
 
 input[type='file'] {
@@ -505,6 +526,10 @@ input[type='file'] {
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .overlay-toggle {
@@ -748,6 +773,8 @@ pre {
   background: #f9fcff;
   padding: 0.64rem;
   overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
   font: 0.73rem/1.35 var(--font-mono);
 }
 
@@ -758,7 +785,7 @@ pre {
 .runs-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 860px;
+  min-width: 680px;
 }
 
 .runs-table th,
@@ -853,6 +880,10 @@ pre {
     grid-template-columns: 1fr;
   }
 
+  .panel {
+    padding: 0.72rem;
+  }
+
   .result-image {
     height: clamp(300px, 50vh, 560px);
   }
@@ -869,6 +900,15 @@ pre {
 
   .workspace {
     padding: 0.64rem;
+  }
+
+  .tool-grid {
+    gap: 0.62rem;
+  }
+
+  .panel {
+    border-radius: 0.78rem;
+    padding: 0.62rem;
   }
 
   .workspace-facts,
@@ -902,6 +942,48 @@ pre {
   .overlay-toggle,
   .overlay-legend-item {
     font-size: 0.63rem;
+  }
+
+  .overlay-controls {
+    flex-wrap: nowrap;
+    padding-bottom: 0.1rem;
+  }
+
+  .result-image {
+    height: clamp(240px, 44vh, 460px);
+  }
+
+  .stage-badge,
+  .stage-badge-right,
+  .stage-scale {
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .runs-table {
+    min-width: 560px;
+  }
+
+  .full-page-mode {
+    padding:
+      max(0.4rem, env(safe-area-inset-top))
+      max(0.4rem, env(safe-area-inset-right))
+      max(0.4rem, env(safe-area-inset-bottom))
+      max(0.4rem, env(safe-area-inset-left));
+  }
+
+  .full-page-mode .fractal-explorer-toolbar {
+    top: auto;
+    bottom: 0.55rem;
+    border-radius: 0.72rem;
+    justify-content: flex-start;
+  }
+
+  .full-page-mode .result-image,
+  .full-page-mode .fractal-canvas {
+    height: calc(100svh - 1.6rem);
   }
 }
 

@@ -10,6 +10,7 @@ export function AppShell() {
         <div className="brand">
           <p>Nexus Fractal Lab</p>
           <h1>Visual Research Workbench</h1>
+          <p className="brand-meta">By Aarti S Ravikumar · Work in Progress</p>
         </div>
 
         <p className="lab-strap">
