@@ -186,6 +186,69 @@ body {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.full-page-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  margin: 0;
+  padding: 0.5rem;
+  background: radial-gradient(circle at 20% 10%, rgba(10, 30, 45, 0.22), rgba(5, 14, 24, 0.92));
+  align-items: stretch;
+}
+
+.full-page-explorer {
+  min-height: calc(100vh - 1rem);
+}
+
+.full-page-explorer .panel {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+  border-radius: 0.75rem;
+  padding: 0.55rem;
+  background: rgba(7, 20, 30, 0.92);
+  border-color: rgba(145, 180, 210, 0.3);
+}
+
+.full-page-explorer .panel-header {
+  display: none;
+}
+
+.full-page-mode .fractal-explorer-toolbar {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  right: 0.6rem;
+  z-index: 12;
+  margin: 0;
+  padding: 0.35rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(162, 205, 235, 0.34);
+  background: rgba(10, 29, 43, 0.68);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.full-page-mode .overlay-toggle {
+  background: rgba(228, 244, 255, 0.95);
+}
+
+.full-page-mode .full-page-controls.is-hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.full-page-mode .result-image,
+.full-page-mode .fractal-canvas {
+  height: calc(100vh - 1.8rem);
+  max-height: none;
+  border-radius: 0.55rem;
+  background: #02070d;
+}
+
 .panel {
   border: 1px solid var(--line);
   background: var(--panel);
@@ -840,4 +903,58 @@ pre {
   .overlay-legend-item {
     font-size: 0.63rem;
   }
+}
+
+/* Research Panel Styles */
+.research-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(247, 251, 255, 0.6);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 119, 182, 0.15);
+}
+
+.research-section {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-left: 3px solid var(--signal);
+  border-radius: 0.25rem;
+}
+
+.research-section h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--signal-deep);
+  letter-spacing: 0.01em;
+}
+
+.research-section p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: var(--ink-900);
+}
+
+.research-section ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.research-section ul li {
+  margin: 0.3rem 0;
+  color: var(--ink-700);
+}
+
+.research-section strong {
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.research-section .muted {
+  font-size: 0.85rem;
+  color: var(--ink-600);
 }

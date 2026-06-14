@@ -34,6 +34,8 @@ import { type Viewport, clamp, defaultExtent, zoomViewport, panViewport } from '
 import { GL_FRACTAL_TYPES, type GLState, initGL, renderWithGL } from './webgl-renderer'
 import { renderIFS } from './ifs-renderer'
 import { exportPng, exportSvg } from './export'
+import { generateResearchSummary, type FractalResearchSummary } from './research-analysis'
+import { generateResearchReport } from './research-guides'
 
 // ── Default form / initial render values ─────────────────────────────────────
 
@@ -48,6 +50,145 @@ const DEFAULT_PARAMS: RenderParams = {
   cImag: 0.6,
 }
 
+// ── Animated zoom sequences ────────────────────────────────────────────────────
+
+/** A keyframe in an animated zoom sequence with target viewport and normalized time (0–1). */
+type ZoomKeyframe = {
+  time: number
+  viewport: Viewport
+  title?: string
+  insight?: string
+}
+
+/**
+ * Creates an infinite zoom sequence that demonstrates self-similarity.
+ * Continuously zooms in to reveal fractal structure, then smoothly cycles back
+ * to show the same pattern at different scales, creating a hypnotic loop.
+ */
+const getInfiniteZoomSequence = (fractalType: FractalType, startViewport: Viewport): ZoomKeyframe[] => {
+  const base = startViewport
+  
+  switch (fractalType) {
+    case 'Mandelbrot':
+      // Infinite zoom into Seahorse Valley: spiral patterns repeat at smaller scales
+      return [
+        // Phase 1: Zoom in (0.0 → 0.7) — dive deep into the structure
+        { time: 0.0, viewport: base, title: 'Global Set', insight: 'Start at the full Mandelbrot to see where mini-sets live on the boundary.' },
+        { time: 0.1, viewport: { xMin: -0.75, xMax: -0.74, yMin: 0.085, yMax: 0.095 }, title: 'Seahorse Valley', insight: 'Filaments spiral into smaller copies, a hallmark of self-similarity.' },
+        { time: 0.2, viewport: { xMin: -0.7473, xMax: -0.7465, yMin: 0.0899, yMax: 0.0907 }, title: 'Spiral Corridor', insight: 'Repeated curling bands show near-scale invariance with deformation.' },
+        { time: 0.35, viewport: { xMin: -0.746914, xMax: -0.746864, yMin: 0.08987, yMax: 0.08992 }, title: 'Mini-Set Boundary', insight: 'Tiny cardioid-like shapes echo the parent structure.' },
+        { time: 0.5, viewport: { xMin: -0.7468897, xMax: -0.7468847, yMin: 0.089885, yMax: 0.089935 }, title: 'Filament Lace', insight: 'Boundary complexity rises as effective fractal dimension approaches 2.' },
+        { time: 0.65, viewport: { xMin: -0.74688974, xMax: -0.74688924, yMin: 0.0898896, yMax: 0.0898946 }, title: 'Deep Repeat', insight: 'The motif recurs again: detail appears no matter how far you zoom.' },
+        // Phase 2: Transition (0.7 → 1.0) — zoom out but reveal similar structure
+        { time: 0.75, viewport: { xMin: -0.748, xMax: -0.742, yMin: 0.087, yMax: 0.093 }, title: 'Scale Bridge', insight: 'Zooming out reveals the same grammar of spirals at a larger scale.' },
+        { time: 0.85, viewport: { xMin: -0.755, xMax: -0.735, yMin: 0.08, yMax: 0.1 }, title: 'Context Recovery', insight: 'You regain neighborhood context while preserving repeated motifs.' },
+        { time: 1.0, viewport: base, title: 'Loop Restart', insight: 'One complete pedagogical loop: global to deep to global.' }, // Loop seamlessly
+      ]
+    
+    case 'Julia':
+      // Infinite spiral through Julia set
+      return [
+        { time: 0.0, viewport: base, title: 'Julia Global', insight: 'Connected lobes reveal sensitivity to the complex parameter c.' },
+        { time: 0.15, viewport: { xMin: -0.8, xMax: -0.6, yMin: 0, yMax: 0.2 }, title: 'Primary Spiral', insight: 'Arms twist around attractor-like regions in complex dynamics.' },
+        { time: 0.3, viewport: { xMin: -0.73, xMax: -0.71, yMin: 0.04, yMax: 0.06 }, title: 'Filament Junction', insight: 'Fine threads split repeatedly, forming recursive branch geometry.' },
+        { time: 0.45, viewport: { xMin: -0.719, xMax: -0.709, yMin: 0.048, yMax: 0.058 }, title: 'Micro Spiral', insight: 'Local turns mimic macro turns: same pattern language, new scale.' },
+        { time: 0.6, viewport: { xMin: -0.7149, xMax: -0.7139, yMin: 0.0508, yMax: 0.0518 }, title: 'Deep Julia Texture', insight: 'Boundary complexity indicates chaotic basin separation.' },
+        { time: 0.8, viewport: { xMin: -0.76, xMax: -0.66, yMin: 0.01, yMax: 0.11 }, title: 'Scale Return', insight: 'Zoom-out reconnects micro detail to global topology.' },
+        { time: 1.0, viewport: base, title: 'Loop Restart', insight: 'Replay to compare self-similarity across cycles.' },
+      ]
+    
+    case 'Burning Ship':
+      // Infinite asymmetric zoom
+      return [
+        { time: 0.0, viewport: base, title: 'Burning Ship Global', insight: 'Absolute-value dynamics break symmetry and create flame-like ridges.' },
+        { time: 0.15, viewport: { xMin: -1.8, xMax: -1.6, yMin: -0.2, yMax: 0 }, title: 'Main Hull', insight: 'The hull region exhibits strong directional asymmetry.' },
+        { time: 0.3, viewport: { xMin: -1.76, xMax: -1.74, yMin: -0.1, yMax: -0.08 }, title: 'Ridge Stack', insight: 'Ridges replicate in scaled clusters with sharp cusps.' },
+        { time: 0.45, viewport: { xMin: -1.7547, xMax: -1.7527, yMin: -0.0947, yMax: -0.0927 }, title: 'Cusp Cascade', insight: 'Successive cusps show recurring geometry under anisotropic growth.' },
+        { time: 0.6, viewport: { xMin: -1.75385, xMax: -1.75355, yMin: -0.09365, yMax: -0.09335 }, title: 'Deep Flame Detail', insight: 'Tiny crenellations mirror larger serrated structures.' },
+        { time: 0.8, viewport: { xMin: -1.77, xMax: -1.73, yMin: -0.15, yMax: -0.05 }, title: 'Scale Return', insight: 'The same ridge language remains visible as scale expands.' },
+        { time: 1.0, viewport: base, title: 'Loop Restart', insight: 'Use repeated loops to compare asymmetric self-similarity.' },
+      ]
+    
+    case 'Newton':
+      // Infinite cycle through Newton convergence basins
+      return [
+        { time: 0.0, viewport: base, title: 'Newton Basins', insight: 'Colors represent which root each point converges to.' },
+        { time: 0.2, viewport: { xMin: -0.5, xMax: 0.5, yMin: -0.5, yMax: 0.5 }, title: 'Basin Boundary', insight: 'Near boundaries, tiny perturbations switch destination roots.' },
+        { time: 0.4, viewport: { xMin: -0.1, xMax: 0.1, yMin: -0.1, yMax: 0.1 }, title: 'Chaotic Interface', insight: 'Convergence regions interleave in intricate fractal seams.' },
+        { time: 0.6, viewport: { xMin: -0.02, xMax: 0.02, yMin: -0.02, yMax: 0.02 }, title: 'Deep Interface', insight: 'Boundary complexity persists as you magnify.' },
+        { time: 0.8, viewport: { xMin: -0.3, xMax: 0.3, yMin: -0.3, yMax: 0.3 }, title: 'Scale Return', insight: 'Macro basins and micro seams align conceptually across scale.' },
+        { time: 1.0, viewport: base, title: 'Loop Restart', insight: 'Each cycle replays root-basin sensitivity.' },
+      ]
+    
+    case 'Barnsley Fern':
+    case 'Sierpinski Triangle':
+    default:
+      // No zoom for IFS types
+      return [
+        { time: 0.0, viewport: base },
+        { time: 1.0, viewport: base },
+      ]
+  }
+}
+
+/**
+ * Add short pauses at educational landmarks so users can read the insight text.
+ */
+const withDwellKeyframes = (sequence: ZoomKeyframe[], dwell = 0.035): ZoomKeyframe[] => {
+  if (sequence.length < 3) return sequence
+  const out: ZoomKeyframe[] = []
+
+  for (let i = 0; i < sequence.length; i++) {
+    const current = sequence[i]
+    out.push(current)
+
+    if (i === sequence.length - 1) continue
+    const next = sequence[i + 1]
+    const segment = next.time - current.time
+    const canDwell = Boolean(current.title) && segment > dwell * 1.6 && current.time + dwell < 0.995
+
+    if (canDwell) {
+      out.push({ ...current, time: current.time + dwell })
+    }
+  }
+
+  return out.sort((a, b) => a.time - b.time)
+}
+
+/** Slower loops improve readability of each named region. */
+const getInfiniteZoomCycleDurationMs = (fractalType: FractalType): number => {
+  switch (fractalType) {
+    case 'Mandelbrot':
+      return 14000
+    case 'Julia':
+      return 13000
+    case 'Burning Ship':
+      return 13000
+    case 'Newton':
+      return 12000
+    default:
+      return 10000
+  }
+}
+
+/**
+ * Interpolates between two viewports using linear interpolation.
+ * Smoother easing can be applied by the caller.
+ */
+const lerpViewport = (a: Viewport, b: Viewport, t: number): Viewport => ({
+  xMin: a.xMin + (b.xMin - a.xMin) * t,
+  xMax: a.xMax + (b.xMax - a.xMax) * t,
+  yMin: a.yMin + (b.yMin - a.yMin) * t,
+  yMax: a.yMax + (b.yMax - a.yMax) * t,
+})
+
+/**
+ * Easing function for smooth animation (cubic ease-in-out).
+ */
+const easeCubicInOut = (t: number): number => {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function FractalsPage() {
@@ -57,6 +198,19 @@ export function FractalsPage() {
   const [showOverlays, setShowOverlays]        = useOverlayPreference('fractals.overlay.visible')
   const [controlsExpanded, setControlsExpanded] = useState(false)
   const [precisionMode, setPrecisionMode]      = useState(false)
+  const [isFullPageMode, setIsFullPageMode]    = useState(false)
+  const [isFullPageControlsVisible, setIsFullPageControlsVisible] = useState(true)
+
+  // ── Animation state ────────────────────────────────────────────────────────
+  const [isAnimating, setIsAnimating]          = useState(false)
+  const [animationProgress, setAnimationProgress] = useState(0)
+  const [animationLoop, setAnimationLoop] = useState(0)
+  const [zoomInsight, setZoomInsight] = useState<{ title: string; insight: string } | null>(null)
+
+  // ── Research state ────────────────────────────────────────────────────────
+  const [showResearchPanel, setShowResearchPanel] = useState(false)
+  const [researchData, setResearchData] = useState<FractalResearchSummary | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   // ── Render state ───────────────────────────────────────────────────────────
   const [isRendering, setIsRendering]          = useState(false)
@@ -70,6 +224,12 @@ export function FractalsPage() {
   const canvasRef   = useRef<HTMLCanvasElement | null>(null)   // Canvas 2D (IFS)
   const glStateRef  = useRef<GLState | null>(null)             // Compiled GL program
 
+  // ── Animation refs ───────────────────────────────────────────────────────────
+  const animationRafRef    = useRef<number | null>(null)       // requestAnimationFrame ID
+  const animationStartRef  = useRef(0)                          // Animation start timestamp
+  const zoomSequenceRef    = useRef<ZoomKeyframe[]>([])         // Current zoom sequence
+  const infiniteZoomCycleRef = useRef(0)                        // Number of infinite loops completed
+
   // ── Interaction refs (mutations never need React re-render) ───────────────
   const panRef             = useRef<{ pointerId: number; x: number; y: number; viewport: Viewport } | null>(null)
   const panRafRef          = useRef<number | null>(null)
@@ -81,6 +241,7 @@ export function FractalsPage() {
   const renderDebounceRef     = useRef<ReturnType<typeof window.setTimeout> | null>(null)
   const renderTokenRef        = useRef(0)
   const renderOverlayTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null)
+  const fullPageControlsTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null)
 
   // ── Derived / memoised values ──────────────────────────────────────────────
 
@@ -137,10 +298,132 @@ export function FractalsPage() {
     return () => {
       if (panRafRef.current !== null)    cancelAnimationFrame(panRafRef.current)
       if (wheelRafRef.current !== null)  cancelAnimationFrame(wheelRafRef.current)
+      if (animationRafRef.current !== null) cancelAnimationFrame(animationRafRef.current)
       if (renderDebounceRef.current)     clearTimeout(renderDebounceRef.current)
       if (renderOverlayTimerRef.current) clearTimeout(renderOverlayTimerRef.current)
+      if (fullPageControlsTimerRef.current) clearTimeout(fullPageControlsTimerRef.current)
     }
   }, [])
+
+  const scheduleFullPageControlsHide = () => {
+    if (fullPageControlsTimerRef.current) {
+      clearTimeout(fullPageControlsTimerRef.current)
+    }
+    fullPageControlsTimerRef.current = window.setTimeout(() => {
+      setIsFullPageControlsVisible(false)
+    }, 2200)
+  }
+
+  const revealFullPageControls = () => {
+    if (!isFullPageMode) return
+    if (!isFullPageControlsVisible) {
+      setIsFullPageControlsVisible(true)
+    }
+    scheduleFullPageControlsHide()
+  }
+
+  useEffect(() => {
+    if (!isFullPageMode) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsFullPageMode(false)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isFullPageMode])
+
+  useEffect(() => {
+    if (!isFullPageMode) {
+      setIsFullPageControlsVisible(true)
+      if (fullPageControlsTimerRef.current) {
+        clearTimeout(fullPageControlsTimerRef.current)
+        fullPageControlsTimerRef.current = null
+      }
+      return
+    }
+
+    setIsFullPageControlsVisible(true)
+    scheduleFullPageControlsHide()
+
+    return () => {
+      if (fullPageControlsTimerRef.current) {
+        clearTimeout(fullPageControlsTimerRef.current)
+        fullPageControlsTimerRef.current = null
+      }
+    }
+  }, [isFullPageMode])
+
+  // ── Infinite animated zoom effect ────────────────────────────────────────
+  useEffect(() => {
+    if (!isAnimating || !isZoomEnabled) {
+      if (animationRafRef.current !== null) {
+        cancelAnimationFrame(animationRafRef.current)
+        animationRafRef.current = null
+      }
+      setZoomInsight(null)
+      return
+    }
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - animationStartRef.current
+      const cycleDurationMs = getInfiniteZoomCycleDurationMs(activeParams.type)
+      const cycleProgress = (elapsed % cycleDurationMs) / cycleDurationMs
+      const loop = Math.floor(elapsed / cycleDurationMs)
+
+      if (loop !== infiniteZoomCycleRef.current) {
+        infiniteZoomCycleRef.current = loop
+        setAnimationLoop(loop)
+      }
+      
+      // Update displayed progress
+      setAnimationProgress(cycleProgress)
+
+      // Find the current keyframe pair
+      const sequence = zoomSequenceRef.current
+      if (sequence.length > 0) {
+        let keyframeIdx = 0
+        for (let i = sequence.length - 1; i >= 0; i--) {
+          if (cycleProgress >= sequence[i].time) {
+            keyframeIdx = i
+            break
+          }
+        }
+
+        const currentKf = sequence[keyframeIdx]
+        const nextKf = sequence[Math.min(keyframeIdx + 1, sequence.length - 1)]
+        
+        // Interpolate between keyframes
+        const kfProgress = 
+          currentKf.time === nextKf.time 
+            ? 0 
+            : (cycleProgress - currentKf.time) / (nextKf.time - currentKf.time)
+        
+        const easedProgress = easeCubicInOut(kfProgress)
+        const interpolated = lerpViewport(currentKf.viewport, nextKf.viewport, easedProgress)
+
+        const focusKf = kfProgress < 0.55 ? currentKf : nextKf
+        if (focusKf.title && focusKf.insight) {
+          setZoomInsight({ title: focusKf.title, insight: focusKf.insight })
+        }
+        
+        setViewport(interpolated)
+      }
+      
+      // Infinite loop: always schedule next frame
+      animationRafRef.current = requestAnimationFrame(animate)
+    }
+
+    animationStartRef.current = performance.now()
+    animationRafRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRafRef.current !== null) {
+        cancelAnimationFrame(animationRafRef.current)
+        animationRafRef.current = null
+      }
+    }
+  }, [activeParams.type, isAnimating, isZoomEnabled])
 
   // ── WebGL render effect ────────────────────────────────────────────────────
   useEffect(() => {
@@ -247,6 +530,81 @@ export function FractalsPage() {
 
   const resetView = () => setViewport(defaultExtent(activeParams.type))
 
+  const startInfiniteZoom = () => {
+    if (!isZoomEnabled || isAnimating) return
+    // Stop any ongoing animation interactions
+    if (animationRafRef.current !== null) {
+      cancelAnimationFrame(animationRafRef.current)
+    }
+    // Generate the infinite zoom sequence for current fractal
+    zoomSequenceRef.current = withDwellKeyframes(getInfiniteZoomSequence(activeParams.type, viewport))
+    infiniteZoomCycleRef.current = 0
+    setAnimationLoop(0)
+    const initialKf = zoomSequenceRef.current[0]
+    if (initialKf?.title && initialKf?.insight) {
+      setZoomInsight({ title: initialKf.title, insight: initialKf.insight })
+    }
+    setAnimationProgress(0)
+    setIsAnimating(true)
+  }
+
+  const stopInfiniteZoom = () => {
+    setIsAnimating(false)
+    infiniteZoomCycleRef.current = 0
+    setAnimationLoop(0)
+    setZoomInsight(null)
+    if (animationRafRef.current !== null) {
+      cancelAnimationFrame(animationRafRef.current)
+      animationRafRef.current = null
+    }
+  }
+
+  // ── Research Analysis Handlers ──────────────────────────────────────────
+
+  const performResearchAnalysis = async () => {
+    setIsAnalyzing(true)
+    try {
+      const canvas = isGLType ? glCanvasRef.current : canvasRef.current
+      if (!canvas) return
+
+      // Small delay to allow render to complete
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const analysis = generateResearchSummary(imageData)
+      setResearchData(analysis)
+      setShowResearchPanel(true)
+    } catch {
+      // Analysis failed silently
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  const exportResearchData = () => {
+    if (!researchData) return
+    const report = generateResearchReport(
+      activeParams.type,
+      viewport,
+      researchData.dimension.estimatedDimension,
+      researchData.lacunarity.lacunarity,
+      researchData.selfSimilarity,
+    )
+
+    const blob = new Blob([report], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `fractal-research-${activeParams.type.toLowerCase().replace(/ /g, '-')}-${Date.now()}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   // ── Inertial wheel zoom ────────────────────────────────────────────────────
   const handleWheel: React.WheelEventHandler<HTMLDivElement> = (event) => {
     if (!isZoomEnabled) return
@@ -349,9 +707,9 @@ export function FractalsPage() {
   const viewportWidth = viewport.xMax - viewport.xMin
 
   return (
-    <div className="tool-grid">
+    <div className={`tool-grid ${isFullPageMode ? 'tool-grid-single full-page-mode' : ''}`}>
 
-      <Panel title="Fractal Generator" subtitle="Fast path to visual complexity experiments.">
+      {!isFullPageMode && <Panel title="Fractal Generator" subtitle="Fast path to visual complexity experiments.">
         <form className="form-grid" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit() }}>
 
           <form.Field name="type" children={(field) => (
@@ -426,32 +784,71 @@ export function FractalsPage() {
           </button>
           <p className="muted">Mouse wheel to zoom, drag to pan, and use Home or keyboard shortcuts (+/-/0/arrows).</p>
         </form>
-      </Panel>
+      </Panel>}
 
+      <div
+        className={isFullPageMode ? 'full-page-explorer' : ''}
+        onMouseMove={revealFullPageControls}
+        onPointerMove={revealFullPageControls}
+        onTouchStart={revealFullPageControls}
+        onKeyDownCapture={revealFullPageControls}
+        onFocusCapture={revealFullPageControls}
+      >
       <Panel title="Interactive Explorer" subtitle="Deep zoom and pan with GPU-accelerated rendering.">
-        <div className="overlay-controls fractal-explorer-toolbar">
-          <button type="button" className="overlay-toggle" onClick={() => zoomTo(0.7)}  disabled={!isZoomEnabled || isDisplayLoading}>Zoom In</button>
-          <button type="button" className="overlay-toggle" onClick={() => zoomTo(1.4)}  disabled={!isZoomEnabled || isDisplayLoading}>Zoom Out</button>
-          <button type="button" className="overlay-toggle" onClick={resetView}          disabled={isDisplayLoading}>Home</button>
-          <button type="button" className="overlay-toggle" onClick={handleDownloadPng}  disabled={isDisplayLoading}>Download PNG</button>
-          <button type="button" className="overlay-toggle" onClick={handleDownloadSvg}  disabled={isDisplayLoading}>Download SVG</button>
+        <div className={`overlay-controls fractal-explorer-toolbar${isFullPageMode ? ' full-page-controls' : ''}${isFullPageMode && !isFullPageControlsVisible ? ' is-hidden' : ''}`}>
+          <button type="button" className="overlay-toggle" onClick={() => zoomTo(0.7)}  disabled={!isZoomEnabled || isDisplayLoading || isAnimating}>Zoom In</button>
+          <button type="button" className="overlay-toggle" onClick={() => zoomTo(1.4)}  disabled={!isZoomEnabled || isDisplayLoading || isAnimating}>Zoom Out</button>
+          <button type="button" className="overlay-toggle" onClick={resetView}          disabled={isDisplayLoading || isAnimating}>Home</button>
+          <button
+            type="button"
+            className="overlay-toggle"
+            onClick={() => setIsFullPageMode((v) => !v)}
+            title={isFullPageMode ? 'Exit full page mode' : 'Show only fractal and zoom controls'}
+          >
+            {isFullPageMode ? 'Exit Full Page (Esc)' : 'Full Page'}
+          </button>
+          {!isFullPageMode && (
+            <>
+          <button type="button" className="overlay-toggle" 
+            onClick={isAnimating ? stopInfiniteZoom : startInfiniteZoom}
+            disabled={!isZoomEnabled || isDisplayLoading}
+            title={isAnimating ? 'Stop infinite zoom' : 'Continuously zoom in and out to demonstrate self-similarity and repeating patterns'}>
+            {isAnimating ? '⏸ Stop ∞ Zoom' : '∞ Infinite Zoom'}
+          </button>
+          <button type="button" className="overlay-toggle" onClick={performResearchAnalysis} disabled={isDisplayLoading || isAnalyzing}
+            title="Analyze fractal: dimension, lacunarity, self-similarity">
+            {isAnalyzing ? '⟳ Analyzing...' : '📊 Analyze'}
+          </button>
+          <button type="button" className="overlay-toggle" onClick={handleDownloadPng}  disabled={isDisplayLoading || isAnimating}>Download PNG</button>
+          <button type="button" className="overlay-toggle" onClick={handleDownloadSvg}  disabled={isDisplayLoading || isAnimating}>Download SVG</button>
           <button type="button" className="overlay-toggle" onClick={() => setPrecisionMode((v) => !v)}
-            disabled={!isZoomEnabled || isDisplayLoading}>
+            disabled={!isZoomEnabled || isDisplayLoading || isAnimating}>
             {precisionMode ? 'Precision On' : 'Precision Off'}
           </button>
           <button type="button" className="overlay-toggle" onClick={() => setShowOverlays((v) => !v)}>
             {showOverlays ? 'Hide overlays' : 'Show overlays'}
           </button>
+            </>
+          )}
         </div>
 
-        <div className="edu-chip-row" aria-label="Explorer telemetry">
+        {!isFullPageMode && <div className="edu-chip-row" aria-label="Explorer telemetry">
           <span className="edu-chip">Type: {activeParams.type}</span>
           <span className="edu-chip">Zoom: {zoomFactor.toFixed(2)}x</span>
           <span className="edu-chip">Viewport width: {viewportWidth.toExponential(3)}</span>
           <span className="edu-chip">Iter: {dynamicMaxIter}</span>
           <span className="edu-chip">Size: {activeParams.width}x{activeParams.height}</span>
+          {isAnimating && <span className="edu-chip">Animation: {(animationProgress * 100).toFixed(0)}%</span>}
+          {isAnimating && <span className="edu-chip">Loop: {animationLoop + 1}</span>}
           <span className="edu-chip">Keyboard: +/-/0/arrows</span>
-        </div>
+        </div>}
+
+        {!isFullPageMode && isAnimating && zoomInsight && (
+          <div className="edu-note" aria-live="polite">
+            <p className="edu-note-title">Infinite Zoom Focus: {zoomInsight.title}</p>
+            <p>{zoomInsight.insight}</p>
+          </div>
+        )}
 
         <div
           className={`image-stage stage-grid fractal-canvas-stage ${showOverlays ? 'stage-reticle' : ''}`}
@@ -472,7 +869,7 @@ export function FractalsPage() {
             className={`result-image fractal-canvas${isGLType ? ' fractal-canvas-hidden' : ''}`}
             aria-label="Interactive fractal canvas (2D)" />
 
-          <div className={`explorer-controls-badge ${controlsExpanded ? 'is-open' : ''}`} aria-label="Explorer control hints">
+          {!isFullPageMode && <div className={`explorer-controls-badge ${controlsExpanded ? 'is-open' : ''}`} aria-label="Explorer control hints">
             <button type="button" className="explorer-controls-toggle"
               aria-label={controlsExpanded ? 'Collapse explorer controls help' : 'Expand explorer controls help'}
               aria-controls="explorer-control-hints"
@@ -485,7 +882,7 @@ export function FractalsPage() {
                 <span>+ / - : zoom</span><span>Arrows: pan</span><span>0 or H: home</span>
               </div>
             )}
-          </div>
+          </div>}
 
           {shouldShowLoadingOverlay && (
             <div className="image-stage-loading-overlay" role="status" aria-live="polite" aria-label="Fractal render in progress">
@@ -494,7 +891,7 @@ export function FractalsPage() {
             </div>
           )}
 
-          {showOverlays && (
+          {!isFullPageMode && showOverlays && (
             <>
               <span className="stage-badge stage-focusable" tabIndex={0} aria-label="Current fractal family">{activeParams.type}</span>
               <span className="stage-badge stage-badge-right stage-focusable" tabIndex={0} aria-label="Current color scheme">Palette: {activeParams.colorScheme}</span>
@@ -505,17 +902,100 @@ export function FractalsPage() {
           )}
         </div>
 
-        <div className="overlay-legend" aria-label="Fractal interaction legend">
+        {!isFullPageMode && <div className="overlay-legend" aria-label="Fractal interaction legend">
           <span className="overlay-legend-item" tabIndex={0} title="Use mouse wheel or Zoom In/Out controls to navigate scales quickly.">Wheel zoom</span>
           <span className="overlay-legend-item" tabIndex={0} title="Drag on the canvas to pan while keeping magnification fixed.">Drag pan</span>
           <span className="overlay-legend-item" tabIndex={0} title="Home resets viewport to the canonical range for the selected fractal family.">Home reset</span>
           <span className="overlay-legend-item" tabIndex={0} title="SVG is vector-native for Fern and Sierpinski, and image-embedded SVG for escape-time fractals.">SVG export</span>
           <span className="overlay-legend-item" tabIndex={0} title="Use + and - to zoom, arrows to pan, 0 or H for reset, Shift for finer control.">Keyboard nav</span>
-        </div>
+        </div>}
 
         {renderError && <p className="muted">{renderError}</p>}
         {precisionMode && isZoomEnabled && <p className="muted">Precision mode adaptively increases iteration depth as magnification grows.</p>}
       </Panel>
+      </div>
+
+      {!isFullPageMode && showResearchPanel && researchData && (
+        <Panel title="Research Analysis" subtitle="Fractal dimension, lacunarity, and self-similarity metrics">
+          <div className="research-panel" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+            <div className="research-section">
+              <h3>Fractal Dimension</h3>
+              <p>
+                <strong>Estimated Dimension:</strong> {researchData.dimension.estimatedDimension.toFixed(3)}
+              </p>
+              <p className="muted">
+                Calculated via box-counting method. Values typically range 1.3–2.0 for mathematical fractals.
+              </p>
+              <p>
+                <strong>Confidence:</strong> {(researchData.dimension.confidence * 100).toFixed(1)}%
+                <span className="muted"> (R² value: {researchData.dimension.correlationCoefficient.toFixed(3)})</span>
+              </p>
+            </div>
+
+            <div className="research-section">
+              <h3>Lacunarity (Gap Analysis)</h3>
+              <p>
+                <strong>Lacunarity Score:</strong> {researchData.lacunarity.lacunarity.toFixed(3)}
+              </p>
+              <p className="muted">Higher values indicate more irregular gap distribution.</p>
+              <p>
+                <strong>Average Gap Size:</strong> {researchData.lacunarity.averageGapSize.toFixed(1)} pixels
+              </p>
+              <p>
+                <strong>Gap Uniformity:</strong> {(researchData.lacunarity.gapUniformity * 100).toFixed(0)}%
+              </p>
+            </div>
+
+            <div className="research-section">
+              <h3>Self-Similarity</h3>
+              <p>
+                <strong>Score:</strong> {(researchData.selfSimilarity * 100).toFixed(1)}%
+              </p>
+              <p className="muted">Measures how similar the fractal is at different scales (0–100%).</p>
+            </div>
+
+            <div className="research-section">
+              <h3>Iteration Analysis</h3>
+              <p>
+                <strong>Complexity Growth:</strong> {(researchData.iteration.complexityGrowth * 100).toFixed(1)}%
+              </p>
+              <p>
+                <strong>Suggested Max Iterations:</strong> {researchData.iteration.estimatedOptimalIterations}
+              </p>
+            </div>
+
+            {researchData.recommendations.length > 0 && (
+              <div className="research-section">
+                <h3>Recommendations</h3>
+                <ul className="muted">
+                  {researchData.recommendations.map((rec, i) => (
+                    <li key={i}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="action"
+                onClick={exportResearchData}
+                style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+              >
+                📄 Export Report
+              </button>
+              <button
+                type="button"
+                className="action"
+                onClick={() => setShowResearchPanel(false)}
+                style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </Panel>
+      )}
     </div>
   )
 }
