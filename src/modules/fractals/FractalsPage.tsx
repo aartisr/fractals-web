@@ -917,7 +917,7 @@ export function FractalsPage() {
 
       {!isFullPageMode && showResearchPanel && researchData && (
         <Panel title="Research Analysis" subtitle="Fractal dimension, lacunarity, and self-similarity metrics">
-          <div className="research-panel" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+          <div className="research-panel research-panel-scroll">
             <div className="research-section">
               <h3>Fractal Dimension</h3>
               <p>
@@ -975,20 +975,18 @@ export function FractalsPage() {
               </div>
             )}
 
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+            <div className="research-actions">
               <button
                 type="button"
-                className="action"
+                className="action research-action-button"
                 onClick={exportResearchData}
-                style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
               >
                 📄 Export Report
               </button>
               <button
                 type="button"
-                className="action"
+                className="action research-action-button"
                 onClick={() => setShowResearchPanel(false)}
-                style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
               >
                 Close
               </button>
