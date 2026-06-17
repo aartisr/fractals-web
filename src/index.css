@@ -878,6 +878,304 @@ input[type='file'] {
   font-weight: 600;
 }
 
+.roi-draft-rect {
+  position: absolute;
+  left: var(--roi-draft-left, -9999px);
+  top: var(--roi-draft-top, -9999px);
+  width: var(--roi-draft-size, 0px);
+  height: var(--roi-draft-size, 0px);
+  z-index: 3;
+  border: 2px dashed rgba(0, 119, 182, 0.92);
+  background: rgba(0, 119, 182, 0.12);
+  border-radius: 0.34rem;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
+.roi-committed-rect {
+  position: absolute;
+  left: var(--roi-draft-left, -9999px);
+  top: var(--roi-draft-top, -9999px);
+  width: var(--roi-draft-size, 0px);
+  height: var(--roi-draft-size, 0px);
+  z-index: 2;
+  border: 2px solid rgba(220, 38, 38, 0.92);
+  background: rgba(220, 38, 38, 0.08);
+  border-radius: 0.34rem;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(4, 49, 74, 0.18);
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  color: var(--ink-700);
+}
+
+.checkbox-row input {
+  accent-color: var(--signal);
+}
+
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.preset-chip {
+  border: 1px solid rgba(7, 67, 100, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-700);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.16rem 0.52rem;
+  cursor: pointer;
+}
+
+.preset-chip-active {
+  border-color: rgba(0, 119, 182, 0.6);
+  background: rgba(0, 119, 182, 0.12);
+  color: var(--signal-deep);
+}
+
+.alert-inline {
+  margin: 0;
+  border: 1px solid rgba(188, 75, 81, 0.35);
+  border-radius: 0.58rem;
+  background: rgba(255, 241, 242, 0.86);
+  color: #7b2026;
+  padding: 0.45rem 0.56rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+}
+
+.insight-card {
+  border: 1px solid rgba(12, 89, 132, 0.18);
+  border-radius: 0.62rem;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.46rem 0.52rem;
+}
+
+.insight-label {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-600);
+}
+
+.insight-value {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.insight-low {
+  background: linear-gradient(150deg, rgba(126, 200, 227, 0.18), rgba(255, 255, 255, 0.96));
+}
+
+.insight-moderate {
+  background: linear-gradient(150deg, rgba(255, 209, 102, 0.2), rgba(255, 255, 255, 0.96));
+}
+
+.insight-high {
+  background: linear-gradient(150deg, rgba(188, 75, 81, 0.16), rgba(255, 255, 255, 0.96));
+}
+
+.log-chart-wrap {
+  border: 1px solid rgba(12, 89, 132, 0.18);
+  border-radius: 0.62rem;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.36rem 0.46rem;
+}
+
+.log-chart-wrap svg {
+  width: 100%;
+  height: auto;
+}
+
+.log-axis {
+  stroke: rgba(13, 64, 97, 0.28);
+  stroke-width: 1;
+}
+
+.log-line {
+  fill: none;
+  stroke: rgba(0, 119, 182, 0.9);
+  stroke-width: 2.2;
+}
+
+.log-dot {
+  fill: rgba(255, 123, 74, 0.92);
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1;
+}
+
+.checklist-grid {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.check-pass,
+.check-pending {
+  margin: 0;
+  font-size: 0.73rem;
+  font-weight: 600;
+}
+
+.check-pass {
+  color: #0b6b56;
+}
+
+.check-pending {
+  color: var(--ink-600);
+}
+
+.roi-committed-rect {
+  position: absolute;
+  left: var(--roi-draft-left, -9999px);
+  top: var(--roi-draft-top, -9999px);
+  width: var(--roi-draft-size, 0px);
+  height: var(--roi-draft-size, 0px);
+  z-index: 3;
+  border: 2px solid rgba(220, 38, 38, 0.96);
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 0.34rem;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(8, 18, 29, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.48);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(9, 82, 124, 0.2);
+  border-radius: 0.55rem;
+  background: rgba(244, 251, 255, 0.75);
+  padding: 0.5rem 0.62rem;
+  font-size: 0.74rem;
+  color: var(--ink-700);
+}
+
+.checkbox-row input {
+  accent-color: var(--signal);
+}
+
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.preset-chip {
+  border: 1px solid rgba(0, 94, 140, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-700);
+  padding: 0.2rem 0.62rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.preset-chip-active {
+  background: rgba(255, 209, 102, 0.28);
+  border-color: rgba(210, 129, 4, 0.45);
+  color: #7a4a00;
+}
+
+.alert-inline {
+  margin: 0;
+  border: 1px solid rgba(188, 75, 81, 0.35);
+  border-radius: 0.52rem;
+  background: rgba(188, 75, 81, 0.1);
+  color: #7a2024;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.45rem 0.54rem;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.insight-card {
+  border: 1px solid rgba(20, 79, 113, 0.2);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.5rem 0.58rem;
+}
+
+.insight-label {
+  margin: 0;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-600);
+}
+
+.insight-value {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.insight-low {
+  border-color: rgba(0, 119, 182, 0.28);
+  background: rgba(0, 119, 182, 0.08);
+}
+
+.insight-moderate {
+  border-color: rgba(255, 209, 102, 0.42);
+  background: rgba(255, 209, 102, 0.15);
+}
+
+.insight-high {
+  border-color: rgba(188, 75, 81, 0.42);
+  background: rgba(188, 75, 81, 0.12);
+}
+
+.log-chart-wrap {
+  border: 1px solid rgba(21, 84, 121, 0.2);
+  border-radius: 0.66rem;
+  background: rgba(248, 252, 255, 0.93);
+  padding: 0.34rem;
+}
+
+.log-chart-wrap svg {
+  width: 100%;
+  height: auto;
+}
+
+.log-axis {
+  stroke: rgba(8, 55, 82, 0.4);
+  stroke-width: 1;
+}
+
+.log-line {
+  fill: none;
+  stroke: rgba(0, 119, 182, 0.95);
+  stroke-width: 2;
+}
+
+.log-dot {
+  fill: rgba(255, 123, 74, 0.95);
+}
+
 .stage-focusable:focus-visible {
   outline: 2px solid rgba(0, 119, 182, 0.85);
   outline-offset: 2px;

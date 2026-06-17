@@ -10,9 +10,11 @@ import type {
   RunSummary,
   RunType,
 } from './contracts'
+import { isUsableBoxCountResult } from '../../modules/box-count/boxCountResultValidation'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
 const HISTORY_KEY = 'fractals-workbench-runs'
+const MAX_LOCAL_HISTORY = 120
 const LOCAL_LATENCY_MS = 80
 
 const isJobAccepted = (value: unknown): value is JobAccepted => {
@@ -89,9 +91,67 @@ const loadLocalHistory = (): RunSummary[] => {
   }
 }
 
+const sanitizeRunPayload = (value: unknown): unknown => {
+  if (!value || typeof value !== 'object') {
+    return value
+  }
+
+  const source = value as Record<string, unknown>
+  const compact: Record<string, unknown> = {}
+
+  for (const [key, raw] of Object.entries(source)) {
+    const isImageLikeKey =
+      key === 'imageUrl' ||
+      key === 'image_url' ||
+      key === 'previewUrl' ||
+      key === 'preview_url' ||
+      key === 'overlayUrl' ||
+      key === 'overlay_url' ||
+      key === 'artifact_url'
+
+    if (typeof raw === 'string') {
+      const isDataUrl = raw.startsWith('data:')
+      const isTooLarge = raw.length > 2048
+      if (isImageLikeKey && (isDataUrl || isTooLarge)) {
+        compact[key] = '[omitted: large image payload]'
+        continue
+      }
+      compact[key] = raw
+      continue
+    }
+
+    if (key === 'boxCounts' && Array.isArray(raw)) {
+      compact[key] = raw.slice(0, 128)
+      continue
+    }
+
+    compact[key] = raw
+  }
+
+  return compact
+}
+
+const saveLocalHistorySafely = (runs: RunSummary[]) => {
+  // Persist progressively smaller snapshots if storage is near quota.
+  for (let keep = runs.length; keep >= 1; keep -= 10) {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(runs.slice(0, keep)))
+      return
+    } catch {
+      // Keep trying with fewer rows.
+    }
+  }
+
+  try {
+    localStorage.removeItem(HISTORY_KEY)
+  } catch {
+    // Ignore localStorage failures.
+  }
+}
+
 const addLocalHistory = (entry: RunSummary) => {
-  const next = [entry, ...loadLocalHistory()].slice(0, 200)
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+  const next = [entry, ...loadLocalHistory()].slice(0, MAX_LOCAL_HISTORY)
+  saveLocalHistorySafely(next)
 }
 
 const pollJob = async <T>(jobId: string): Promise<T> => {
@@ -122,6 +182,7 @@ const pollJob = async <T>(jobId: string): Promise<T> => {
 }
 
 const saveRun = (type: RunType, runId: string, detail: string, payload?: unknown, parameters?: unknown) => {
+  const compactPayload = sanitizeRunPayload(payload)
   addLocalHistory({
     id: runId,
     type,
@@ -129,7 +190,7 @@ const saveRun = (type: RunType, runId: string, detail: string, payload?: unknown
     createdAt: new Date().toISOString(),
     detail,
     payload: {
-      result: payload,
+      result: compactPayload,
       parameters,
     },
   })
@@ -776,9 +837,10 @@ export const api = {
 
       const responseObj = asRecord(response)
       const jobId = asString(pick(responseObj, 'jobId', 'job_id', 'id'))
-      result = isJobAccepted(response)
+      const normalized = isJobAccepted(response)
         ? normalizeBoxResult(await pollJob<unknown>(jobId))
         : normalizeBoxResult(response)
+      result = isUsableBoxCountResult(normalized) ? normalized : await localAnalyzeBoxCount(file, roi)
     } catch {
       result = await localAnalyzeBoxCount(file, roi)
     }
