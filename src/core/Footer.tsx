@@ -109,8 +109,9 @@ export function Footer() {
 
       {/* ── Bottom bar ── */}
       <div className="ft-bottom">
-        <span className="ft-copy">
-          © {CURRENT_YEAR} Aarti S. Ravikumar · Work in Progress
+        <span className="ft-copy ft-copy-brand">
+          <img src="/pcssii-logo.jpg" alt="PCSS II School" className="pcssii-logo-inline" />
+          © {CURRENT_YEAR} Aarti S Ravikumar · PCSS II School · Work in Progress
         </span>
         <span className="ft-pipe" aria-hidden="true" />
         <span className="ft-copy ft-copy--muted">

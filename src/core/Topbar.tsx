@@ -216,7 +216,10 @@ export function Topbar() {
         {/* Meta — right side */}
         <div className="tb-meta">
           <span className="tb-pulse" title="Backend status" aria-label="Backend connected" />
-          <span className="tb-meta-text">Aarti S. Ravikumar · WIP</span>
+          <span className="tb-meta-text">
+            <img src="/pcssii-logo.jpg" alt="PCSS II School" className="pcssii-logo-inline" />
+            Aarti S Ravikumar · PCSS II School · WIP
+          </span>
         </div>
 
         {/* Mobile hamburger */}
@@ -262,7 +265,10 @@ export function Topbar() {
           })}
           <div className="tb-drawer-footer">
             <span className="tb-pulse" />
-            <span className="tb-meta-text">Aarti S. Ravikumar · Work in Progress</span>
+            <span className="tb-meta-text">
+              <img src="/pcssii-logo.jpg" alt="PCSS II School" className="pcssii-logo-inline" />
+              Aarti S Ravikumar · PCSS II School · Work in Progress
+            </span>
           </div>
         </nav>
       )}

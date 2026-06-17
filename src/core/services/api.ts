@@ -525,6 +525,35 @@ const fractalDimensionFromCounts = (boxCounts: Array<{ size: number; count: numb
   return Number((-numerator / denominator).toFixed(4))
 }
 
+const fitR2FromCounts = (boxCounts: Array<{ size: number; count: number }>) => {
+  const points = boxCounts.filter((item) => item.size > 0 && item.count > 0)
+  const n = points.length
+  if (n < 2) {
+    return 0
+  }
+
+  const xs = points.map((item) => Math.log(item.size))
+  const ys = points.map((item) => Math.log(item.count))
+  const meanX = xs.reduce((sum, value) => sum + value, 0) / n
+  const meanY = ys.reduce((sum, value) => sum + value, 0) / n
+  const numerator = xs.reduce((sum, value, index) => sum + (value - meanX) * (ys[index] - meanY), 0)
+  const denominator = xs.reduce((sum, value) => sum + (value - meanX) ** 2, 0)
+  if (denominator === 0) {
+    return 0
+  }
+
+  const slope = numerator / denominator
+  const intercept = meanY - slope * meanX
+  const fitted = xs.map((value) => slope * value + intercept)
+  const ssRes = ys.reduce((sum, value, index) => sum + (value - fitted[index]) ** 2, 0)
+  const ssTot = ys.reduce((sum, value) => sum + (value - meanY) ** 2, 0)
+  if (ssTot === 0) {
+    return 0
+  }
+
+  return Number((1 - ssRes / ssTot).toFixed(4))
+}
+
 const analyzeImageDimension = async (file: File, roi?: { x: number; y: number; size: number }) => {
   const start = performance.now()
   const { canvas, data } = await readImage(file)
@@ -539,8 +568,9 @@ const analyzeImageDimension = async (file: File, roi?: { x: number; y: number; s
   const { binary, width, height } = makeBinary(data, resolvedRoi)
   const boxCounts = countBoxes(binary, width, height)
   const fractalDimension = fractalDimensionFromCounts(boxCounts)
+  const fitR2 = fitR2FromCounts(boxCounts)
   const elapsedSeconds = Number(((performance.now() - start) / 1000).toFixed(4))
-  return { canvas, fractalDimension, elapsedSeconds, boxCounts, roi: resolvedRoi }
+  return { canvas, fractalDimension, elapsedSeconds, fitR2, boxCounts, roi: resolvedRoi }
 }
 
 const localAnalyzeBoxCount = async (file: File, roi: { x: number; y: number; size: number }): Promise<BoxCountResult> => {
@@ -574,8 +604,18 @@ const localAnalyzeCompare = async (fileA: File, fileB: File): Promise<CompareRes
         : 'Image B has the higher estimated fractal complexity.'
   return {
     runId: createRunId('compare'),
-    imageA: { fractalDimension: a.fractalDimension },
-    imageB: { fractalDimension: b.fractalDimension },
+    imageA: {
+      fractalDimension: a.fractalDimension,
+      elapsedSeconds: a.elapsedSeconds,
+      fitR2: a.fitR2,
+      boxCounts: a.boxCounts,
+    },
+    imageB: {
+      fractalDimension: b.fractalDimension,
+      elapsedSeconds: b.elapsedSeconds,
+      fitR2: b.fitR2,
+      boxCounts: b.boxCounts,
+    },
     delta,
     interpretation,
   }
@@ -723,14 +763,23 @@ const normalizeCompareResult = (input: unknown): CompareResult => {
   const imageA = asRecord(pick(result, 'imageA', 'image_a'))
   const imageB = asRecord(pick(result, 'imageB', 'image_b'))
 
+  const normalizeCompareImage = (image: Record<string, unknown>) => ({
+    fractalDimension: asNumber(pick(image, 'fractalDimension', 'fractal_dimension'), 0),
+    elapsedSeconds: asNumber(pick(image, 'elapsedSeconds', 'elapsed_seconds'), 0),
+    fitR2: asNumber(pick(image, 'fitR2', 'fit_r2'), 0),
+    boxCounts: asArray<unknown>(pick(image, 'boxCounts', 'box_counts')).map((item) => {
+      const countObj = asRecord(item)
+      return {
+        size: asNumber(pick(countObj, 'size'), 0),
+        count: asNumber(pick(countObj, 'count'), 0),
+      }
+    }),
+  })
+
   return {
     runId: asString(pick(result, 'runId', 'run_id', 'id'), `compare_${Date.now()}`),
-    imageA: {
-      fractalDimension: asNumber(pick(imageA, 'fractalDimension', 'fractal_dimension'), 0),
-    },
-    imageB: {
-      fractalDimension: asNumber(pick(imageB, 'fractalDimension', 'fractal_dimension'), 0),
-    },
+    imageA: normalizeCompareImage(imageA),
+    imageB: normalizeCompareImage(imageB),
     delta: asNumber(pick(result, 'delta'), 0),
     interpretation: asString(pick(result, 'interpretation', 'summary'), ''),
   }

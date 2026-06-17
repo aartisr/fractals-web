@@ -40,8 +40,18 @@ export interface BoxCountResult {
 
 export interface CompareResult {
   runId: string
-  imageA: { fractalDimension: number }
-  imageB: { fractalDimension: number }
+  imageA: {
+    fractalDimension: number
+    elapsedSeconds?: number
+    fitR2?: number
+    boxCounts?: Array<{ size: number; count: number }>
+  }
+  imageB: {
+    fractalDimension: number
+    elapsedSeconds?: number
+    fitR2?: number
+    boxCounts?: Array<{ size: number; count: number }>
+  }
   delta: number
   interpretation: string
 }

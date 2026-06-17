@@ -1,6 +1,6 @@
 # Fractals TanStack Workbench
 
-Author: Aarti S Ravikumar  
+Author: ![PCSS II School](public/pcssii-logo.jpg) Aarti S Ravikumar · PCSS II School  
 Status: Work in Progress
 
 Responsive, modular scientific workbench scaffolded as a sibling project to support fractal generation, box counting, image comparison, and tumor detection workflows.
@@ -67,3 +67,7 @@ src/
 - Configure backend origin with `VITE_API_BASE_URL` (default: `http://127.0.0.1:8000`) when a Python/ONNX service is available.
 - Job responses with `jobId` are automatically polled through `/api/jobs/:jobId`.
 - Run history route (`/workbench/runs`) uses `/api/runs`, with localStorage fallback for resilience.
+
+## Documentation
+
+- Image Compare guide: `docs/image-compare-guide.md`
