@@ -599,32 +599,19 @@ video {
   min-width: 0;
 }
 
+.compare-tool-grid {
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 0.22rem;
+}
+
 .tool-grid-single {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.compare-tool-grid .compare-step {
+.compare-column {
+  display: grid;
+  gap: 0.18rem;
   min-width: 0;
-}
-
-.compare-tool-grid .compare-step-1 {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.compare-tool-grid .compare-step-2 {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.compare-tool-grid .compare-step-3 {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.compare-tool-grid .compare-step-4 {
-  grid-column: 1;
-  grid-row: 2;
 }
 
 .compare-step1-layout {
@@ -760,7 +747,7 @@ video {
 
 .compare-preprocess-stack {
   display: grid;
-  gap: 0.58rem;
+  gap: 0.4rem;
 }
 
 .compare-empty-state {
@@ -792,23 +779,71 @@ video {
 .compare-preprocess-item {
   border: 1px solid rgba(20, 79, 113, 0.14);
   border-radius: 0.66rem;
-  padding: 0.42rem;
+  padding: 0.22rem;
   background: rgba(255, 255, 255, 0.95);
   display: grid;
-  gap: 0.36rem;
+  gap: 0.2rem;
 }
 
 .compare-preprocess-title {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--ink-800);
+}
+
+.compare-quality-badge {
+  border: 1px solid rgba(20, 79, 113, 0.12);
+  border-radius: 0.58rem;
+  padding: 0.3rem 0.42rem;
+  display: grid;
+  gap: 0.1rem;
+  background: rgba(247, 251, 255, 0.94);
+}
+
+.compare-quality-badge strong {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.compare-quality-badge span {
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--ink-600);
+}
+
+.compare-quality-trusted {
+  border-color: rgba(0, 168, 150, 0.28);
+  background: rgba(242, 255, 251, 0.95);
+}
+
+.compare-quality-trusted strong {
+  color: #0f6f64;
+}
+
+.compare-quality-caution {
+  border-color: rgba(255, 209, 102, 0.34);
+  background: rgba(255, 251, 236, 0.96);
+}
+
+.compare-quality-caution strong {
+  color: #8b6500;
+}
+
+.compare-quality-unreliable {
+  border-color: rgba(188, 75, 81, 0.28);
+  background: rgba(255, 245, 245, 0.96);
+}
+
+.compare-quality-unreliable strong {
+  color: #9a1f28;
 }
 
 .compare-preprocess-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.36rem;
+  gap: 0.22rem;
 }
 
 .compare-series-legend {
@@ -1038,9 +1073,9 @@ video {
   border: 1px solid rgba(2, 92, 140, 0.18);
   border-radius: 0.7rem;
   background: rgba(255, 255, 255, 0.94);
-  padding: 0.52rem 0.58rem;
+  padding: 0.42rem 0.48rem;
   display: grid;
-  gap: 0.32rem;
+  gap: 0.24rem;
 }
 
 .compare-stage-card.is-active {
@@ -1065,7 +1100,7 @@ video {
   margin: 0;
   padding-left: 1rem;
   display: grid;
-  gap: 0.18rem;
+  gap: 0.14rem;
 }
 
 .compare-stage-list li {
@@ -1094,6 +1129,169 @@ video {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.34rem;
+}
+
+.compare-step-3-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 0.44rem;
+  align-items: start;
+}
+
+.compare-step-3-shell {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.compare-step-3-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.34rem;
+}
+
+.compare-step-3-summary .insight-card {
+  padding: 0.36rem 0.42rem;
+}
+
+.compare-step-3-summary .insight-value {
+  margin-top: 0.12rem;
+  font-size: 0.76rem;
+}
+
+.compare-step-3-side {
+  display: grid;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.compare-step-3-chips {
+  margin-bottom: 0;
+  gap: 0.18rem;
+}
+
+.compare-table-wrap-compact {
+  border: 1px solid rgba(20, 79, 113, 0.14);
+  border-radius: 0.68rem;
+  background: rgba(255, 255, 255, 0.96);
+  overflow: auto;
+  max-height: 168px;
+}
+
+.compare-table-wrap-compact .runs-table {
+  min-width: 0;
+}
+
+.compare-table-wrap-compact .runs-table th,
+.compare-table-wrap-compact .runs-table td {
+  padding: 0.34rem 0.38rem;
+  font-size: 0.74rem;
+}
+
+.compare-table-wrap-compact .runs-table th {
+  font-size: 0.63rem;
+}
+
+.compare-step-3-chart .log-chart-wrap {
+  padding: 0.22rem 0.3rem;
+}
+
+.compare-step-3-chart .log-chart-wrap svg {
+  max-height: 150px;
+}
+
+.compare-step-3-chart {
+  position: sticky;
+  top: 0.58rem;
+}
+
+.compare-step-3 > .panel {
+  padding-top: 0.34rem;
+  padding-bottom: 0.34rem;
+}
+
+.compare-step-2 > .panel {
+  padding-bottom: 0.28rem;
+}
+
+.compare-step-3 {
+  margin-top: -0.08rem;
+}
+
+.compare-step-4 {
+  margin-top: -0.08rem;
+}
+
+.compare-step-3 > .panel .panel-header {
+  margin-bottom: 0.22rem;
+}
+
+.compare-step-3 > .panel .panel-header p {
+  margin-top: 0.16rem;
+}
+
+@media (max-width: 900px) {
+  .compare-tool-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-column {
+    gap: 0.12rem;
+  }
+
+  .compare-step-3-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-step-3-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-table-wrap-compact {
+    max-height: none;
+  }
+
+  .compare-step-3-chart .log-chart-wrap svg {
+    max-height: none;
+  }
+
+  .compare-step-3-chart {
+    position: static;
+  }
+
+  .log-chart-header {
+    flex-direction: column;
+  }
+
+  .log-chart-summary {
+    font-size: 0.66rem;
+  }
+
+  .compare-series-legend {
+    gap: 0.24rem;
+  }
+
+  .compare-series-item {
+    justify-content: flex-start;
+  }
+
+  .tumor-fractal-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .tumor-status-card,
+  .tumor-evidence-panel,
+  .tumor-fractal-panel,
+  .tumor-stage-card {
+    padding: 0.56rem;
+  }
+
+  .tumor-fractal-guide-chip {
+    padding: 0.36rem 0.44rem;
+  }
+
+  .tb-drawer-tagline {
+    white-space: normal;
+  }
 }
 
 .compare-dataset-grid {
@@ -1562,17 +1760,105 @@ input[type='file'] {
   border: 1px solid rgba(21, 84, 121, 0.2);
   border-radius: 0.66rem;
   background: rgba(248, 252, 255, 0.93);
-  padding: 0.34rem;
+  padding: 0.42rem 0.48rem 0.46rem;
+  overflow: hidden;
+  display: grid;
+  gap: 0.32rem;
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+  transform-origin: center center;
+}
+
+.log-chart-surface {
+  position: relative;
+}
+
+.log-chart-wrap.is-hovered {
+  border-color: rgba(21, 84, 121, 0.34);
+  box-shadow: 0 12px 28px rgba(6, 22, 38, 0.12);
+}
+
+.log-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.log-chart-kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-600);
+}
+
+.log-chart-title {
+  margin: 0.05rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.15;
+  color: var(--ink-900);
+}
+
+.log-chart-summary {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--ink-600);
+  font-weight: 600;
 }
 
 .log-chart-wrap svg {
   width: 100%;
   height: auto;
+  transition: transform 0.22s ease, filter 0.22s ease;
+  transform-origin: center center;
+}
+
+.log-chart-wrap.is-hovered svg {
+  transform: scale(1.03);
+  filter: saturate(1.06);
+}
+
+.log-gridline {
+  stroke: rgba(8, 55, 82, 0.1);
+  stroke-width: 0.8;
+  stroke-dasharray: 2 3;
 }
 
 .log-axis {
   stroke: rgba(8, 55, 82, 0.4);
   stroke-width: 1;
+}
+
+.log-axis-label {
+  fill: rgba(8, 55, 82, 0.72);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.log-axis-label-x {
+  text-anchor: middle;
+}
+
+.log-axis-label-y {
+  text-anchor: middle;
+}
+
+.log-tick-label {
+  fill: rgba(8, 55, 82, 0.56);
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.log-tick-label-x {
+  dominant-baseline: hanging;
+}
+
+.log-tick-label-y {
+  text-anchor: end;
+  dominant-baseline: middle;
 }
 
 .log-line {
@@ -1581,8 +1867,43 @@ input[type='file'] {
   transition: opacity 0.18s ease;
 }
 
+.log-chart-wrap.is-hovered .log-line {
+  stroke-width: 2.25;
+}
+
 .log-dot {
   transition: opacity 0.18s ease;
+}
+
+.log-chart-wrap.is-hovered .log-dot {
+  r: 3.25;
+}
+
+.log-point-tooltip {
+  position: absolute;
+  z-index: 2;
+  min-width: 154px;
+  max-width: 210px;
+  transform: translate(-50%, -115%);
+  border: 1px solid rgba(21, 84, 121, 0.22);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 12px 24px rgba(6, 22, 38, 0.16);
+  padding: 0.42rem 0.5rem;
+  display: grid;
+  gap: 0.14rem;
+  pointer-events: none;
+}
+
+.log-point-tooltip strong {
+  color: var(--ink-900);
+  font-size: 0.72rem;
+}
+
+.log-point-tooltip span {
+  color: var(--ink-600);
+  font-size: 0.66rem;
+  line-height: 1.25;
 }
 
 .log-chart-wrap .is-muted .log-line,
@@ -1601,6 +1922,26 @@ input[type='file'] {
 .log-chart-wrap .log-series-2 .log-dot { fill: #64b5f6; }
 .log-chart-wrap .log-series-3 .log-dot { fill: #ffd166; }
 .log-chart-wrap .log-series-4 .log-dot { fill: #b78dff; }
+
+.log-chart-caption {
+  margin: 0;
+  color: var(--ink-600);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.log-chart-explainer {
+  display: grid;
+  gap: 0.18rem;
+  border-top: 1px solid rgba(21, 84, 121, 0.12);
+  padding-top: 0.28rem;
+}
+
+.log-chart-explainer span {
+  color: var(--ink-600);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
 
 .stage-focusable:focus-visible {
   outline: 2px solid rgba(0, 119, 182, 0.85);
@@ -1836,9 +2177,16 @@ input[type='file'] {
   border: 1px solid rgba(20, 79, 113, 0.18);
   border-radius: 0.68rem;
   background: rgba(255, 255, 255, 0.94);
-  padding: 0.38rem;
+  padding: 0.24rem;
   display: grid;
-  gap: 0.32rem;
+  gap: 0.18rem;
+}
+
+.compare-visual-card-image {
+  position: relative;
+  overflow: hidden;
+  padding: 0.12rem;
+  gap: 0;
 }
 
 .compare-overlay-card {
@@ -1847,9 +2195,21 @@ input[type='file'] {
 
 .compare-visual-title {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--ink-800);
+  line-height: 1.15;
+}
+
+.compare-visual-card-image .compare-visual-title {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.18rem;
+  z-index: 1;
+  padding: 0.06rem 0.24rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 1px 6px rgba(9, 29, 43, 0.08);
 }
 
 .compare-visual-meta {
@@ -1860,7 +2220,7 @@ input[type='file'] {
 
 .compare-visual-image {
   width: 100%;
-  height: clamp(170px, 22vh, 280px);
+  height: clamp(88px, 12vh, 150px);
   object-fit: contain;
   border-radius: 0.54rem;
   border: 1px solid rgba(202, 213, 226, 0.72);
@@ -2008,6 +2368,21 @@ input[type='file'] {
   white-space: nowrap;
 }
 
+.tumor-fractal-pill-trusted {
+  border-color: rgba(0, 168, 150, 0.28);
+  color: #0f6f64;
+}
+
+.tumor-fractal-pill-caution {
+  border-color: rgba(255, 209, 102, 0.34);
+  color: #8b6500;
+}
+
+.tumor-fractal-pill-unreliable {
+  border-color: rgba(188, 75, 81, 0.28);
+  color: #9a1f28;
+}
+
 .tumor-fractal-stack {
   display: grid;
   gap: 0.56rem;
@@ -2086,6 +2461,46 @@ input[type='file'] {
   color: var(--ink-600);
   font-size: 0.73rem;
   line-height: 1.45;
+}
+
+.tumor-fractal-warning {
+  border: 1px solid rgba(20, 79, 113, 0.14);
+  border-radius: 0.62rem;
+  padding: 0.54rem 0.6rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.tumor-fractal-warning strong {
+  font-size: 0.74rem;
+  color: var(--ink-900);
+}
+
+.tumor-fractal-warning ul {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.tumor-fractal-warning li {
+  font-size: 0.7rem;
+  color: var(--ink-600);
+}
+
+.tumor-fractal-warning-trusted {
+  border-color: rgba(0, 168, 150, 0.24);
+  background: rgba(242, 255, 251, 0.95);
+}
+
+.tumor-fractal-warning-caution {
+  border-color: rgba(255, 209, 102, 0.34);
+  background: rgba(255, 251, 236, 0.96);
+}
+
+.tumor-fractal-warning-unreliable {
+  border-color: rgba(188, 75, 81, 0.26);
+  background: rgba(255, 245, 245, 0.96);
 }
 
 .tumor-fractal-loading {
@@ -2798,8 +3213,13 @@ pre {
   }
 
   .overlay-controls {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    align-items: flex-start;
     padding-bottom: 0.1rem;
+  }
+
+  .overlay-legend {
+    width: 100%;
   }
 
   .result-image {
@@ -2808,6 +3228,38 @@ pre {
 
   .tumor-stage-media {
     min-height: clamp(220px, 38vh, 420px);
+  }
+
+  .tumor-zoom-toolbar,
+  .tumor-fractal-header,
+  .tumor-stage-header,
+  .tumor-detection-item-header,
+  .tumor-status-running {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tumor-zoom-toolbar {
+    gap: 0.4rem;
+  }
+
+  .tumor-zoom-controls {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .tumor-zoom-value {
+    min-width: 3rem;
+  }
+
+  .tumor-compare-grid {
+    gap: 0.48rem;
+  }
+
+  .tumor-fractal-pill,
+  .tumor-stage-pill {
+    white-space: normal;
   }
 
   .stage-badge,
@@ -2821,6 +3273,16 @@ pre {
 
   .runs-table {
     min-width: 560px;
+  }
+
+  .compare-tool-grid .compare-step {
+    min-width: 0;
+  }
+
+  .compare-step-2,
+  .compare-step-3,
+  .compare-step-4 {
+    margin-top: 0;
   }
 
   .full-page-mode {
@@ -2936,8 +3398,8 @@ pre {
   }
 
   .module-ribbon {
-    grid-auto-columns: minmax(155px, 1fr);
-    gap: 0.34rem;
+    grid-auto-columns: minmax(140px, 1fr);
+    gap: 0.3rem;
   }
 
   .module-link {
@@ -2972,6 +3434,93 @@ pre {
   .research-action-button {
     flex: 1 1 140px;
   }
+
+  .tb-brand {
+    gap: 0.42rem;
+    min-width: 0;
+  }
+
+  .tb-brand-text {
+    min-width: 0;
+  }
+
+  .tb-brand-name {
+    white-space: normal;
+    line-height: 1.05;
+  }
+
+  .tb-meta-text {
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .tb-drawer {
+    top: 48px;
+    padding: 0.42rem;
+  }
+
+  .tb-drawer-row {
+    align-items: flex-start;
+  }
+
+  .tb-drawer-kbd {
+    align-self: center;
+  }
+
+  .compare-step-3-summary,
+  .compare-step-3-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-compact-preview-item {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-dataset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-step-3-chart .log-chart-wrap svg {
+    max-height: none;
+  }
+
+  .log-chart-wrap {
+    padding: 0.36rem 0.4rem 0.4rem;
+  }
+
+  .log-chart-title {
+    font-size: 0.78rem;
+  }
+
+  .log-chart-caption {
+    font-size: 0.66rem;
+  }
+
+  .tumor-stage-media {
+    min-height: clamp(180px, 34vh, 340px);
+  }
+
+  .tumor-zoom-toolbar {
+    padding: 0.42rem 0.5rem;
+  }
+
+  .tumor-zoom-button {
+    height: 1.9rem;
+  }
+
+  .tumor-status-empty {
+    padding: 0.72rem 0.76rem;
+    gap: 0.64rem;
+  }
+
+  .tumor-detection-item {
+    padding: 0.5rem 0.56rem;
+  }
+
+  .tumor-status-grid,
+  .tumor-metric-row {
+    gap: 0.28rem;
+  }
 }
 
 @media (max-height: 620px) and (orientation: landscape) {
@@ -2983,8 +3532,36 @@ pre {
     padding-top: 0.48rem;
   }
 
+  .tool-grid {
+    gap: 0.52rem;
+  }
+
+  .panel {
+    padding: 0.6rem;
+  }
+
   .result-image {
     height: clamp(180px, 56vh, 320px);
+  }
+
+  .compare-step-3-chart {
+    position: static;
+  }
+
+  .compare-step-3-chart .log-chart-wrap svg {
+    max-height: 120px;
+  }
+
+  .tumor-stage-media {
+    min-height: clamp(160px, 42vh, 280px);
+  }
+
+  .tumor-zoom-toolbar {
+    padding: 0.38rem 0.48rem;
+  }
+
+  .tumor-compare-grid {
+    gap: 0.48rem;
   }
 
   .full-page-mode .fractal-explorer-toolbar {

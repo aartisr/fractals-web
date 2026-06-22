@@ -1,14 +1,16 @@
 import type { DetectionResult } from '../../core/services/contracts'
 import { formatTumorFractalDelta, tumorFractalEvidenceSources } from './tumorEvidence'
+import type { FractalQualityAssessment } from '../compare/fractalQuality'
 
 type View = DetectionResult['view']
 
 type FractalEvidence = {
   status: 'idle' | 'loading' | 'ready' | 'error'
   message: string
-  source: { fractalDimension: number; fitR2: number } | null
-  crop: { fractalDimension: number; fitR2: number } | null
+  source: { fractalDimension: number; fitR2: number; quality: FractalQualityAssessment } | null
+  crop: { fractalDimension: number; fitR2: number; quality: FractalQualityAssessment } | null
   delta: number | null
+  quality: FractalQualityAssessment | null
 }
 
 interface TumorStatusCardProps {
@@ -41,6 +43,8 @@ export function TumorStatusCard({
   const sourceEvidence = fractalEvidence.source
   const cropEvidence = fractalEvidence.crop
   const hasFractalComparison = fractalEvidence.status === 'ready' && sourceEvidence !== null && cropEvidence !== null
+  const quality = fractalEvidence.quality
+  const hasQualityWarning = quality?.level === 'caution' || quality?.level === 'unreliable'
   return (
     <div className="tumor-status-card">
       <p className="tumor-status-title">Current status</p>
@@ -60,7 +64,9 @@ export function TumorStatusCard({
             <p className="tumor-fractal-title">Fractal evidence</p>
             <p className="tumor-fractal-subtitle">A structural complexity score that turns visual roughness into a number you can compare.</p>
           </div>
-          <span className="tumor-fractal-pill">Supporting biomarker</span>
+          <span className={`tumor-fractal-pill tumor-fractal-pill-${quality?.level ?? 'idle'}`}>
+            {quality ? quality.title : 'Supporting biomarker'}
+          </span>
         </div>
 
         <div className="tumor-fractal-guide" aria-label="How to read fractal dimension">
@@ -86,6 +92,18 @@ export function TumorStatusCard({
           </div>
         ) : hasFractalComparison ? (
           <div className="tumor-fractal-stack">
+            {hasQualityWarning ? (
+              <div className={`tumor-fractal-warning tumor-fractal-warning-${quality?.level ?? 'caution'}`}>
+                <strong>{quality?.summary ?? 'Fractal estimate requires caution.'}</strong>
+                {quality?.reasons.length ? (
+                  <ul>
+                    {quality.reasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
             <div className="tumor-fractal-metrics">
               <div className="tumor-fractal-metric">
                 <span>Whole scan D</span>
@@ -99,7 +117,7 @@ export function TumorStatusCard({
               </div>
               <div className="tumor-fractal-metric tumor-fractal-metric-emphasis">
                 <span>Delta</span>
-                <strong>{formatTumorFractalDelta(fractalEvidence.delta ?? 0)}</strong>
+                <strong>{fractalEvidence.delta === null ? 'Withheld' : formatTumorFractalDelta(fractalEvidence.delta)}</strong>
                 <small>Crop minus whole scan</small>
               </div>
             </div>
@@ -109,7 +127,9 @@ export function TumorStatusCard({
                   ? 'The detected region is more structurally irregular than the whole scan in this run.'
                   : fractalEvidence.delta !== null && fractalEvidence.delta < 0
                     ? 'The detected region is structurally simpler than the whole scan in this run.'
-                    : 'The detected region and whole scan have very similar measured complexity in this run.'}
+                    : quality?.level === 'unreliable'
+                      ? 'The comparison is too unstable to interpret confidently.'
+                      : 'The detected region and whole scan have very similar measured complexity in this run.'}
               </strong>
               <p>
                 Fractal dimension is a quantitative roughness score, not a diagnosis. Here it helps answer a simple question: does the
@@ -119,6 +139,18 @@ export function TumorStatusCard({
           </div>
         ) : fractalEvidence.status === 'ready' ? (
           <div className="tumor-fractal-stack">
+            {hasQualityWarning ? (
+              <div className={`tumor-fractal-warning tumor-fractal-warning-${quality?.level ?? 'caution'}`}>
+                <strong>{quality?.summary ?? 'Fractal estimate requires caution.'}</strong>
+                {quality?.reasons.length ? (
+                  <ul>
+                    {quality.reasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
             <div className="tumor-fractal-metrics">
               <div className="tumor-fractal-metric tumor-fractal-metric-emphasis">
                 <span>Whole scan D</span>

@@ -4,11 +4,17 @@ import { FilePicker } from '../../components/FilePicker'
 import { Panel } from '../../components/Panel'
 import { useOverlayPreference } from '../../core/hooks/useOverlayPreference'
 import { buildCompareImageVisuals } from './compareVisuals'
+import type { FractalQualityAssessment } from './fractalQuality'
 
 const MAX_IMAGES = 5
 const MIN_IMAGES = 2
 const BOX_SIZES = [8, 16, 32]
 const SERIES_COLORS = ['#ff7b4a', '#41d6a4', '#64b5f6', '#ffd166', '#b78dff']
+const QUALITY_LABELS: Record<FractalQualityAssessment['level'], string> = {
+  trusted: 'Trusted',
+  caution: 'Limited confidence',
+  unreliable: 'Unreliable',
+}
 
 const imageLetterLabel = (index: number) => `Image ${String.fromCharCode(65 + index)}`
 
@@ -44,10 +50,37 @@ type ImageAnalysis = SelectedImage & {
   fractalDimension: number
   fitR2: number
   chartPoints: Array<{ x: number; y: number }>
+  quality: FractalQualityAssessment
+}
+
+type ChartHoverState = {
+  seriesIndex: number
+  pointIndex: number
+  label: string
+  boxSize: number
+  count: number
+  x: number
+  y: number
+  fractalDimension: number
+  fitR2: number
+}
+
+function buildTickValues(min: number, max: number, tickCount = 4) {
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    return []
+  }
+
+  if (Math.abs(max - min) < 1e-6) {
+    return [min]
+  }
+
+  return Array.from({ length: tickCount }, (_, index) => min + ((max - min) * index) / (tickCount - 1))
 }
 
 function MultiSeriesLogChart({ analyses }: { analyses: ImageAnalysis[] }) {
   const [activeSeriesIndex, setActiveSeriesIndex] = useState<number | null>(null)
+  const [isHovered, setIsHovered] = useState(false)
+  const [hoveredPoint, setHoveredPoint] = useState<ChartHoverState | null>(null)
   const allPoints = analyses.flatMap((analysis) => analysis.chartPoints)
   if (allPoints.length < 2) {
     return <p className="muted">The log-log chart appears after at least two images are analyzed.</p>
@@ -59,53 +92,192 @@ function MultiSeriesLogChart({ analyses }: { analyses: ImageAnalysis[] }) {
   const maxY = Math.max(...allPoints.map((point) => point.y))
   const pad = 18
   const width = 520
-  const height = 220
+  const height = 170
   const xRange = Math.max(1e-6, maxX - minX)
   const yRange = Math.max(1e-6, maxY - minY)
+  const xTicks = buildTickValues(minX, maxX)
+  const yTicks = buildTickValues(minY, maxY)
 
   const mapX = (value: number) => pad + ((value - minX) / xRange) * (width - pad * 2)
   const mapY = (value: number) => height - pad - ((value - minY) / yRange) * (height - pad * 2)
   const buildPath = (points: Array<{ x: number; y: number }>) =>
     points.map((point, index) => `${index === 0 ? 'M' : 'L'}${mapX(point.x)} ${mapY(point.y)}`).join(' ')
+  const chartTitleId = 'compare-log-chart-title'
+  const chartDescId = 'compare-log-chart-desc'
+  const activeLabel =
+    activeSeriesIndex !== null ? analyses[activeSeriesIndex]?.label ?? 'selected series' : 'all series'
+  const hoveredTooltip =
+    hoveredPoint !== null
+      ? {
+          left: `${(mapX(hoveredPoint.x) / width) * 100}%`,
+          top: `${(mapY(hoveredPoint.y) / height) * 100}%`,
+        }
+      : null
 
   return (
-    <div className="log-chart-wrap" aria-label="Multi-image log-log box counting chart">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="multi-image log-log slope chart">
-        <line className="log-axis" x1={pad} y1={height - pad} x2={width - pad} y2={height - pad} />
-        <line className="log-axis" x1={pad} y1={height - pad} x2={pad} y2={pad} />
-        {analyses.map((analysis, index) => (
-          <g
-            key={`${analysis.index}-${analysis.label}`}
-            className={`log-series-${index % SERIES_COLORS.length} ${activeSeriesIndex !== null && activeSeriesIndex !== index ? 'is-muted' : ''}`}
-          >
-            <path className="log-line" d={buildPath(analysis.chartPoints)} />
-            {analysis.chartPoints.map((point) => (
-              <circle
-                key={`${analysis.label}-${point.x}-${point.y}`}
-                className="log-dot"
-                cx={mapX(point.x)}
-                cy={mapY(point.y)}
-                r={3}
-              />
-            ))}
-          </g>
-        ))}
-      </svg>
+    <figure
+      className={`log-chart-wrap ${isHovered ? 'is-hovered' : ''}`}
+      aria-label="Multi-image log-log box counting chart"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="log-chart-header">
+        <div>
+          <p className="log-chart-kicker">Scaling-law view</p>
+          <h4 id={chartTitleId} className="log-chart-title">
+            Log-log box-count plot
+          </h4>
+        </div>
+        <p className="log-chart-summary">
+          Hover zoom: {isHovered ? 'on' : 'off'} · Active series: {activeLabel}
+        </p>
+      </div>
+
+      <div className="log-chart-surface">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-labelledby={chartTitleId}
+          aria-describedby={chartDescId}
+        >
+          <desc id={chartDescId}>
+            X axis shows log(1 divided by box size), so points farther right represent smaller boxes. Y axis shows log(box count), so
+            points higher up represent more occupied boxes. A straighter line indicates a more stable scaling law.
+          </desc>
+
+          {xTicks.map((tick) => {
+            const x = mapX(tick)
+            const label = tick.toFixed(2)
+            return (
+              <g key={`x-grid-${tick}`}>
+                <line className="log-gridline" x1={x} y1={pad} x2={x} y2={height - pad} />
+                <text className="log-axis-label log-tick-label log-tick-label-x" x={x} y={height - 3}>
+                  {label}
+                </text>
+              </g>
+            )
+          })}
+
+          {yTicks.map((tick) => {
+            const y = mapY(tick)
+            const label = tick.toFixed(2)
+            return (
+              <g key={`y-grid-${tick}`}>
+                <line className="log-gridline" x1={pad} y1={y} x2={width - pad} y2={y} />
+                <text className="log-axis-label log-tick-label log-tick-label-y" x={pad - 4} y={y}>
+                  {label}
+                </text>
+              </g>
+            )
+          })}
+
+          <line className="log-axis" x1={pad} y1={height - pad} x2={width - pad} y2={height - pad} />
+          <line className="log-axis" x1={pad} y1={height - pad} x2={pad} y2={pad} />
+          <text className="log-axis-label log-axis-label-x" x={width / 2} y={height - 2}>
+            log(1 / box size)
+          </text>
+          <text className="log-axis-label log-axis-label-y" x={8} y={height / 2} transform={`rotate(-90 8 ${height / 2})`}>
+            log(box count)
+          </text>
+
+          {analyses.map((analysis, seriesIndex) => (
+            <g
+              key={`${analysis.index}-${analysis.label}`}
+              className={`log-series-${seriesIndex % SERIES_COLORS.length} ${activeSeriesIndex !== null && activeSeriesIndex !== seriesIndex ? 'is-muted' : ''}`}
+            >
+              <path className="log-line" d={buildPath(analysis.chartPoints)} />
+              {analysis.chartPoints.map((point, pointIndex) => {
+                const cx = mapX(point.x)
+                const cy = mapY(point.y)
+                const boxSize = analysis.boxCounts[pointIndex]?.size ?? BOX_SIZES[pointIndex] ?? pointIndex + 1
+                const count = analysis.boxCounts[pointIndex]?.count ?? 0
+                return (
+                  <circle
+                    key={`${analysis.label}-${point.x}-${point.y}`}
+                    className="log-dot"
+                    cx={cx}
+                    cy={cy}
+                    r={3}
+                    tabIndex={0}
+                    aria-label={`${analysis.label}, box size ${boxSize}, occupied boxes ${count}, log x ${point.x.toFixed(2)}, log y ${point.y.toFixed(2)}`}
+                    onMouseEnter={() =>
+                      setHoveredPoint({
+                        seriesIndex,
+                        pointIndex,
+                        label: analysis.label,
+                        boxSize,
+                        count,
+                        x: point.x,
+                        y: point.y,
+                        fractalDimension: analysis.fractalDimension,
+                        fitR2: analysis.fitR2,
+                      })
+                    }
+                    onFocus={() =>
+                      setHoveredPoint({
+                        seriesIndex,
+                        pointIndex,
+                        label: analysis.label,
+                        boxSize,
+                        count,
+                        x: point.x,
+                        y: point.y,
+                        fractalDimension: analysis.fractalDimension,
+                        fitR2: analysis.fitR2,
+                      })
+                    }
+                    onMouseLeave={() => setHoveredPoint(null)}
+                    onBlur={() => setHoveredPoint(null)}
+                  >
+                    <title>
+                      {analysis.label}: box size {boxSize}, occupied boxes {count}, log x {point.x.toFixed(2)}, log y {point.y.toFixed(2)}
+                    </title>
+                  </circle>
+                )
+              })}
+            </g>
+          ))}
+        </svg>
+
+        {hoveredPoint && hoveredTooltip ? (
+          <div className="log-point-tooltip" style={hoveredTooltip}>
+            <strong>{hoveredPoint.label}</strong>
+            <span>Box size: {hoveredPoint.boxSize}</span>
+            <span>Occupied boxes: {hoveredPoint.count}</span>
+            <span>log x: {hoveredPoint.x.toFixed(2)} · log y: {hoveredPoint.y.toFixed(2)}</span>
+            <span>D: {hoveredPoint.fractalDimension.toFixed(4)} · R²: {hoveredPoint.fitR2.toFixed(4)}</span>
+          </div>
+        ) : null}
+      </div>
       <div className="compare-series-legend">
         {analyses.map((analysis, index) => (
           <button
             key={`${analysis.index}-${analysis.label}`}
             type="button"
             className={`compare-series-item ${activeSeriesIndex === index ? 'is-active' : ''} ${activeSeriesIndex !== null && activeSeriesIndex !== index ? 'is-muted' : ''}`}
-            onClick={() => setActiveSeriesIndex((current) => (current === index ? null : index))}
+            onClick={() => {
+              setActiveSeriesIndex((current) => (current === index ? null : index))
+              setHoveredPoint(null)
+            }}
           >
             <span className={`compare-series-dot compare-series-dot-${index % SERIES_COLORS.length}`} aria-hidden="true" />
-            {analysis.label} (D={analysis.fractalDimension.toFixed(4)})
+            {analysis.label} (D={analysis.quality.level === 'unreliable' ? 'withheld' : analysis.fractalDimension.toFixed(4)})
           </button>
         ))}
       </div>
-      <p className="muted">x = log(1/box size), y = log(box count). Each line represents one uploaded image.</p>
-    </div>
+      <figcaption className="log-chart-caption">
+        X measures scale shrinkage, Y measures box occupancy. Use the legend to isolate one image, then compare slope, straightness,
+        and how tightly each series tracks the same pattern across scales.
+      </figcaption>
+      <div className="log-chart-explainer">
+        <span>
+          Steeper lines usually mean more structural complexity in the box-counting sense.
+        </span>
+        <span>
+          More overlap across the same scales usually means the images behave more similarly.
+        </span>
+      </div>
+    </figure>
   )
 }
 
@@ -126,6 +298,26 @@ function buildInterpretation(analyses: ImageAnalysis[]) {
   const ranked = [...analyses].sort((left, right) => right.fractalDimension - left.fractalDimension)
   const highest = ranked[0]
   const lowest = ranked[ranked.length - 1]
+  const unreliableCount = analyses.filter((analysis) => analysis.quality.level === 'unreliable').length
+  const cautionCount = analyses.filter((analysis) => analysis.quality.level === 'caution').length
+
+  if (unreliableCount > 0) {
+    return {
+      summary: `One or more images failed quality checks, so the fractal comparison is not stable enough to trust. ${unreliableCount} image${unreliableCount === 1 ? '' : 's'} were marked unreliable.`,
+      student: 'When QC fails, the safest interpretation is to withhold the result instead of ranking the images.',
+      researcher: 'Report the QC failure first, then repeat with more scales, cleaner preprocessing, or a larger region of interest.',
+      community: 'This run should not be used for conclusions because the estimate is too unstable.',
+    }
+  }
+
+  if (cautionCount > 0) {
+    return {
+      summary: `The comparison is usable, but ${cautionCount} image${cautionCount === 1 ? '' : 's'} only passed limited-confidence checks.`,
+      student: 'Treat the ranking as provisional and confirm it with a repeat run.',
+      researcher: `Keep the comparison, but note that ${cautionCount} image${cautionCount === 1 ? ' has' : 's have'} borderline quality.`,
+      community: 'This comparison is informative, but it should be reviewed alongside expert interpretation.',
+    }
+  }
 
   if (analyses.length === 2) {
     const delta = Math.abs(highest.fractalDimension - lowest.fractalDimension)
@@ -154,11 +346,12 @@ function softenInterpretation(text: string) {
 }
 
 function buildStageTwoTemplate(analyses: ImageAnalysis[], summary: string) {
+  const scaleLabel = analyses.length ? analyses[0].boxCounts.map((item) => item.size).join(', ') : '4, 8, 16, 32'
   if (!analyses.length) {
     return [
       'Research question: ________________________________________________',
       'Modality + preprocessing: _________________________________________',
-      'Scale set used: 8, 16, 32',
+      `Scale ladder used: ${scaleLabel}`,
       'Key result: Upload at least two images to generate quantitative output.',
       'Clinical note: Fractal dimension is a structural descriptor, not a diagnosis.',
     ].join('\n')
@@ -167,14 +360,14 @@ function buildStageTwoTemplate(analyses: ImageAnalysis[], summary: string) {
   const rows = analyses
     .map(
       (analysis) =>
-        `- ${analysis.label}: D=${analysis.fractalDimension.toFixed(4)}, R²=${analysis.fitR2.toFixed(4)}, points=${analysis.boxCounts.length}`,
+        `- ${analysis.label}: D=${analysis.quality.level === 'unreliable' ? 'withheld' : analysis.fractalDimension.toFixed(4)}, R²=${analysis.quality.level === 'unreliable' ? 'withheld' : analysis.fitR2.toFixed(4)}, QC=${analysis.quality.title}, points=${analysis.boxCounts.length}`,
     )
     .join('\n')
 
   return [
     'Research question: ________________________________________________',
     'Modality + preprocessing: _________________________________________',
-    'Scale set used: 8, 16, 32',
+    `Scale ladder used: ${scaleLabel}`,
     `Key result: ${summary}`,
     'Per-image metrics:',
     rows,
@@ -254,6 +447,7 @@ export function ComparePage() {
             fractalDimension: visuals.fractalDimension,
             fitR2: visuals.fitR2,
             chartPoints: visuals.chartPoints,
+            quality: visuals.quality,
           } satisfies ImageAnalysis
         }),
       )
@@ -349,364 +543,421 @@ export function ComparePage() {
 
   return (
     <div className="tool-grid compare-tool-grid">
-      <div className="compare-step compare-step-1">
-      <Panel title="Step 1: Load and align" subtitle="Use matched images so the comparison measures structure, not capture drift.">
-        <div className="compare-step1-layout">
-          <div className="compare-step1-left">
-            <div className="compare-upload-stack">
-              {Array.from({ length: slotCount }).map((_, index) => (
-                <div key={`image-slot-${index}`} className="compare-upload-item">
-                  <FilePicker
-                    label={imageLetterLabel(index)}
-                    onChange={(file) => setFileAt(index, file)}
-                  />
-                  <label className="compare-custom-label-field">
-                    <span>Custom label (optional)</span>
-                    <input
-                      type="text"
-                      maxLength={60}
-                      value={customLabels[index] ?? ''}
-                      onChange={(event) => setCustomLabelAt(index, event.target.value)}
-                      placeholder={`Example: Sample ${String.fromCharCode(65 + index)} / Patient ${index + 1}`}
-                    />
-                  </label>
-                </div>
-              ))}
-              <div className="compare-slot-actions">
-                <button
-                  type="button"
-                  className="overlay-toggle"
-                  disabled={slotCount >= MAX_IMAGES}
-                  onClick={() => setSlotCount((count) => Math.min(MAX_IMAGES, count + 1))}
-                >
-                  Add image slot
-                </button>
-                <button
-                  type="button"
-                  className="overlay-toggle"
-                  disabled={slotCount <= MIN_IMAGES}
-                  onClick={() => {
-                    setSlotCount((count) => {
-                      const nextCount = Math.max(MIN_IMAGES, count - 1)
-                      setFiles((prev) => {
-                        const next = [...prev]
-                        for (let index = nextCount; index < MAX_IMAGES; index += 1) {
-                          next[index] = null
-                        }
-                        return next
-                      })
-                      setCustomLabels((prev) => {
-                        const next = [...prev]
-                        for (let index = nextCount; index < MAX_IMAGES; index += 1) {
-                          next[index] = ''
-                        }
-                        return next
-                      })
-                      return nextCount
-                    })
-                  }}
-                >
-                  Remove last slot
-                </button>
-              </div>
-
-              <div className="compare-label-mode" role="group" aria-label="Image label mode">
-                <p className="compare-label-mode-title">Label mode</p>
-                <button
-                  type="button"
-                  className={`overlay-toggle ${useFilenameLabels ? 'is-active' : ''}`}
-                  onClick={() => setUseFilenameLabels(true)}
-                >
-                  Filename labels
-                </button>
-                <button
-                  type="button"
-                  className={`overlay-toggle ${!useFilenameLabels ? 'is-active' : ''}`}
-                  onClick={() => setUseFilenameLabels(false)}
-                >
-                  Image A-E labels
-                </button>
-              </div>
-
-              <p className="muted">Selected {selectedImages.length}/{slotCount} active images. You can add up to {MAX_IMAGES}.</p>
-            </div>
-
-            <div className="compare-compact-preview-list" aria-label="Uploaded image previews">
-              {selectedImages.length ? (
-                selectedImages.map((image) => (
-                  <div key={`${image.index}-${image.label}`} className="compare-compact-preview-item">
-                    <p className="compare-compact-preview-title">{image.label}</p>
-                    {previewUrls[image.index] ? (
-                      <img src={previewUrls[image.index]} alt={`${image.label} uploaded preview`} className="compare-compact-preview-image" />
-                    ) : (
-                      <div className="compare-compact-preview-empty">Preview unavailable</div>
-                    )}
+      <div className="compare-column compare-column-left">
+        <div className="compare-step compare-step-1">
+          <Panel title="Step 1: Load and align" subtitle="Use matched images so the comparison measures structure, not capture drift.">
+            <div className="compare-step1-layout">
+              <div className="compare-step1-left">
+                <div className="compare-upload-stack">
+                  {Array.from({ length: slotCount }).map((_, index) => (
+                    <div key={`image-slot-${index}`} className="compare-upload-item">
+                      <FilePicker
+                        label={imageLetterLabel(index)}
+                        onChange={(file) => setFileAt(index, file)}
+                      />
+                      <label className="compare-custom-label-field">
+                        <span>Custom label (optional)</span>
+                        <input
+                          type="text"
+                          maxLength={60}
+                          value={customLabels[index] ?? ''}
+                          onChange={(event) => setCustomLabelAt(index, event.target.value)}
+                          placeholder={`Example: Sample ${String.fromCharCode(65 + index)} / Patient ${index + 1}`}
+                        />
+                      </label>
+                    </div>
+                  ))}
+                  <div className="compare-slot-actions">
+                    <button
+                      type="button"
+                      className="overlay-toggle"
+                      disabled={slotCount >= MAX_IMAGES}
+                      onClick={() => setSlotCount((count) => Math.min(MAX_IMAGES, count + 1))}
+                    >
+                      Add image slot
+                    </button>
+                    <button
+                      type="button"
+                      className="overlay-toggle"
+                      disabled={slotCount <= MIN_IMAGES}
+                      onClick={() => {
+                        setSlotCount((count) => {
+                          const nextCount = Math.max(MIN_IMAGES, count - 1)
+                          setFiles((prev) => {
+                            const next = [...prev]
+                            for (let index = nextCount; index < MAX_IMAGES; index += 1) {
+                              next[index] = null
+                            }
+                            return next
+                          })
+                          setCustomLabels((prev) => {
+                            const next = [...prev]
+                            for (let index = nextCount; index < MAX_IMAGES; index += 1) {
+                              next[index] = ''
+                            }
+                            return next
+                          })
+                          return nextCount
+                        })
+                      }}
+                    >
+                      Remove last slot
+                    </button>
                   </div>
-                ))
-              ) : (
-                <p className="muted">Upload at least two images to unlock comparison.</p>
-              )}
-            </div>
 
-            <div className="form-grid">
-              <div className="edu-note">
-                <p className="edu-note-title">What this step does</p>
-                <p>Image Compare works best when both inputs come from the same modality, resolution, and preprocessing path.</p>
-                <p>This multi-image mode compares up to five samples using the same preprocessing and box-size scales.</p>
+                  <div className="compare-label-mode" role="group" aria-label="Image label mode">
+                    <p className="compare-label-mode-title">Label mode</p>
+                    <button
+                      type="button"
+                      className={`overlay-toggle ${useFilenameLabels ? 'is-active' : ''}`}
+                      onClick={() => setUseFilenameLabels(true)}
+                    >
+                      Filename labels
+                    </button>
+                    <button
+                      type="button"
+                      className={`overlay-toggle ${!useFilenameLabels ? 'is-active' : ''}`}
+                      onClick={() => setUseFilenameLabels(false)}
+                    >
+                      Image A-E labels
+                    </button>
+                  </div>
+
+                  <p className="muted">Selected {selectedImages.length}/{slotCount} active images. You can add up to {MAX_IMAGES}.</p>
+                </div>
+
+                <div className="compare-compact-preview-list" aria-label="Uploaded image previews">
+                  {selectedImages.length ? (
+                    selectedImages.map((image) => (
+                      <div key={`${image.index}-${image.label}`} className="compare-compact-preview-item">
+                        <p className="compare-compact-preview-title">{image.label}</p>
+                        {previewUrls[image.index] ? (
+                          <img src={previewUrls[image.index]} alt={`${image.label} uploaded preview`} className="compare-compact-preview-image" />
+                        ) : (
+                          <div className="compare-compact-preview-empty">Preview unavailable</div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="muted">Upload at least two images to unlock comparison.</p>
+                  )}
+                </div>
+
+                <div className="form-grid">
+                  <div className="edu-note">
+                    <p className="edu-note-title">What this step does</p>
+                    <p>Image Compare works best when both inputs come from the same modality, resolution, and preprocessing path.</p>
+                    <p>This multi-image mode compares up to five samples using the same preprocessing and box-size scales.</p>
+                  </div>
+                  <button
+                    className="action"
+                    type="button"
+                    disabled={compareMutation.isPending || analysisPayload.length < MIN_IMAGES}
+                    onClick={() => compareMutation.mutate(analysisPayload)}
+                  >
+                    {compareMutation.isPending ? (
+                      <>
+                        <span className="button-spinner" aria-hidden="true" />
+                        Comparing...
+                      </>
+                    ) : (
+                      `Compare ${analysisPayload.length || MIN_IMAGES} Images`
+                    )}
+                  </button>
+                  {analysisPayload.length < MIN_IMAGES ? <p className="muted">At least two uploads are required.</p> : null}
+                </div>
+
+                <div className="overlay-controls">
+                  <button type="button" className="overlay-toggle" onClick={() => setShowOverlays((value) => !value)}>
+                    {showOverlays ? 'Hide overlays' : 'Show overlays'}
+                  </button>
+                  <div className="overlay-legend" aria-label="Compare overlay legend">
+                    <span className="overlay-legend-item" tabIndex={0} title="Image labels keep the reference and comparison channels explicit during discussion.">
+                      Channel label
+                    </span>
+                    <span className="overlay-legend-item" tabIndex={0} title="Bottom labels indicate the role of each image in complexity comparison.">
+                      Channel role
+                    </span>
+                  </div>
+                </div>
               </div>
-              <button
-                className="action"
-                type="button"
-                disabled={compareMutation.isPending || analysisPayload.length < MIN_IMAGES}
-                onClick={() => compareMutation.mutate(analysisPayload)}
-              >
-                {compareMutation.isPending ? (
-                  <>
-                    <span className="button-spinner" aria-hidden="true" />
-                    Comparing...
-                  </>
+
+              <div className="compare-step1-right">
+                {analyses.length ? (
+                  <div className="compare-preprocess-stack">
+                    {displayedAnalyses.map((analysis) => (
+                      <div key={`${analysis.label}-preprocess`} className="compare-preprocess-item">
+                        <p className="compare-preprocess-title">{analysis.label}</p>
+                        <div className={`compare-quality-badge compare-quality-${analysis.quality.level}`}>
+                          <strong>{QUALITY_LABELS[analysis.quality.level]}</strong>
+                          <span>{analysis.quality.summary}</span>
+                        </div>
+                        <div className="compare-preprocess-grid">
+                          <div className="compare-visual-card compare-visual-card-image">
+                            <p className="compare-visual-title">Original</p>
+                            <img className="compare-visual-image" src={analysis.originalUrl} alt={`${analysis.label} original`} />
+                          </div>
+                          <div className="compare-visual-card compare-visual-card-image">
+                            <p className="compare-visual-title">Greyscale</p>
+                            <img className="compare-visual-image" src={analysis.grayscaleUrl} alt={`${analysis.label} grayscale`} />
+                          </div>
+                          <div className="compare-visual-card compare-visual-card-image">
+                            <p className="compare-visual-title">Binarized</p>
+                            <img className="compare-visual-image" src={analysis.binarizedUrl} alt={`${analysis.label} binarized`} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
-                  `Compare ${analysisPayload.length || MIN_IMAGES} Images`
+                  <div className="compare-empty-state" aria-live="polite">
+                    <p className="compare-empty-state-title">No preprocessing previews yet</p>
+                    <p className="compare-empty-state-copy">Preprocessing previews appear here after running comparison.</p>
+                  </div>
                 )}
-              </button>
-              {analysisPayload.length < MIN_IMAGES ? <p className="muted">At least two uploads are required.</p> : null}
-            </div>
-
-            <div className="overlay-controls">
-              <button type="button" className="overlay-toggle" onClick={() => setShowOverlays((value) => !value)}>
-                {showOverlays ? 'Hide overlays' : 'Show overlays'}
-              </button>
-              <div className="overlay-legend" aria-label="Compare overlay legend">
-                <span className="overlay-legend-item" tabIndex={0} title="Image labels keep the reference and comparison channels explicit during discussion.">
-                  Channel label
-                </span>
-                <span className="overlay-legend-item" tabIndex={0} title="Bottom labels indicate the role of each image in complexity comparison.">
-                  Channel role
-                </span>
               </div>
             </div>
-          </div>
+          </Panel>
+        </div>
+      </div>
 
-          <div className="compare-step1-right">
+      <div className="compare-column compare-column-right">
+        <div className="compare-step compare-step-2">
+          <Panel title="Step 2: Preprocess and count" subtitle="The algorithm scans a stable box-size ladder and counts occupied boxes at each step.">
             {analyses.length ? (
-              <div className="compare-preprocess-stack">
+              <div className="compare-overlay-stack">
                 {displayedAnalyses.map((analysis) => (
-                  <div key={`${analysis.label}-preprocess`} className="compare-preprocess-item">
-                    <p className="compare-preprocess-title">{analysis.label}</p>
-                    <div className="compare-preprocess-grid">
-                      <div className="compare-visual-card">
-                        <p className="compare-visual-title">Original</p>
-                        <img className="compare-visual-image" src={analysis.originalUrl} alt={`${analysis.label} original`} />
-                      </div>
-                      <div className="compare-visual-card">
-                        <p className="compare-visual-title">Greyscale</p>
-                        <img className="compare-visual-image" src={analysis.grayscaleUrl} alt={`${analysis.label} grayscale`} />
-                      </div>
-                      <div className="compare-visual-card">
-                        <p className="compare-visual-title">Binarized</p>
-                        <img className="compare-visual-image" src={analysis.binarizedUrl} alt={`${analysis.label} binarized`} />
-                      </div>
+                  <div key={`${analysis.label}-overlays`} className="compare-visual-set">
+                    <p className="compare-visual-set-title">{analysis.label}</p>
+                    <div className="compare-visual-grid compare-overlay-grid">
+                      {analysis.overlayVisuals.map((visual) => (
+                        <div key={`${analysis.label}-${visual.size}`} className="compare-visual-card compare-overlay-card">
+                          <p className="compare-visual-title">Box size {visual.size}</p>
+                          <p className="compare-visual-meta">Occupied boxes: {visual.count}</p>
+                          <img className="compare-visual-image" src={visual.url} alt={`${analysis.label} box overlay ${visual.size}`} />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="compare-empty-state" aria-live="polite">
-                <p className="compare-empty-state-title">No preprocessing previews yet</p>
-                <p className="compare-empty-state-copy">Preprocessing previews appear here after running comparison.</p>
-              </div>
+              <p className="muted">Run a comparison to see the per-scale box counts and preprocessing summary.</p>
             )}
-          </div>
+          </Panel>
         </div>
-      </Panel>
-      </div>
 
-      <div className="compare-step compare-step-2">
-      <Panel title="Step 2: Preprocess and count" subtitle="The algorithm scans fixed box sizes (8, 16, 32) and counts occupied boxes at each step.">
-        {analyses.length ? (
-          <div className="compare-overlay-stack">
-            {displayedAnalyses.map((analysis) => (
-              <div key={`${analysis.label}-overlays`} className="compare-visual-set">
-                <p className="compare-visual-set-title">{analysis.label}</p>
-                <div className="compare-visual-grid compare-overlay-grid">
-                  {analysis.overlayVisuals.map((visual) => (
-                    <div key={`${analysis.label}-${visual.size}`} className="compare-visual-card compare-overlay-card">
-                      <p className="compare-visual-title">Box size {visual.size}</p>
-                      <p className="compare-visual-meta">Occupied boxes: {visual.count}</p>
-                      <img className="compare-visual-image" src={visual.url} alt={`${analysis.label} box overlay ${visual.size}`} />
+        <div className="compare-step compare-step-3">
+          <Panel title="Step 3: Fit the scaling law" subtitle="The log-log slope is the estimated fractal dimension, and R² shows how linear the scale law is.">
+            {analyses.length ? (
+              <div className="compare-step-3-shell">
+                <div className="edu-chip-row compare-step-3-chips" aria-label="Comparison summary">
+                  <span className="edu-chip">Images: {displayedAnalyses.length}</span>
+                  <span className="edu-chip">Quality: {[...displayedAnalyses].every((analysis) => analysis.quality.level === 'trusted') ? 'Trusted' : 'Mixed'}</span>
+                  <span className="edu-chip">Scale ladder: {displayedAnalyses[0]?.boxCounts.map((item) => item.size).join(', ')}</span>
+                  <span className="edu-chip">
+                    Top image:{' '}
+                    {[...displayedAnalyses].some((analysis) => analysis.quality.level === 'unreliable')
+                      ? 'withheld due to QC'
+                      : [...displayedAnalyses].sort((left, right) => right.fractalDimension - left.fractalDimension)[0].label}
+                  </span>
+                </div>
+                <div className="compare-step-3-summary" aria-label="Quick metrics">
+                  <div className="insight-card insight-low">
+                    <p className="insight-label">Most complex</p>
+                    <p className="insight-value">
+                      {[...displayedAnalyses].some((analysis) => analysis.quality.level === 'unreliable')
+                        ? 'Withheld'
+                        : [...displayedAnalyses].sort((left, right) => right.fractalDimension - left.fractalDimension)[0].label}
+                    </p>
+                  </div>
+                  <div className="insight-card insight-moderate">
+                    <p className="insight-label">Fractal spread</p>
+                    <p className="insight-value">
+                      {(Math.max(...displayedAnalyses.map((analysis) => analysis.fractalDimension)) - Math.min(...displayedAnalyses.map((analysis) => analysis.fractalDimension))).toFixed(4)}
+                    </p>
+                  </div>
+                  <div className="insight-card insight-high">
+                    <p className="insight-label">QC status</p>
+                    <p className="insight-value">
+                      {[...displayedAnalyses].every((analysis) => analysis.quality.level === 'trusted') ? 'Stable' : 'Review needed'}
+                    </p>
+                  </div>
+                </div>
+                <div className="compare-step-3-layout">
+                  <div className="compare-step-3-side">
+                    <div className="table-wrap compare-table-wrap-compact">
+                      <table className="runs-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Image</th>
+                            <th scope="col">D</th>
+                            <th scope="col">R²</th>
+                            <th scope="col">QC</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {displayedAnalyses.map((analysis) => (
+                            <tr key={`${analysis.label}-metrics`}>
+                              <td>{analysis.label}</td>
+                              <td>{analysis.quality.level === 'unreliable' ? '—' : analysis.fractalDimension.toFixed(4)}</td>
+                              <td>{analysis.quality.level === 'unreliable' ? '—' : analysis.fitR2.toFixed(4)}</td>
+                              <td>{analysis.quality.title}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
+                  </div>
+                  <div className="compare-step-3-side compare-step-3-chart">
+                    <MultiSeriesLogChart analyses={displayedAnalyses} />
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="muted">Run a comparison to see the per-scale box counts and preprocessing summary.</p>
-        )}
-      </Panel>
-      </div>
+            ) : (
+              <p className="muted">The scaling-law fit appears here after the comparison finishes.</p>
+            )}
+          </Panel>
+        </div>
 
-      <div className="compare-step compare-step-3">
-      <Panel title="Step 3: Fit the scaling law" subtitle="The log-log slope is the estimated fractal dimension, and R² shows how linear the scale law is.">
-        {analyses.length ? (
-          <>
-            <div className="table-wrap">
-              <table className="runs-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Image</th>
-                    <th scope="col">Fractal Dimension</th>
-                    <th scope="col">R²</th>
-                    <th scope="col">Box Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedAnalyses.map((analysis) => (
-                    <tr key={`${analysis.label}-metrics`}>
-                      <td>{analysis.label}</td>
-                      <td>{analysis.fractalDimension.toFixed(4)}</td>
-                      <td>{analysis.fitR2.toFixed(4)}</td>
-                      <td>{analysis.boxCounts.length}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <MultiSeriesLogChart analyses={displayedAnalyses} />
-          </>
-        ) : (
-          <p className="muted">The scaling-law fit appears here after the comparison finishes.</p>
-        )}
-      </Panel>
-      </div>
-
-      <div className="compare-step compare-step-4">
-      <Panel title="Step 4: Interpret the results" subtitle="Turn the curve into an explanation that students, researchers, and communities can use.">
-        {analyses.length ? (
-          <>
-            <div className="edu-chip-row" aria-label="Comparison interpretation">
-              <span className="edu-chip">Images compared: {displayedAnalyses.length}</span>
-              <span className="edu-chip">Scales: {BOX_SIZES.join(', ')}</span>
-              <span className="edu-chip">Top image: {[...displayedAnalyses].sort((left, right) => right.fractalDimension - left.fractalDimension)[0].label}</span>
-            </div>
-
-            <div className="edu-note">
-              <p className="edu-note-title">Interpretation</p>
-              <p>{interpretationText.summary}</p>
-              <p>{interpretationText.student}</p>
-              <p>{interpretationText.researcher}</p>
-              <p>{interpretationText.community}</p>
-            </div>
-
-            <div className="compare-education-stages" aria-label="Three-stage explanation workflow">
-              <div className="compare-stage-progress" aria-label="Interpretation stages">
-                <button
-                  type="button"
-                  className={`compare-stage-tab ${activeEducationStage === 1 ? 'is-active' : ''}`}
-                  onClick={() => setActiveEducationStage(1)}
-                >
-                  Stage 1
-                </button>
-                <button
-                  type="button"
-                  className={`compare-stage-tab ${activeEducationStage === 2 ? 'is-active' : ''}`}
-                  onClick={() => setActiveEducationStage(2)}
-                >
-                  Stage 2
-                </button>
-                <button
-                  type="button"
-                  className={`compare-stage-tab ${activeEducationStage === 3 ? 'is-active' : ''}`}
-                  onClick={() => setActiveEducationStage(3)}
-                >
-                  Stage 3
-                </button>
-              </div>
-              <label className="compare-safe-toggle">
-                <input
-                  type="checkbox"
-                  checked={safeInterpretationMode}
-                  onChange={(event) => setSafeInterpretationMode(event.target.checked)}
-                />
-                Safe interpretation mode
-              </label>
-              <p className="muted">Shortcut: press 1, 2, or 3 to jump between stages.</p>
-
-              <section className={`compare-stage-card ${activeEducationStage === 1 ? 'is-active' : ''}`} aria-labelledby="compare-stage-1-title">
-                <h3 id="compare-stage-1-title">Stage 1: Demo Protocol (2-5 Images)</h3>
-                <p>
-                  Build a balanced cohort view: one healthy/control-style reference and up to four
-                  lesion-focused samples. Keep modality and preprocessing consistent so the slope
-                  differences represent structure, not scanner drift.
-                </p>
-                <ol className="compare-stage-list">
-                  <li>Pick one baseline reference image (same sequence family as all others).</li>
-                  <li>Add 1-4 comparison images from the same preprocessing path.</li>
-                  <li>Run the same box sizes (8, 16, 32) for every image.</li>
-                  <li>Use Stage 3 curves to rank complexity before drawing conclusions.</li>
-                </ol>
-                <div className="compare-stage-chip-row" aria-label="Current image slots">
-                  {displayedAnalyses.map((analysis, index) => (
-                    <span key={`${analysis.label}-slot`} className="compare-stage-chip">
-                      Slot {index + 1}: {analysis.label}
-                    </span>
-                  ))}
+        <div className="compare-step compare-step-4">
+          <Panel title="Step 4: Interpret the results" subtitle="Turn the curve into an explanation that students, researchers, and communities can use.">
+            {analyses.length ? (
+              <>
+                <div className="edu-chip-row" aria-label="Comparison interpretation">
+                  <span className="edu-chip">Images compared: {displayedAnalyses.length}</span>
+                  <span className="edu-chip">Scales: {BOX_SIZES.join(', ')}</span>
+                  <span className="edu-chip">
+                    Quality:{' '}
+                    {[...displayedAnalyses].every((analysis) => analysis.quality.level === 'trusted') ? 'Trusted' : 'Mixed'}
+                  </span>
+                  <span className="edu-chip">
+                    Top image:{' '}
+                    {[...displayedAnalyses].some((analysis) => analysis.quality.level === 'unreliable')
+                      ? 'withheld due to QC'
+                      : [...displayedAnalyses].sort((left, right) => right.fractalDimension - left.fractalDimension)[0].label}
+                  </span>
                 </div>
-              </section>
 
-              <section className={`compare-stage-card ${activeEducationStage === 2 ? 'is-active' : ''}`} aria-labelledby="compare-stage-2-title">
-                <h3 id="compare-stage-2-title">Stage 2: Reporting Template</h3>
-                <p>
-                  Use a fixed template to avoid over-claiming. Always pair fractal dimension with fit
-                  quality (R²), and include a safety note that this is quantitative support, not a
-                  standalone diagnosis.
-                </p>
-                <div className="compare-stage-actions">
-                  <button type="button" className="overlay-toggle" onClick={copyStageTwoReport}>
-                    Copy Stage 2 report
-                  </button>
-                  {copyStatus === 'copied' ? <span className="muted">Copied.</span> : null}
-                  {copyStatus === 'error' ? <span className="muted">Clipboard unavailable. Copy manually from the template below.</span> : null}
+                <div className="edu-note">
+                  <p className="edu-note-title">Interpretation</p>
+                  <p>{interpretationText.summary}</p>
+                  <p>{interpretationText.student}</p>
+                  <p>{interpretationText.researcher}</p>
+                  <p>{interpretationText.community}</p>
                 </div>
-                <pre>{stageTwoReport}</pre>
-              </section>
 
-              <section className={`compare-stage-card ${activeEducationStage === 3 ? 'is-active' : ''}`} aria-labelledby="compare-stage-3-title">
-                <h3 id="compare-stage-3-title">Stage 3: Dataset Acquisition Guide</h3>
-                <p>
-                  Use public datasets to build reproducible examples of healthy/control brains and
-                  heterogeneous tumor subregions (edema, enhancing tumor, necrotic or non-enhancing
-                  core) across MRI sequences.
-                </p>
-                <div className="compare-dataset-grid">
-                  <a href="https://www.oasis-brains.org/" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
-                    <strong>OASIS</strong>
-                    <span>Healthy/control structural brain MRI cohorts.</span>
-                  </a>
-                  <a href="https://www.brain-development.org/ixi-dataset/" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
-                    <strong>IXI</strong>
-                    <span>Healthy multi-sequence MRI for control comparisons.</span>
-                  </a>
-                  <a href="https://www.cancerimagingarchive.net/access-data/" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
-                    <strong>TCIA / BraTS-related collections</strong>
-                    <span>Tumor-focused datasets and analysis resources.</span>
-                  </a>
-                  <a href="https://arxiv.org/abs/1811.02629" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
-                    <strong>BraTS overview paper</strong>
-                    <span>Reference for heterogeneous glioma subregions and mpMRI usage.</span>
-                  </a>
+                <div className="compare-education-stages" aria-label="Three-stage explanation workflow">
+                  <div className="compare-stage-progress" aria-label="Interpretation stages">
+                    <button
+                      type="button"
+                      className={`compare-stage-tab ${activeEducationStage === 1 ? 'is-active' : ''}`}
+                      onClick={() => setActiveEducationStage(1)}
+                    >
+                      Stage 1
+                    </button>
+                    <button
+                      type="button"
+                      className={`compare-stage-tab ${activeEducationStage === 2 ? 'is-active' : ''}`}
+                      onClick={() => setActiveEducationStage(2)}
+                    >
+                      Stage 2
+                    </button>
+                    <button
+                      type="button"
+                      className={`compare-stage-tab ${activeEducationStage === 3 ? 'is-active' : ''}`}
+                      onClick={() => setActiveEducationStage(3)}
+                    >
+                      Stage 3
+                    </button>
+                  </div>
+                  <label className="compare-safe-toggle">
+                    <input
+                      type="checkbox"
+                      checked={safeInterpretationMode}
+                      onChange={(event) => setSafeInterpretationMode(event.target.checked)}
+                    />
+                    Safe interpretation mode
+                  </label>
+                  <p className="muted">Shortcut: press 1, 2, or 3 to jump between stages.</p>
+
+                  <section className={`compare-stage-card ${activeEducationStage === 1 ? 'is-active' : ''}`} aria-labelledby="compare-stage-1-title">
+                    <h3 id="compare-stage-1-title">Stage 1: Demo Protocol (2-5 Images)</h3>
+                    <p>
+                      Build a balanced cohort view: one healthy/control-style reference and up to four
+                      lesion-focused samples. Keep modality and preprocessing consistent so the slope
+                      differences represent structure, not scanner drift.
+                    </p>
+                    <ol className="compare-stage-list">
+                      <li>Pick one baseline reference image (same sequence family as all others).</li>
+                      <li>Add 1-4 comparison images from the same preprocessing path.</li>
+                      <li>Run the same box sizes (8, 16, 32) for every image.</li>
+                      <li>Only trust images that pass QC and show stable box-count scaling.</li>
+                      <li>Use Stage 3 curves to rank complexity before drawing conclusions.</li>
+                    </ol>
+                    <div className="compare-stage-chip-row" aria-label="Current image slots">
+                      {displayedAnalyses.map((analysis, index) => (
+                        <span key={`${analysis.label}-slot`} className="compare-stage-chip">
+                          Slot {index + 1}: {analysis.label}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className={`compare-stage-card ${activeEducationStage === 2 ? 'is-active' : ''}`} aria-labelledby="compare-stage-2-title">
+                    <h3 id="compare-stage-2-title">Stage 2: Reporting Template</h3>
+                    <p>
+                      Use a fixed template to avoid over-claiming. Always pair fractal dimension with fit
+                      quality (R²) and QC status, and include a safety note that this is quantitative support, not a
+                      standalone diagnosis.
+                    </p>
+                    <div className="compare-stage-actions">
+                      <button type="button" className="overlay-toggle" onClick={copyStageTwoReport}>
+                        Copy Stage 2 report
+                      </button>
+                      {copyStatus === 'copied' ? <span className="muted">Copied.</span> : null}
+                      {copyStatus === 'error' ? <span className="muted">Clipboard unavailable. Copy manually from the template below.</span> : null}
+                    </div>
+                    <pre>{stageTwoReport}</pre>
+                  </section>
+
+                  <section className={`compare-stage-card ${activeEducationStage === 3 ? 'is-active' : ''}`} aria-labelledby="compare-stage-3-title">
+                    <h3 id="compare-stage-3-title">Stage 3: Dataset Acquisition Guide</h3>
+                    <p>
+                      Use public datasets to build reproducible examples of healthy/control brains and
+                      heterogeneous tumor subregions (edema, enhancing tumor, necrotic or non-enhancing
+                      core) across MRI sequences.
+                    </p>
+                    <div className="compare-dataset-grid">
+                      <a href="https://www.oasis-brains.org/" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
+                        <strong>OASIS</strong>
+                        <span>Healthy/control structural brain MRI cohorts.</span>
+                      </a>
+                      <a href="https://www.brain-development.org/ixi-dataset/" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
+                        <strong>IXI</strong>
+                        <span>Healthy multi-sequence MRI for control comparisons.</span>
+                      </a>
+                      <a href="https://www.cancerimagingarchive.net/access-data/" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
+                        <strong>TCIA / BraTS-related collections</strong>
+                        <span>Tumor-focused datasets and analysis resources.</span>
+                      </a>
+                      <a href="https://arxiv.org/abs/1811.02629" target="_blank" rel="noopener noreferrer" className="compare-dataset-card">
+                        <strong>BraTS overview paper</strong>
+                        <span>Reference for heterogeneous glioma subregions and mpMRI usage.</span>
+                      </a>
+                    </div>
+                    <p className="muted">
+                      Sequence reminder: T1 and post-contrast T1 emphasize anatomy and enhancement;
+                      T2 and FLAIR better reveal edema-like hyperintense regions.
+                    </p>
+                  </section>
                 </div>
-                <p className="muted">
-                  Sequence reminder: T1 and post-contrast T1 emphasize anatomy and enhancement;
-                  T2 and FLAIR better reveal edema-like hyperintense regions.
-                </p>
-              </section>
-            </div>
-          </>
-        ) : (
-          <p className="muted">After analysis, this section explains which image is more complex and why the difference matters.</p>
-        )}
-      </Panel>
+              </>
+            ) : (
+              <p className="muted">After analysis, this section explains which image is more complex and why the difference matters.</p>
+            )}
+          </Panel>
+        </div>
       </div>
     </div>
   )

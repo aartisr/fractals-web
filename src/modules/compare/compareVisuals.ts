@@ -1,3 +1,5 @@
+import { assessFractalQuality, type FractalQualityAssessment } from './fractalQuality'
+
 type CompareOverlayVisual = {
   size: number
   count: number
@@ -22,6 +24,7 @@ export type CompareImageVisuals = {
   fractalDimension: number
   fitR2: number
   chartPoints: CompareChartPoint[]
+  quality: FractalQualityAssessment
 }
 
 const readImageBitmap = async (file: File) => createImageBitmap(file)
@@ -105,14 +108,11 @@ const countOccupiedBoxes = (binaryData: ImageData, boxSize: number) => {
 
 const countBoxesAcrossScales = (binaryData: ImageData): CompareBoxCount[] => {
   const maxBox = Math.max(2, Math.floor(Math.min(binaryData.width, binaryData.height) / 4))
-  const sizes: number[] = []
-
-  for (let size = 1; size <= maxBox; size *= 2) {
-    sizes.push(size)
-  }
+  const preferredSizes = [4, 8, 16, 32, 64, 128, 256]
+  const sizes = preferredSizes.filter((size) => size <= maxBox)
 
   if (sizes.length < 3) {
-    ;[64, 32, 16, 8, 4, 2, 1].forEach((size) => {
+    ;[2, 1].forEach((size) => {
       if (size <= maxBox && !sizes.includes(size)) {
         sizes.push(size)
       }
@@ -248,6 +248,11 @@ export async function buildCompareImageVisuals(file: File, boxSizes: number[] = 
 
   const boxCounts = countBoxesAcrossScales(binarized)
   const metrics = computeFractalMetrics(boxCounts)
+  const quality = assessFractalQuality({
+    boxCounts,
+    fractalDimension: metrics.fractalDimension,
+    fitR2: metrics.fitR2,
+  })
 
   return {
     grayscaleUrl: canvasToDataUrl(grayscaleCanvas),
@@ -257,5 +262,6 @@ export async function buildCompareImageVisuals(file: File, boxSizes: number[] = 
     fractalDimension: metrics.fractalDimension,
     fitR2: metrics.fitR2,
     chartPoints: metrics.chartPoints,
+    quality,
   }
 }

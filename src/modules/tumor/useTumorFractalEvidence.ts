@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { buildCompareImageVisuals } from '../compare/compareVisuals'
+import { combineFractalQuality, type FractalQualityAssessment } from '../compare/fractalQuality'
 
 type FractalEvidence = {
   status: 'idle' | 'loading' | 'ready' | 'error'
   message: string
-  source: { fractalDimension: number; fitR2: number } | null
-  crop: { fractalDimension: number; fitR2: number } | null
+  source: { fractalDimension: number; fitR2: number; quality: FractalQualityAssessment } | null
+  crop: { fractalDimension: number; fitR2: number; quality: FractalQualityAssessment } | null
   delta: number | null
+  quality: FractalQualityAssessment | null
 }
 
 const makeIdleState = (): FractalEvidence => ({
@@ -15,6 +17,7 @@ const makeIdleState = (): FractalEvidence => ({
   source: null,
   crop: null,
   delta: null,
+  quality: null,
 })
 
 const dataUrlToFile = async (dataUrl: string, filename: string) => {
@@ -49,6 +52,7 @@ export function useTumorFractalEvidence(file: File | null, cropImageUrl: string 
           source: null,
           crop: null,
           delta: null,
+          quality: null,
         })
       }
     })
@@ -61,12 +65,21 @@ export function useTumorFractalEvidence(file: File | null, cropImageUrl: string 
         }
 
         if (!cropImageUrl) {
+          const quality = sourceAnalysis.quality
           setEvidence({
             status: 'ready',
-            message: 'Whole-scan fractal complexity is ready. Run detection to compare it with the tumor candidate crop.',
-            source: { fractalDimension: sourceAnalysis.fractalDimension, fitR2: sourceAnalysis.fitR2 },
+            message:
+              quality.level === 'unreliable'
+                ? 'Whole-scan fractal estimate is unstable, so it should be treated as low confidence.'
+                : 'Whole-scan fractal complexity is ready. Run detection to compare it with the tumor candidate crop.',
+            source: {
+              fractalDimension: sourceAnalysis.fractalDimension,
+              fitR2: sourceAnalysis.fitR2,
+              quality,
+            },
             crop: null,
             delta: null,
+            quality,
           })
           return
         }
@@ -78,12 +91,25 @@ export function useTumorFractalEvidence(file: File | null, cropImageUrl: string 
         }
 
         const delta = Number((cropAnalysis.fractalDimension - sourceAnalysis.fractalDimension).toFixed(4))
+        const comparisonQuality = combineFractalQuality([sourceAnalysis.quality, cropAnalysis.quality])
         setEvidence({
           status: 'ready',
-          message: 'Fractal comparison is ready. The candidate crop and whole scan can now be read side by side.',
-          source: { fractalDimension: sourceAnalysis.fractalDimension, fitR2: sourceAnalysis.fitR2 },
-          crop: { fractalDimension: cropAnalysis.fractalDimension, fitR2: cropAnalysis.fitR2 },
-          delta,
+          message:
+            comparisonQuality?.level === 'unreliable'
+              ? 'Fractal comparison is unstable, so the result is being withheld as low confidence.'
+              : 'Fractal comparison is ready. The candidate crop and whole scan can now be read side by side.',
+          source: {
+            fractalDimension: sourceAnalysis.fractalDimension,
+            fitR2: sourceAnalysis.fitR2,
+            quality: sourceAnalysis.quality,
+          },
+          crop: {
+            fractalDimension: cropAnalysis.fractalDimension,
+            fitR2: cropAnalysis.fitR2,
+            quality: cropAnalysis.quality,
+          },
+          delta: comparisonQuality?.level === 'unreliable' ? null : delta,
+          quality: comparisonQuality,
         })
       } catch (error) {
         if (!active) {
@@ -96,6 +122,7 @@ export function useTumorFractalEvidence(file: File | null, cropImageUrl: string 
           source: null,
           crop: null,
           delta: null,
+          quality: null,
         })
       }
     }
