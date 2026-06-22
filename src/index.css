@@ -629,7 +629,7 @@ video {
 
 .compare-step1-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.72rem;
   align-items: start;
 }
@@ -761,6 +761,32 @@ video {
 .compare-preprocess-stack {
   display: grid;
   gap: 0.58rem;
+}
+
+.compare-empty-state {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 0.22rem;
+  border: 1px dashed rgba(20, 79, 113, 0.18);
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, rgba(247, 251, 255, 0.96), rgba(240, 248, 255, 0.88));
+  padding: 1rem;
+}
+
+.compare-empty-state-title {
+  margin: 0;
+  color: var(--ink-800);
+  font: 600 0.88rem/1.25 var(--font-heading);
+}
+
+.compare-empty-state-copy {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--ink-600);
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .compare-preprocess-item {

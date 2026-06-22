@@ -511,7 +511,10 @@ export function ComparePage() {
                 ))}
               </div>
             ) : (
-              <p className="muted">Preprocessing previews appear here after running comparison.</p>
+              <div className="compare-empty-state" aria-live="polite">
+                <p className="compare-empty-state-title">No preprocessing previews yet</p>
+                <p className="compare-empty-state-copy">Preprocessing previews appear here after running comparison.</p>
+              </div>
             )}
           </div>
         </div>
