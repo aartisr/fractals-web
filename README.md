@@ -62,11 +62,14 @@ src/
 
 ## Notes
 
-- The frontend is wired to real HTTP endpoints through `src/core/services/api.ts`, then falls back to browser-local computation when the API is not available.
-- Local fallback coverage includes Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, Sierpinski Triangle, ROI box counting, image comparison, tumor-candidate overlays, and run history.
+- The frontend is wired to real HTTP endpoints through `src/core/services/api.ts`, with the tumor workflow using bundled ONNX weights directly in the browser.
+- Local computation coverage includes Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, Sierpinski Triangle, ROI box counting, image comparison, tumor detection, and run history.
 - Configure backend origin with `VITE_API_BASE_URL` (default: `http://127.0.0.1:8000`) when a Python/ONNX service is available.
 - Job responses with `jobId` are automatically polled through `/api/jobs/:jobId`.
 - Run history route (`/workbench/runs`) uses `/api/runs`, with localStorage fallback for resilience.
+- Tumor detection weights are bundled under `public/models/` and run locally through ONNX Runtime in the browser.
+- The ONNX Runtime browser bundle is vendored under `public/vendor/ort/` so tumor inference works offline without a CDN.
+- The bundled tumor ONNX weights are normalized to IR version 8 so they stay compatible with the vendored browser runtime.
 
 ## Documentation
 

@@ -117,9 +117,10 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
 export function Topbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const navigate = useNavigate()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [drawerOpenAtPath, setDrawerOpenAtPath] = useState<string | null>(null)
   const [tooltipId, setTooltipId] = useState<string | null>(null)
   const tooltipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const mobileOpen = drawerOpenAtPath === pathname
 
   const activeModule = workbenchModules.find(
     (m) => pathname === m.path || pathname.startsWith(`${m.path}/`),
@@ -135,18 +136,13 @@ export function Topbar() {
       const idx = parseInt(e.key, 10) - 1
       if (idx >= 0 && idx < workbenchModules.length) {
         navigate({ to: workbenchModules[idx].path })
-        setMobileOpen(false)
+        setDrawerOpenAtPath(null)
       }
-      if (e.key === 'Escape') setMobileOpen(false)
+      if (e.key === 'Escape') setDrawerOpenAtPath(null)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [navigate])
-
-  // ── Close drawer on route change ───────────────────────────────────────────
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [pathname])
 
   // ── Tooltip helpers ────────────────────────────────────────────────────────
   function showTooltip(id: string) {
@@ -225,7 +221,7 @@ export function Topbar() {
         {/* Mobile hamburger */}
         <button
           className={`tb-hamburger${mobileOpen ? ' tb-hamburger--open' : ''}`}
-          onClick={() => setMobileOpen((v) => !v)}
+          onClick={() => setDrawerOpenAtPath(mobileOpen ? null : pathname)}
           aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
           aria-controls="tb-drawer"
         >
@@ -250,7 +246,7 @@ export function Topbar() {
                 to={mod.path}
                 className={`tb-drawer-row${active ? ' tb-drawer-row--active' : ''}`}
                 data-module-id={mod.id}
-                onClick={() => setMobileOpen(false)}
+                onClick={() => setDrawerOpenAtPath(null)}
               >
                 <span className="tb-drawer-icon">
                   {MODULE_ICONS[mod.id]}

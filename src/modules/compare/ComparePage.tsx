@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { FilePicker } from '../../components/FilePicker'
 import { Panel } from '../../components/Panel'
@@ -186,7 +186,6 @@ export function ComparePage() {
   const [slotCount, setSlotCount] = useState(MIN_IMAGES)
   const [files, setFiles] = useState<Array<File | null>>(Array.from({ length: MAX_IMAGES }, () => null))
   const [customLabels, setCustomLabels] = useState<string[]>(Array.from({ length: MAX_IMAGES }, () => ''))
-  const [previewUrls, setPreviewUrls] = useState<Array<string>>([])
   const [analyses, setAnalyses] = useState<ImageAnalysis[]>([])
   const [useFilenameLabels, setUseFilenameLabels] = useState(true)
   const [showOverlays, setShowOverlays] = useOverlayPreference('compare.overlay.visible')
@@ -194,14 +193,18 @@ export function ComparePage() {
   const [safeInterpretationMode, setSafeInterpretationMode] = useState(true)
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle')
   const activeFiles = useMemo(() => files.slice(0, slotCount), [files, slotCount])
+  const previewUrls = useMemo(() => files.map((file) => (file ? URL.createObjectURL(file) : '')), [files])
 
-  const resolveImageLabel = (index: number, file: File) => {
-    const custom = clipLabel(customLabels[index] ?? '')
-    if (custom) {
-      return custom
-    }
-    return useFilenameLabels ? sanitizeFilenameLabel(file) : imageLetterLabel(index)
-  }
+  const resolveImageLabel = useCallback(
+    (index: number, file: File) => {
+      const custom = clipLabel(customLabels[index] ?? '')
+      if (custom) {
+        return custom
+      }
+      return useFilenameLabels ? sanitizeFilenameLabel(file) : imageLetterLabel(index)
+    },
+    [customLabels, useFilenameLabels],
+  )
 
   const selectedImages = useMemo(() => {
     return activeFiles
@@ -212,27 +215,24 @@ export function ComparePage() {
         file: entry.file,
         label: resolveImageLabel(entry.index, entry.file),
       }))
-  }, [activeFiles, customLabels, useFilenameLabels])
+  }, [activeFiles, resolveImageLabel])
 
   const displayedAnalyses = useMemo(() => {
     return analyses.map((analysis) => ({
       ...analysis,
       label: resolveImageLabel(analysis.index, analysis.file),
     }))
-  }, [analyses, customLabels, useFilenameLabels])
+  }, [analyses, resolveImageLabel])
 
   useEffect(() => {
-    const nextUrls = files.map((file) => (file ? URL.createObjectURL(file) : ''))
-    setPreviewUrls(nextUrls)
-
     return () => {
-      nextUrls.forEach((url) => {
+      previewUrls.forEach((url) => {
         if (url) {
           URL.revokeObjectURL(url)
         }
       })
     }
-  }, [files])
+  }, [previewUrls])
 
   const compareMutation = useMutation({
     mutationFn: async (payload: SelectedImage[]) => {

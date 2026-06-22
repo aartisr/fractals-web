@@ -11,6 +11,7 @@ import type {
   RunType,
 } from './contracts'
 import { isUsableBoxCountResult } from '../../modules/box-count/boxCountResultValidation'
+import { detectTumorLocally, preloadTumorModel as preloadTumorModelLocal } from './tumorInference'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
 const HISTORY_KEY = 'fractals-workbench-runs'
@@ -103,10 +104,18 @@ const sanitizeRunPayload = (value: unknown): unknown => {
     const isImageLikeKey =
       key === 'imageUrl' ||
       key === 'image_url' ||
+      key === 'sourceImageUrl' ||
+      key === 'source_image_url' ||
+      key === 'overlayImageUrl' ||
+      key === 'overlay_image_url' ||
       key === 'previewUrl' ||
       key === 'preview_url' ||
       key === 'overlayUrl' ||
       key === 'overlay_url' ||
+      key === 'cropImageUrl' ||
+      key === 'crop_image_url' ||
+      key === 'annotatedImageUrl' ||
+      key === 'annotated_image_url' ||
       key === 'artifact_url'
 
     if (typeof raw === 'string') {
@@ -621,68 +630,6 @@ const localAnalyzeCompare = async (fileA: File, fileB: File): Promise<CompareRes
   }
 }
 
-const localDetectTumor = async (file: File, view: DetectionResult['view']): Promise<DetectionResult> => {
-  await delay()
-  const { canvas, data } = await readImage(file)
-  const width = data.width
-  const height = data.height
-  const samples: number[] = []
-  for (let y = 0; y < height; y += 2) {
-    for (let x = 0; x < width; x += 2) {
-      samples.push(grayscaleAt(data, x, y))
-    }
-  }
-  const mean = samples.reduce((sum, value) => sum + value, 0) / samples.length
-  const variance = samples.reduce((sum, value) => sum + (value - mean) ** 2, 0) / samples.length
-  const threshold = mean + Math.sqrt(variance) * 1.1
-  let minX = width
-  let minY = height
-  let maxX = 0
-  let maxY = 0
-  let count = 0
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const value = grayscaleAt(data, x, y)
-      if (value > threshold) {
-        minX = Math.min(minX, x)
-        minY = Math.min(minY, y)
-        maxX = Math.max(maxX, x)
-        maxY = Math.max(maxY, y)
-        count += 1
-      }
-    }
-  }
-  const ctx = canvas.getContext('2d')
-  const detections: DetectionResult['detections'] = []
-  if (ctx && count > width * height * 0.002 && maxX > minX && maxY > minY) {
-    ctx.strokeStyle = '#41d6a4'
-    ctx.lineWidth = Math.max(2, Math.floor(Math.min(width, height) / 120))
-    ctx.strokeRect(minX, minY, maxX - minX, maxY - minY)
-    ctx.fillStyle = 'rgba(8, 53, 45, 0.86)'
-    ctx.fillRect(minX, Math.max(0, minY - 24), 132, 24)
-    ctx.fillStyle = '#ffffff'
-    ctx.font = '16px sans-serif'
-    const confidence = clamp(0.55 + count / (width * height), 0.55, 0.94)
-    ctx.fillText(`Tumor ${confidence.toFixed(2)}`, minX + 6, Math.max(16, minY - 7))
-    detections.push({
-      label: 'Tumor candidate',
-      confidence: Number(confidence.toFixed(2)),
-      box: {
-        x1: Number(((minX / width) * 100).toFixed(2)),
-        y1: Number(((minY / height) * 100).toFixed(2)),
-        x2: Number(((maxX / width) * 100).toFixed(2)),
-        y2: Number(((maxY / height) * 100).toFixed(2)),
-      },
-    })
-  }
-  return {
-    runId: createRunId('tumor'),
-    view,
-    detections,
-    imageUrl: canvas.toDataURL('image/png'),
-  }
-}
-
 const normalizeFractalResult = (input: unknown): FractalResult => {
   const result = asRecord(input)
   const metadata = asRecord(pick(result, 'metadata', 'params', 'parameters'))
@@ -782,32 +729,6 @@ const normalizeCompareResult = (input: unknown): CompareResult => {
     imageB: normalizeCompareImage(imageB),
     delta: asNumber(pick(result, 'delta'), 0),
     interpretation: asString(pick(result, 'interpretation', 'summary'), ''),
-  }
-}
-
-const normalizeDetectionResult = (input: unknown): DetectionResult => {
-  const result = asRecord(input)
-  const detections = asArray<unknown>(pick(result, 'detections', 'boxes', 'predictions')).map((item) => {
-    const det = asRecord(item)
-    const boxObj = asRecord(pick(det, 'box', 'bbox'))
-
-    return {
-      label: asString(pick(det, 'label', 'class'), 'Tumor'),
-      confidence: asNumber(pick(det, 'confidence', 'score'), 0),
-      box: {
-        x1: asNumber(pick(boxObj, 'x1', 'left'), 0),
-        y1: asNumber(pick(boxObj, 'y1', 'top'), 0),
-        x2: asNumber(pick(boxObj, 'x2', 'right'), 0),
-        y2: asNumber(pick(boxObj, 'y2', 'bottom'), 0),
-      },
-    }
-  })
-
-  return {
-    runId: asString(pick(result, 'runId', 'run_id', 'id'), `tumor_${Date.now()}`),
-    view: asString(pick(result, 'view'), 'axial') as DetectionResult['view'],
-    detections,
-    imageUrl: resolveAssetUrl(asString(pick(result, 'imageUrl', 'image_url', 'overlay_url', 'overlayUrl', 'original_url', 'originalUrl'))),
   }
 }
 
@@ -920,26 +841,12 @@ export const api = {
     return result
   },
 
-  async detectTumor(file: File, view: 'axial' | 'coronal' | 'sagittal'): Promise<DetectionResult> {
-    const formData = new FormData()
-    formData.append('image', file)
-    formData.append('view', view)
+  async preloadTumorModel(view: 'axial' | 'coronal' | 'sagittal'): Promise<void> {
+    await preloadTumorModelLocal(view)
+  },
 
-    let result: DetectionResult
-    try {
-      const response = await request<unknown>('/api/tumor-detection/detect', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const responseObj = asRecord(response)
-      const jobId = asString(pick(responseObj, 'jobId', 'job_id', 'id'))
-      result = isJobAccepted(response)
-        ? normalizeDetectionResult(await pollJob<unknown>(jobId))
-        : normalizeDetectionResult(response)
-    } catch {
-      result = await localDetectTumor(file, view)
-    }
+  async detectTumor(file: File, view: 'axial' | 'coronal' | 'sagittal', threshold = 0.25): Promise<DetectionResult> {
+    const result = await detectTumorLocally(file, view, threshold)
 
     saveRun('tumor_detection', result.runId, `${view} detections ${result.detections.length}`, result, { view, image: file.name })
     return result

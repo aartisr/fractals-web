@@ -59,6 +59,9 @@ export interface CompareResult {
 export interface DetectionResult {
   runId: string
   view: 'axial' | 'coronal' | 'sagittal'
+  sourceImageUrl?: string
+  overlayImageUrl?: string
+  cropImageUrl?: string
   detections: Array<{
     label: string
     confidence: number
