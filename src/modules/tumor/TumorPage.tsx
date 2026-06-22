@@ -7,6 +7,7 @@ import { api } from '../../core/services/api'
 import { TumorComparisonPanel } from './TumorComparisonPanel'
 import { TumorStatusCard } from './TumorStatusCard'
 import { formatConfidence, summarizeConfidence } from './tumorDisplay'
+import { useTumorFractalEvidence } from './useTumorFractalEvidence'
 
 type View = 'axial' | 'coronal' | 'sagittal'
 type ModelStatus = 'idle' | 'loading' | 'ready' | 'error'
@@ -76,6 +77,7 @@ export function TumorPage() {
   const detectionData = detectMutation.data
   const detectionError = detectMutation.error instanceof Error ? detectMutation.error.message : ''
   const confidenceSummary = detectionData ? summarizeConfidence(detectionData.detections) : null
+  const fractalEvidence = useTumorFractalEvidence(file, detectionData?.cropImageUrl)
 
   const strongestDetection = useMemo(() => {
     if (!detectionData?.detections.length) {
@@ -154,6 +156,7 @@ export function TumorPage() {
             detectionCount={detectionCount}
             strongestConfidence={strongestConfidence}
             confidenceSummary={confidenceSummary}
+            fractalEvidence={fractalEvidence}
           />
         </div>
       </Panel>
