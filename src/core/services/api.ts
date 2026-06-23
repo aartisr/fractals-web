@@ -6,6 +6,7 @@ import type {
   FractalResult,
   JobAccepted,
   JobStatus,
+  RunProvenance,
   RunDetail,
   RunSummary,
   RunType,
@@ -17,6 +18,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000
 const HISTORY_KEY = 'fractals-workbench-runs'
 const MAX_LOCAL_HISTORY = 120
 const LOCAL_LATENCY_MS = 80
+const RUN_PAYLOAD_VERSION = 1
 
 const isJobAccepted = (value: unknown): value is JobAccepted => {
   if (!value || typeof value !== 'object') {
@@ -33,6 +35,7 @@ const asRecord = (value: unknown): Record<string, unknown> => (value && typeof v
 const asString = (value: unknown, fallback = ''): string => (typeof value === 'string' ? value : fallback)
 const asNumber = (value: unknown, fallback = 0): number => (typeof value === 'number' ? value : fallback)
 const asArray = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : [])
+const isEmptyRecord = (value: Record<string, unknown>) => Object.keys(value).length === 0
 const pick = <T = unknown>(obj: Record<string, unknown>, ...keys: string[]): T | undefined => {
   for (const key of keys) {
     if (key in obj) {
@@ -190,8 +193,18 @@ const pollJob = async <T>(jobId: string): Promise<T> => {
   throw new Error('Timed out while polling job status.')
 }
 
+const buildRunProvenance = (type: RunType, method: string): RunProvenance => ({
+  version: 1,
+  module: type,
+  generatedAt: new Date().toISOString(),
+  source: 'local',
+  method,
+  appVersion: import.meta.env.VITE_APP_VERSION ?? 'local',
+})
+
 const saveRun = (type: RunType, runId: string, detail: string, payload?: unknown, parameters?: unknown) => {
   const compactPayload = sanitizeRunPayload(payload)
+  const provenance = buildRunProvenance(type, detail)
   addLocalHistory({
     id: runId,
     type,
@@ -199,9 +212,14 @@ const saveRun = (type: RunType, runId: string, detail: string, payload?: unknown
     createdAt: new Date().toISOString(),
     detail,
     payload: {
-      result: compactPayload,
+      version: RUN_PAYLOAD_VERSION,
+      provenance,
       parameters,
+      result: compactPayload,
+      artifacts: {},
+      summary: detail,
     },
+    provenance,
   })
 }
 
@@ -734,6 +752,9 @@ const normalizeCompareResult = (input: unknown): CompareResult => {
 
 const normalizeRunSummary = (input: unknown): RunSummary => {
   const run = asRecord(input)
+  const payload = asRecord(pick(run, 'payload'))
+  const provenance = asRecord(pick(run, 'provenance', 'runProvenance', 'provenance_json', 'meta'))
+  const payloadProvenance = asRecord(pick(payload, 'provenance'))
   return {
     id: asString(pick(run, 'id', 'run_id', 'runId'), `run_${Date.now()}`),
     type: asString(pick(run, 'type'), 'fractal') as RunType,
@@ -741,17 +762,30 @@ const normalizeRunSummary = (input: unknown): RunSummary => {
     createdAt: asString(pick(run, 'createdAt', 'created_at'), new Date().toISOString()),
     detail: asString(pick(run, 'detail', 'summary', 'message'), ''),
     payload: pick(run, 'payload', 'result'),
+    provenance: {
+      version: 1,
+      module: asString(pick(provenance, 'module', 'type', 'run_type', 'workflow'), asString(pick(payloadProvenance, 'module'), asString(pick(run, 'type'), 'fractal'))) as RunType,
+      generatedAt: asString(pick(provenance, 'generatedAt', 'generated_at', 'createdAt'), asString(pick(payloadProvenance, 'generatedAt', 'generated_at'), asString(pick(run, 'createdAt', 'created_at'), new Date().toISOString()))),
+      source: asString(pick(provenance, 'source'), asString(pick(payloadProvenance, 'source'), 'api')) as RunProvenance['source'],
+      method: asString(pick(provenance, 'method'), asString(pick(payloadProvenance, 'method'), asString(pick(run, 'detail', 'summary', 'message'), 'analysis'))),
+      appVersion: asString(pick(provenance, 'appVersion', 'app_version'), asString(pick(payloadProvenance, 'appVersion', 'app_version'), 'unknown')),
+    },
   }
 }
 
 const normalizeRunDetail = (input: unknown): RunDetail => {
   const run = asRecord(input)
   const summary = normalizeRunSummary(run)
+  const payload = asRecord(pick(run, 'payload'))
+  const payloadResult = pick(payload, 'result', 'data', 'payload')
+  const payloadParameters = pick(payload, 'parameters', 'params')
+  const payloadArtifacts = asRecord(pick(payload, 'artifacts'))
+  const topLevelArtifacts = asRecord(pick(run, 'artifacts'))
   return {
     ...summary,
-    result: pick(run, 'result', 'payload'),
-    parameters: pick(run, 'parameters', 'params', 'parameters_json'),
-    artifacts: asRecord(pick(run, 'artifacts')) as Record<string, string>,
+    result: pick(run, 'result', 'payload', 'data') ?? payloadResult,
+    parameters: pick(run, 'parameters', 'params', 'parameters_json') ?? payloadParameters,
+    artifacts: (isEmptyRecord(topLevelArtifacts) ? payloadArtifacts : topLevelArtifacts) as Record<string, string>,
     errorMessage: asString(pick(run, 'errorMessage', 'error_message', 'error'), ''),
   }
 }
@@ -877,6 +911,8 @@ export const api = {
         ...local,
         result: asRecord(local.payload).result ?? local.payload,
         parameters: asRecord(local.payload).parameters,
+        artifacts: asRecord(asRecord(local.payload).artifacts) as Record<string, string>,
+        provenance: local.provenance,
       }
     }
   },

@@ -1,6 +1,6 @@
 # Fractals TanStack Workbench
 
-Author: ![PCSS II School](public/pcssii-logo.jpg) Aarti S Ravikumar · PCSS II School  
+Author: ![Pioneer Charter School of Science II](public/pcssii-logo.jpg) Aarti S Ravikumar · Pioneer Charter School of Science II  
 Status: Work in Progress
 
 Responsive, modular scientific workbench scaffolded as a sibling project to support fractal generation, box counting, image comparison, and tumor detection workflows.
@@ -74,3 +74,5 @@ src/
 ## Documentation
 
 - Image Compare guide: `docs/image-compare-guide.md`
+- Feature strategy and research plan: `docs/fractals-web-feature-strategy.md`
+- Phase roadmap: `docs/fractals-web-phase-roadmap.md`

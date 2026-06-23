@@ -21,7 +21,36 @@ export const tumorFractalEvidenceSources = [
   },
 ]
 
+export type TumorEvidenceSummary = {
+  title: string
+  summary: string
+  cautions: string[]
+  sources: typeof tumorFractalEvidenceSources
+}
+
 export function formatTumorFractalDelta(delta: number) {
   const sign = delta > 0 ? '+' : ''
   return `${sign}${delta.toFixed(4)}`
+}
+
+export function buildTumorEvidenceSummary(input: {
+  view: 'axial' | 'coronal' | 'sagittal'
+  threshold: number
+  detectionCount: number
+  strongestConfidence: string
+  confidenceSummary?: { high: number; medium: number; low: number } | null
+}): TumorEvidenceSummary {
+  const { view, threshold, detectionCount, strongestConfidence, confidenceSummary } = input
+  return {
+    title: `Tumor evidence snapshot: ${view}`,
+    summary: confidenceSummary
+      ? `Detection confidence bands: high ${confidenceSummary.high}, medium ${confidenceSummary.medium}, low ${confidenceSummary.low}. Strongest confidence: ${strongestConfidence}.`
+      : `Detected ${detectionCount} candidate regions at a ${Math.round(threshold * 100)}% threshold. Strongest confidence: ${strongestConfidence}.`,
+    cautions: [
+      'Educational support only, not diagnosis or treatment guidance.',
+      'Interpret confidence with clinical context and expert review.',
+      'Keep the fractal evidence as supporting context, not a standalone claim.',
+    ],
+    sources: tumorFractalEvidenceSources,
+  }
 }

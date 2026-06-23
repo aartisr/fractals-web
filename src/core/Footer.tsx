@@ -53,7 +53,7 @@ export function Footer() {
       <div className="ft-inner">
         {/* ── Left — brand block ── */}
         <div className="ft-brand-block">
-          <Link to="/workbench/fractals" className="ft-brand-link" aria-label="Nexus Fractal Lab home">
+          <Link to="/" className="ft-brand-link" aria-label="Nexus Fractal Lab home">
             <FooterGlyph />
             <span className="ft-brand-name">Nexus Fractal Lab</span>
           </Link>
@@ -101,7 +101,9 @@ export function Footer() {
           </ul>
           <p className="ft-nav-heading ft-nav-heading--spaced">Keyboard</p>
           <ul className="ft-stack-list">
-            <li><kbd className="ft-kbd">1</kbd>–<kbd className="ft-kbd">5</kbd> Jump to module</li>
+            <li>
+              <kbd className="ft-kbd">1</kbd>–<kbd className="ft-kbd">{workbenchModules.length}</kbd> Jump to module
+            </li>
             <li><kbd className="ft-kbd">Esc</kbd> Close menus</li>
           </ul>
         </div>
@@ -110,8 +112,8 @@ export function Footer() {
       {/* ── Bottom bar ── */}
       <div className="ft-bottom">
         <span className="ft-copy ft-copy-brand">
-          <img src="/pcssii-logo.jpg" alt="PCSS II School" className="pcssii-logo-inline" />
-          © {CURRENT_YEAR} Aarti S Ravikumar · PCSS II School · Work in Progress
+          <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
+          © {CURRENT_YEAR} Aarti S Ravikumar · Pioneer Charter School of Science II · Work in Progress
         </span>
         <span className="ft-pipe" aria-hidden="true" />
         <span className="ft-copy ft-copy--muted">

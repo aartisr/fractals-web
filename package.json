@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --test --experimental-transform-types src/modules/box-count/*.test.ts",
-    "test:watch": "node --test --watch --experimental-transform-types src/modules/box-count/*.test.ts"
+    "test": "node --test --experimental-transform-types src/**/*.test.ts",
+    "test:watch": "node --test --watch --experimental-transform-types src/**/*.test.ts"
   },
   "dependencies": {
     "@tanstack/react-form": "^1.33.0",

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { useEducatorMode } from './hooks/useEducatorMode'
 import { workbenchModules } from './plugins/modules'
 
 // ─── Module Icons ─────────────────────────────────────────────────────────────
@@ -16,6 +17,25 @@ function IconFractals() {
         stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"
       />
       <circle cx="10" cy="10" r="1.8" fill="currentColor" />
+    </svg>
+  )
+}
+
+function IconDiscover() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path
+        d="M10 2.4 12.2 7.8 17.6 10 12.2 12.2 10 17.6 7.8 12.2 2.4 10 7.8 7.8 10 2.4Z"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 5.3 11.3 8.7 14.7 10 11.3 11.3 10 14.7 8.7 11.3 5.3 10 8.7 8.7 10 5.3Z"
+        fill="currentColor"
+        fillOpacity=".16"
+      />
+      <circle cx="10" cy="10" r="1.1" fill="currentColor" />
     </svg>
   )
 }
@@ -106,6 +126,7 @@ function FractalHexIcon() {
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
   fractals: <IconFractals />,
+  discover: <IconDiscover />,
   'box-count': <IconBoxCount />,
   compare: <IconCompare />,
   'tumor-detection': <IconTumor />,
@@ -120,6 +141,7 @@ export function Topbar() {
   const [drawerOpenAtPath, setDrawerOpenAtPath] = useState<string | null>(null)
   const [tooltipId, setTooltipId] = useState<string | null>(null)
   const tooltipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { educatorMode, setEducatorMode } = useEducatorMode()
   const mobileOpen = drawerOpenAtPath === pathname
 
   const activeModule = workbenchModules.find(
@@ -162,7 +184,7 @@ export function Topbar() {
         data-active-module={activeModule?.id ?? 'fractals'}
       >
         {/* Brand */}
-        <Link to="/workbench/fractals" className="tb-brand" aria-label="Nexus Fractal Lab — home">
+        <Link to="/" className="tb-brand" aria-label="Nexus Fractal Lab — home">
           <FractalHexIcon />
           <div className="tb-brand-text">
             <span className="tb-brand-name">Nexus Fractal Lab</span>
@@ -212,9 +234,18 @@ export function Topbar() {
         {/* Meta — right side */}
         <div className="tb-meta">
           <span className="tb-pulse" title="Backend status" aria-label="Backend connected" />
+          <button
+            type="button"
+            className={`tb-classroom-toggle${educatorMode ? ' is-active' : ''}`}
+            aria-pressed={educatorMode}
+            aria-label={educatorMode ? 'Turn classroom mode off' : 'Turn classroom mode on'}
+            onClick={() => setEducatorMode((value) => !value)}
+          >
+            {educatorMode ? 'Classroom mode on' : 'Classroom mode off'}
+          </button>
           <span className="tb-meta-text">
-            <img src="/pcssii-logo.jpg" alt="PCSS II School" className="pcssii-logo-inline" />
-            Aarti S Ravikumar · PCSS II School · WIP
+            <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
+            Aarti S Ravikumar · Pioneer Charter School of Science II · WIP
           </span>
         </div>
 
@@ -262,8 +293,8 @@ export function Topbar() {
           <div className="tb-drawer-footer">
             <span className="tb-pulse" />
             <span className="tb-meta-text">
-              <img src="/pcssii-logo.jpg" alt="PCSS II School" className="pcssii-logo-inline" />
-              Aarti S Ravikumar · PCSS II School · Work in Progress
+              <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
+              Aarti S Ravikumar · Pioneer Charter School of Science II · Work in Progress
             </span>
           </div>
         </nav>

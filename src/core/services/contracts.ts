@@ -72,6 +72,15 @@ export interface DetectionResult {
 
 export type RunType = 'fractal' | 'box_count' | 'compare' | 'tumor_detection'
 
+export interface RunProvenance {
+  version: 1
+  module: RunType
+  generatedAt: string
+  source: 'local' | 'api'
+  method: string
+  appVersion: string
+}
+
 export interface RunSummary {
   id: string
   type: RunType
@@ -79,6 +88,7 @@ export interface RunSummary {
   createdAt: string
   detail: string
   payload?: unknown
+  provenance?: RunProvenance
 }
 
 export interface RunDetail extends RunSummary {

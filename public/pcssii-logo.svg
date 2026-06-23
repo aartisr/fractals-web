@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" role="img" aria-labelledby="pcssii-logo-title pcssii-logo-desc">
-  <title id="pcssii-logo-title">PCSS II School logo</title>
-  <desc id="pcssii-logo-desc">Shield mark and text for PCSS II School</desc>
+  <title id="pcssii-logo-title">Pioneer Charter School of Science II logo</title>
+  <desc id="pcssii-logo-desc">Shield mark and text for Pioneer Charter School of Science II</desc>
   <defs>
     <linearGradient id="pcssii-g" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0" stop-color="#0b5d8a"/>
@@ -13,6 +13,6 @@
     <path d="M30 8l16 7v12c0 11-6 19-16 24-10-5-16-13-16-24V15z" fill="none" stroke="#e9f6ff" stroke-width="2"/>
     <path d="M20 32h20M30 22v20" stroke="#e9f6ff" stroke-width="3" stroke-linecap="round"/>
   </g>
-  <text x="78" y="35" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="700" fill="#0d2740">PCSS II</text>
+  <text x="78" y="35" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="700" fill="#0d2740">Pioneer Charter School of Science II</text>
   <text x="78" y="56" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="600" fill="#2f5a75">School</text>
 </svg>

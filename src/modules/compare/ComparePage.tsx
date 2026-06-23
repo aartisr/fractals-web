@@ -1,8 +1,35 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
+import { CommentThreadPanel } from '../../components/CommentThreadPanel'
 import { FilePicker } from '../../components/FilePicker'
+import { ClassroomPanel } from '../../components/ClassroomPanel'
 import { Panel } from '../../components/Panel'
+import { ResultCardPanel } from '../../components/ResultCardPanel'
+import { downloadJson, downloadTextAsFile } from '../../core/services/export'
+import { useEducatorMode } from '../../core/hooks/useEducatorMode'
+import { useWorkbenchShareArtifact } from '../../core/hooks/useWorkbenchShareArtifact'
 import { useOverlayPreference } from '../../core/hooks/useOverlayPreference'
+import {
+  buildClassroomStatus,
+  buildHandoutMarkdown,
+  buildSlideSummaryMarkdown,
+  defaultChecklistStatus,
+} from '../../core/services/educationToolkit'
+import {
+  createCompareShareCard,
+  decodeWorkbenchShareRecord,
+  encodeWorkbenchState,
+  trackWorkbenchEvent,
+} from '../../core/services/workbenchSharing'
+import {
+  buildCohortComparisonJson,
+  buildCohortComparisonMarkdown,
+  buildPublicationFigureManifest,
+  buildResearchSnapshot,
+  type ResearchSnapshot,
+} from '../../core/services/researchWorkbench'
+import type { RunSummary } from '../../core/services/contracts'
 import { buildCompareImageVisuals } from './compareVisuals'
 import type { FractalQualityAssessment } from './fractalQuality'
 
@@ -14,6 +41,52 @@ const QUALITY_LABELS: Record<FractalQualityAssessment['level'], string> = {
   trusted: 'Trusted',
   caution: 'Limited confidence',
   unreliable: 'Unreliable',
+}
+
+type CompareViewState = {
+  slotCount: number
+  customLabels: string[]
+  useFilenameLabels: boolean
+  safeInterpretationMode: boolean
+  activeEducationStage: number
+}
+
+const compareViewStorageKey = 'fractals-workbench-compare-view'
+
+const readCompareViewState = (): CompareViewState | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    const raw = window.localStorage.getItem(compareViewStorageKey)
+    if (!raw) {
+      return null
+    }
+    const parsed = JSON.parse(raw) as CompareViewState
+    if (typeof parsed.slotCount === 'number') {
+      return parsed
+    }
+  } catch {
+    // Ignore malformed state.
+  }
+
+  return null
+}
+
+const persistCompareViewState = (state: CompareViewState) => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(compareViewStorageKey, JSON.stringify(state))
+    const url = new URL(window.location.href)
+    url.searchParams.set('view', encodeWorkbenchState(state))
+    window.history.replaceState({}, '', url)
+  } catch {
+    // Ignore state persistence errors.
+  }
 }
 
 const imageLetterLabel = (index: number) => `Image ${String.fromCharCode(65 + index)}`
@@ -376,15 +449,22 @@ function buildStageTwoTemplate(analyses: ImageAnalysis[], summary: string) {
 }
 
 export function ComparePage() {
-  const [slotCount, setSlotCount] = useState(MIN_IMAGES)
+  const { educatorMode } = useEducatorMode()
+  const initialCompareView = useMemo(() => readCompareViewState(), [])
+  const [slotCount, setSlotCount] = useState(initialCompareView?.slotCount ?? MIN_IMAGES)
   const [files, setFiles] = useState<Array<File | null>>(Array.from({ length: MAX_IMAGES }, () => null))
-  const [customLabels, setCustomLabels] = useState<string[]>(Array.from({ length: MAX_IMAGES }, () => ''))
+  const [customLabels, setCustomLabels] = useState<string[]>(
+    initialCompareView?.customLabels ?? Array.from({ length: MAX_IMAGES }, () => ''),
+  )
   const [analyses, setAnalyses] = useState<ImageAnalysis[]>([])
-  const [useFilenameLabels, setUseFilenameLabels] = useState(true)
+  const [useFilenameLabels, setUseFilenameLabels] = useState(initialCompareView?.useFilenameLabels ?? true)
   const [showOverlays, setShowOverlays] = useOverlayPreference('compare.overlay.visible')
-  const [activeEducationStage, setActiveEducationStage] = useState(1)
-  const [safeInterpretationMode, setSafeInterpretationMode] = useState(true)
+  const [activeEducationStage, setActiveEducationStage] = useState(initialCompareView?.activeEducationStage ?? 1)
+  const [safeInterpretationMode, setSafeInterpretationMode] = useState(
+    initialCompareView?.safeInterpretationMode ?? educatorMode ?? true,
+  )
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle')
+  const shareHydratedRef = useRef(false)
   const activeFiles = useMemo(() => files.slice(0, slotCount), [files, slotCount])
   const previewUrls = useMemo(() => files.map((file) => (file ? URL.createObjectURL(file) : '')), [files])
 
@@ -474,6 +554,243 @@ export function ComparePage() {
     [displayedAnalyses, interpretationText.summary],
   )
 
+  const compareShareResult = useMemo(() => {
+    if (displayedAnalyses.length < 2) {
+      return null
+    }
+
+    const ranked = [...displayedAnalyses].sort((left, right) => right.fractalDimension - left.fractalDimension)
+    const highest = ranked[0]
+    const lowest = ranked[ranked.length - 1]
+    return {
+      runId: `compare-${displayedAnalyses.map((analysis) => analysis.label).join('-')}`,
+      imageA: {
+        fractalDimension: highest.fractalDimension,
+        elapsedSeconds: highest.quality.level === 'unreliable' ? undefined : undefined,
+        fitR2: highest.fitR2,
+        boxCounts: highest.boxCounts,
+      },
+      imageB: {
+        fractalDimension: lowest.fractalDimension,
+        elapsedSeconds: lowest.quality.level === 'unreliable' ? undefined : undefined,
+        fitR2: lowest.fitR2,
+        boxCounts: lowest.boxCounts,
+      },
+      delta: Number(Math.abs(highest.fractalDimension - lowest.fractalDimension).toFixed(4)),
+      interpretation: interpretationText.summary,
+    }
+  }, [displayedAnalyses, interpretationText.summary])
+
+  const compareShareCard = useMemo(
+    () =>
+      compareShareResult
+        ? createCompareShareCard({
+            result: compareShareResult,
+            summary: interpretationText.summary,
+            labels: displayedAnalyses.map((analysis) => analysis.label),
+            safeInterpretationMode,
+            slotCount,
+            activeEducationStage,
+          })
+        : null,
+    [activeEducationStage, compareShareResult, displayedAnalyses, interpretationText.summary, safeInterpretationMode, slotCount],
+  )
+  const researchSnapshots = useMemo<ResearchSnapshot[]>(
+    () =>
+      displayedAnalyses.map((analysis, index) =>
+        buildResearchSnapshot({
+          run: {
+            id: `compare-${analysis.label}-${index}`,
+            type: 'compare',
+            status: 'complete',
+            createdAt: new Date().toISOString(),
+            detail: `${analysis.label} comparison snapshot`,
+            payload: {
+              result: analysis,
+              parameters: {
+                label: analysis.label,
+                quality: analysis.quality.level,
+                sourceName: analysis.file.name,
+              },
+            },
+          } as RunSummary,
+          title: `${analysis.label} comparison`,
+          summary: `${analysis.label}: D ${analysis.fractalDimension.toFixed(4)}, R² ${analysis.fitR2.toFixed(4)}.`,
+          metrics: [
+            { label: 'Dimension', value: analysis.fractalDimension.toFixed(4) },
+            { label: 'R²', value: analysis.fitR2.toFixed(4) },
+            { label: 'Quality', value: QUALITY_LABELS[analysis.quality.level] },
+          ],
+          annotations: [
+            { label: 'Label', text: analysis.label },
+            { label: 'Source', text: analysis.file.name },
+          ],
+          parameters: {
+            label: analysis.label,
+            quality: analysis.quality.level,
+          },
+          result: {
+            fractalDimension: analysis.fractalDimension,
+            fitR2: analysis.fitR2,
+            quality: analysis.quality,
+          },
+        }),
+      ),
+    [displayedAnalyses],
+  )
+  const cohortComparisonMarkdown = useMemo(
+    () => buildCohortComparisonMarkdown(researchSnapshots),
+    [researchSnapshots],
+  )
+  const cohortComparisonJson = useMemo(
+    () => buildCohortComparisonJson(researchSnapshots),
+    [researchSnapshots],
+  )
+  const publicationFigureManifest = useMemo(
+    () =>
+      compareShareCard
+        ? buildPublicationFigureManifest({
+            version: 1,
+            title: compareShareCard.title,
+            module: 'compare',
+            runId: compareShareCard.id,
+            createdAt: compareShareCard.createdAt,
+            summary: compareShareCard.summary,
+            provenance: {
+              version: 1,
+              module: 'compare',
+              generatedAt: compareShareCard.createdAt,
+              source: 'local',
+              method: 'Comparison cohort export',
+              appVersion: 'unknown',
+            },
+            parameters: { labels: displayedAnalyses.map((analysis) => analysis.label) },
+            result: compareShareResult,
+            artifacts: {},
+            metrics: [],
+            annotations: researchSnapshots.flatMap((snapshot) => snapshot.annotations),
+          })
+        : null,
+    [compareShareCard, compareShareResult, displayedAnalyses, researchSnapshots],
+  )
+  const {
+    shareUrl: compareShareUrl,
+    shareText: compareShareText,
+    shareStatus: compareShareStatus,
+    copyShareLink: copyCompareShareLink,
+    copyShareText: copyCompareShareText,
+    saveShareCard: saveCompareShareCard,
+    remixShareCard,
+  } = useWorkbenchShareArtifact<{
+    labels?: string[]
+    safeInterpretationMode?: boolean
+    slotCount?: number
+    activeEducationStage?: number
+  }>({
+    card: compareShareCard,
+    sourcePath: '/workbench/compare',
+    copyLinkEventName: 'compare_share_link_copied',
+    copyTextEventName: 'compare_share_card_copied',
+    saveEventName: 'compare_share_saved',
+    remixEventName: 'compare_share_remixed',
+    eventPayload: { labels: displayedAnalyses.map((analysis) => analysis.label) },
+    onRemix: (state) => {
+      if (typeof state.slotCount === 'number') {
+        setSlotCount(Math.min(MAX_IMAGES, Math.max(MIN_IMAGES, state.slotCount)))
+      }
+      if (Array.isArray(state.labels)) {
+        const labels = state.labels
+        setCustomLabels(labels.slice(0, MAX_IMAGES))
+        setUseFilenameLabels(false)
+      }
+      if (typeof state.safeInterpretationMode === 'boolean') {
+        setSafeInterpretationMode(state.safeInterpretationMode)
+      }
+      if (typeof state.activeEducationStage === 'number') {
+        setActiveEducationStage(state.activeEducationStage)
+      }
+    },
+  })
+
+  const classroomStatus = useMemo(() => {
+    const checklist = defaultChecklistStatus([
+      'Upload two or more comparable images',
+      'Run the comparison and inspect QC',
+      'Keep safe interpretation mode on',
+      'Copy or export the report for submission',
+    ])
+
+    checklist[0].complete = selectedImages.length >= 2
+    checklist[0].detail = `${selectedImages.length} uploaded`
+    checklist[1].complete = analyses.length > 0 && displayedAnalyses.every((analysis) => analysis.quality.level !== 'unreliable')
+    checklist[1].detail = analyses.length ? `Quality ${[...displayedAnalyses].every((analysis) => analysis.quality.level === 'trusted') ? 'trusted' : 'mixed'}` : 'Waiting for run'
+    checklist[2].complete = safeInterpretationMode
+    checklist[2].detail = safeInterpretationMode ? 'Safe mode enabled' : 'Turned off'
+    checklist[3].complete = analyses.length > 0
+    checklist[3].detail = analyses.length ? 'Report ready' : 'Run comparison first'
+
+    return buildClassroomStatus(
+      'compare',
+      [
+        { label: 'Images', value: String(displayedAnalyses.length || selectedImages.length) },
+        { label: 'QC', value: analyses.length ? (displayedAnalyses.every((analysis) => analysis.quality.level === 'trusted') ? 'Trusted' : 'Mixed') : 'Pending' },
+        { label: 'Stage', value: String(activeEducationStage) },
+        {
+          label: 'Spread',
+          value: analyses.length
+            ? (Math.max(...displayedAnalyses.map((analysis) => analysis.fractalDimension)) - Math.min(...displayedAnalyses.map((analysis) => analysis.fractalDimension))).toFixed(4)
+            : '—',
+        },
+      ],
+      checklist,
+      {
+        submissionStatus: analyses.length ? 'ready-to-submit' : selectedImages.length >= 2 ? 'in-progress' : 'not-started',
+        progressLabel: `${Math.min(selectedImages.length, 2)}/2 images ready`,
+        summary: analyses.length
+          ? `Comparison complete for ${displayedAnalyses.length} image${displayedAnalyses.length === 1 ? '' : 's'}.`
+          : 'Comparison setup is ready for a classroom run.',
+      },
+    )
+  }, [activeEducationStage, analyses.length, displayedAnalyses, safeInterpretationMode, selectedImages.length])
+
+  const exportCompareHandout = () => {
+    downloadTextAsFile(
+      'compare-classroom-handout.md',
+      buildHandoutMarkdown('compare', classroomStatus, ['Use the share card to submit the class result.']),
+      'text/markdown',
+    )
+    trackWorkbenchEvent('compare_classroom_handout_exported', { images: selectedImages.length, safeInterpretationMode })
+  }
+
+  const exportCompareSlides = () => {
+    downloadTextAsFile(
+      'compare-slide-summary.md',
+      buildSlideSummaryMarkdown('compare', classroomStatus, [
+        `Images compared: ${displayedAnalyses.length || selectedImages.length}`,
+        `Safe interpretation: ${safeInterpretationMode ? 'on' : 'off'}`,
+        `Stage: ${activeEducationStage}`,
+      ]),
+      'text/markdown',
+    )
+    trackWorkbenchEvent('compare_classroom_slides_exported', { images: selectedImages.length, safeInterpretationMode })
+  }
+
+  const exportCompareCohortNote = () => {
+    downloadTextAsFile('compare-cohort-comparison.md', cohortComparisonMarkdown, 'text/markdown')
+  }
+
+  const exportCompareCohortJson = () => {
+    downloadJson('compare-cohort-comparison.json', cohortComparisonJson)
+  }
+
+  const exportCompareFigureManifest = () => {
+    if (!publicationFigureManifest) {
+      return
+    }
+
+    downloadJson('compare-figure-manifest.json', publicationFigureManifest)
+  }
+
   const copyStageTwoReport = async () => {
     try {
       await navigator.clipboard.writeText(stageTwoReport)
@@ -518,6 +835,73 @@ export function ComparePage() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [analyses.length])
 
+  useEffect(() => {
+    persistCompareViewState({
+      slotCount,
+      customLabels,
+      useFilenameLabels,
+      safeInterpretationMode,
+      activeEducationStage,
+    })
+  }, [activeEducationStage, customLabels, safeInterpretationMode, slotCount, useFilenameLabels])
+
+  useEffect(() => {
+    if (educatorMode) {
+      setSafeInterpretationMode(true)
+    }
+  }, [educatorMode])
+
+  useEffect(() => {
+    if (shareHydratedRef.current) {
+      return
+    }
+    shareHydratedRef.current = true
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const url = new URL(window.location.href)
+    const encodedShare = url.searchParams.get('share')
+    if (!encodedShare) {
+      return
+    }
+
+    const decodedShare = decodeWorkbenchShareRecord(encodedShare)
+    const shareState = decodedShare?.card.shareState as
+      | {
+          labels?: string[]
+          safeInterpretationMode?: boolean
+          slotCount?: number
+          activeEducationStage?: number
+        }
+      | undefined
+
+    if (!shareState) {
+      return
+    }
+
+    if (typeof shareState.slotCount === 'number') {
+      setSlotCount(Math.min(MAX_IMAGES, Math.max(MIN_IMAGES, shareState.slotCount)))
+    }
+    if (Array.isArray(shareState.labels)) {
+      setCustomLabels((prev) => {
+        const next = [...prev]
+        shareState.labels?.forEach((label, index) => {
+          if (index < MAX_IMAGES) {
+            next[index] = label
+          }
+        })
+        return next
+      })
+    }
+    if (typeof shareState.safeInterpretationMode === 'boolean') {
+      setSafeInterpretationMode(shareState.safeInterpretationMode)
+    }
+    if (typeof shareState.activeEducationStage === 'number') {
+      setActiveEducationStage(shareState.activeEducationStage)
+    }
+  }, [])
+
   const setFileAt = (index: number, file: File | null) => {
     setFiles((prev) => {
       const next = [...prev]
@@ -543,6 +927,29 @@ export function ComparePage() {
 
   return (
     <div className="tool-grid compare-tool-grid">
+      <GuidedKickoffPanel
+        title="Image Comparison Studio"
+        subtitle="Load matching images, keep the interpretation safe, and compare the scaling story."
+        steps={[
+          'Upload at least two images that answer the same question.',
+          'Use the built-in labels and preprocessing controls to align the comparison.',
+          'Read the fit quality before you treat the dimension estimate as meaningful.',
+        ]}
+        actions={[
+          {
+            label: 'Try discovery feed',
+            to: '/workbench/discover',
+            description: 'Pick a challenge or open a shared example.',
+          },
+          {
+            label: 'Open run history',
+            to: '/workbench/runs',
+            description: 'Inspect previous comparisons and exports.',
+          },
+        ]}
+        note="Safe interpretation mode keeps the story grounded in evidence, which is especially useful in classroom settings."
+      />
+
       <div className="compare-column compare-column-left">
         <div className="compare-step compare-step-1">
           <Panel title="Step 1: Load and align" subtitle="Use matched images so the comparison measures structure, not capture drift.">
@@ -952,6 +1359,63 @@ export function ComparePage() {
                     </p>
                   </section>
                 </div>
+
+                {educatorMode ? (
+                  <ClassroomPanel
+                    moduleId="compare"
+                    status={classroomStatus}
+                    educatorMode={educatorMode}
+                    onExportHandout={exportCompareHandout}
+                    onExportSlides={exportCompareSlides}
+                  />
+                ) : null}
+
+                {compareShareCard ? (
+                  <div className="compare-share-panel">
+                    <ResultCardPanel
+                      card={compareShareCard}
+                      shareUrl={compareShareUrl}
+                      cardText={compareShareText}
+                      primaryActionLabel="Save example"
+                      secondaryActionLabel="Remix layout"
+                      onPrimaryAction={saveCompareShareCard}
+                      onSecondaryAction={remixShareCard}
+                      onCopyText={copyCompareShareText}
+                      onCopyLink={copyCompareShareLink}
+                    />
+                    <div className="edu-note">
+                      <p className="edu-note-title">Share status</p>
+                      <p>
+                        {compareShareStatus === 'copied'
+                          ? 'Copied to clipboard.'
+                          : compareShareStatus === 'saved'
+                            ? 'Saved to the local gallery.'
+                            : compareShareStatus === 'error'
+                              ? 'Clipboard unavailable, but the card is still visible.'
+                              : 'Use the buttons above to create a reusable link and local example.'}
+                      </p>
+                    </div>
+                    <div className="edu-note">
+                      <p className="edu-note-title">Research exports</p>
+                      <p>Export a side-by-side cohort note, a normalized JSON bundle, or a figure manifest for papers and lab notes.</p>
+                      <div className="compare-stage-actions">
+                        <button type="button" className="overlay-toggle" onClick={exportCompareCohortNote}>
+                          Export cohort note
+                        </button>
+                        <button type="button" className="overlay-toggle" onClick={exportCompareCohortJson}>
+                          Export cohort JSON
+                        </button>
+                        <button type="button" className="overlay-toggle" onClick={exportCompareFigureManifest}>
+                          Export figure manifest
+                        </button>
+                      </div>
+                    </div>
+                    <CommentThreadPanel
+                      target={{ kind: 'card', id: compareShareCard.id, title: compareShareCard.title, module: 'compare' }}
+                      subject="compare result card"
+                    />
+                  </div>
+                ) : null}
               </>
             ) : (
               <p className="muted">After analysis, this section explains which image is more complex and why the difference matters.</p>

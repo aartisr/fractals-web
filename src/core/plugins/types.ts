@@ -1,6 +1,4 @@
-import type { ComponentType } from 'react'
-
-export type ModuleId = 'fractals' | 'box-count' | 'compare' | 'tumor-detection' | 'runs'
+export type ModuleId = 'fractals' | 'discover' | 'box-count' | 'compare' | 'tumor-detection' | 'runs'
 
 export interface WorkbenchModule {
   id: ModuleId
@@ -8,5 +6,4 @@ export interface WorkbenchModule {
   tagline: string
   path: string
   accent: string
-  component: ComponentType
 }

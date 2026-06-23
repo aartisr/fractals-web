@@ -24,9 +24,34 @@
 
 import { useForm } from '@tanstack/react-form'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
+import { CommentThreadPanel } from '../../components/CommentThreadPanel'
+import { ClassroomPanel } from '../../components/ClassroomPanel'
 import { Panel } from '../../components/Panel'
+import { ResultCardPanel } from '../../components/ResultCardPanel'
+import { useEducatorMode } from '../../core/hooks/useEducatorMode'
+import { useWorkbenchShareArtifact } from '../../core/hooks/useWorkbenchShareArtifact'
 import { useOverlayPreference } from '../../core/hooks/useOverlayPreference'
 import type { FractalType } from '../../core/services/contracts'
+import { downloadJson, downloadTextAsFile } from '../../core/services/export'
+import {
+  buildClassroomStatus,
+  buildHandoutMarkdown,
+  buildSlideSummaryMarkdown,
+  defaultChecklistStatus,
+} from '../../core/services/educationToolkit'
+import {
+  createFractalShareCard,
+  decodeWorkbenchShareRecord,
+  decodeWorkbenchState,
+  encodeWorkbenchState,
+  trackWorkbenchEvent,
+} from '../../core/services/workbenchSharing'
+import {
+  buildMethodsSnapshotMarkdown,
+  buildPublicationFigureManifest,
+  buildResearchSnapshot,
+} from '../../core/services/researchWorkbench'
 
 import { FRACTAL_TYPES, ZOOMABLE_TYPES, FRACTAL_GUIDES, type RenderParams } from './fractal-types'
 import { COLOR_SCHEMES } from './palettes'
@@ -48,6 +73,59 @@ const DEFAULT_PARAMS: RenderParams = {
   power: 2,
   cReal: -0.42,
   cImag: 0.6,
+}
+
+type FractalViewState = {
+  selectedType: FractalType
+  activeParams: RenderParams
+  viewport: Viewport
+}
+
+const fractalViewStorageKey = 'fractals-workbench-fractal-view'
+
+const readFractalViewState = (): FractalViewState | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const url = new URL(window.location.href)
+  const encodedState = url.searchParams.get('view')
+  if (encodedState) {
+    const decoded = decodeWorkbenchState<FractalViewState>(encodedState)
+    if (decoded?.activeParams && decoded?.viewport && decoded?.selectedType) {
+      return decoded
+    }
+  }
+
+  try {
+    const raw = window.localStorage.getItem(fractalViewStorageKey)
+    if (!raw) {
+      return null
+    }
+    const parsed = JSON.parse(raw) as FractalViewState
+    if (parsed?.activeParams && parsed?.viewport && parsed?.selectedType) {
+      return parsed
+    }
+  } catch {
+    // Ignore malformed state.
+  }
+
+  return null
+}
+
+const persistFractalViewState = (state: FractalViewState) => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(fractalViewStorageKey, JSON.stringify(state))
+    const url = new URL(window.location.href)
+    url.searchParams.set('view', encodeWorkbenchState(state))
+    window.history.replaceState({}, '', url)
+  } catch {
+    // Ignore state persistence errors.
+  }
 }
 
 // ── Animated zoom sequences ────────────────────────────────────────────────────
@@ -194,7 +272,9 @@ const easeCubicInOut = (t: number): number => {
 export function FractalsPage() {
 
   // ── UI state ───────────────────────────────────────────────────────────────
-  const [selectedType, setSelectedType]       = useState<FractalType>('Mandelbrot')
+  const { educatorMode } = useEducatorMode()
+  const initialFractalView = useMemo(() => readFractalViewState(), [])
+  const [selectedType, setSelectedType]       = useState<FractalType>(initialFractalView?.selectedType ?? 'Mandelbrot')
   const [showOverlays, setShowOverlays]        = useOverlayPreference('fractals.overlay.visible')
   const [controlsExpanded, setControlsExpanded] = useState(false)
   const [precisionMode, setPrecisionMode]      = useState(false)
@@ -216,8 +296,153 @@ export function FractalsPage() {
   const [isRendering, setIsRendering]          = useState(false)
   const [showRenderOverlay, setShowRenderOverlay] = useState(false)
   const [renderError, setRenderError]          = useState<string | null>(null)
-  const [activeParams, setActiveParams]        = useState<RenderParams>(DEFAULT_PARAMS)
-  const [viewport, setViewport]                = useState<Viewport>(defaultExtent('Mandelbrot'))
+  const [activeParams, setActiveParams]        = useState<RenderParams>(initialFractalView?.activeParams ?? DEFAULT_PARAMS)
+  const [viewport, setViewport]                = useState<Viewport>(initialFractalView?.viewport ?? defaultExtent('Mandelbrot'))
+
+  const shareCard = useMemo(
+    () =>
+      createFractalShareCard({
+        params: activeParams,
+        viewport,
+        fractalDimension: researchData?.dimension.estimatedDimension ?? null,
+        fitR2: researchData?.dimension.correlationCoefficient ?? null,
+        summary: researchData
+          ? `Fractal dimension ${researchData.dimension.estimatedDimension.toFixed(4)} with ${Math.round(researchData.selfSimilarity * 100)}% self-similarity support.`
+          : `Exploration of ${activeParams.type} at ${activeParams.width}×${activeParams.height}.`,
+        safetyNote: 'Great for classroom discussion and research notes. Keep the interpretation descriptive and method-aware.',
+      }),
+    [activeParams, researchData, viewport],
+  )
+  const researchSnapshot = useMemo(() => {
+    if (!researchData) {
+      return null
+    }
+
+    return buildResearchSnapshot({
+      run: {
+        id: shareCard.id,
+        type: 'fractal',
+        status: 'complete',
+        createdAt: shareCard.createdAt,
+        detail: shareCard.summary,
+        payload: {
+          result: researchData,
+          parameters: { ...activeParams, viewport },
+        },
+      },
+      title: `${activeParams.type} research snapshot`,
+      summary: shareCard.summary,
+      metrics: [
+        { label: 'Dimension', value: researchData.dimension.estimatedDimension.toFixed(4) },
+        { label: 'Lacunarity', value: researchData.lacunarity.lacunarity.toFixed(4) },
+        { label: 'Self-similarity', value: `${(researchData.selfSimilarity * 100).toFixed(1)}%` },
+        { label: 'Iterations', value: String(activeParams.maxIter) },
+      ],
+      annotations: researchData.recommendations.slice(0, 3).map((text, index) => ({
+        label: `Recommendation ${index + 1}`,
+        text,
+      })),
+      parameters: { ...activeParams, viewport },
+      result: researchData,
+      artifacts: {
+        imageUrl: shareCard.sourcePath ?? '',
+      },
+    })
+  }, [activeParams, researchData, shareCard.createdAt, shareCard.id, shareCard.sourcePath, shareCard.summary, viewport])
+  const {
+    shareUrl,
+    shareText,
+    shareStatus: shareCopyStatus,
+    copyShareLink: handleCopyShareLink,
+    copyShareText: handleCopyShareText,
+    saveShareCard,
+    remixShareCard,
+  } = useWorkbenchShareArtifact<{ params?: RenderParams; viewport?: Viewport }>({
+    card: shareCard,
+    sourcePath: '/workbench/fractals',
+    copyLinkEventName: 'fractals_share_link_copied',
+    copyTextEventName: 'fractals_share_card_copied',
+    saveEventName: 'fractals_share_saved',
+    remixEventName: 'fractals_share_remixed',
+    eventPayload: { runId: shareCard.sourceRunId ?? shareCard.id, type: shareCard.kind },
+    onRemix: (state) => {
+      if (state.params?.type) {
+        setSelectedType(state.params.type)
+      }
+      if (state.params) {
+        setActiveParams(state.params)
+      }
+      if (state.viewport) {
+        setViewport(state.viewport)
+      }
+    },
+  })
+  const handleSaveShareCard = () => {
+    saveShareCard()
+    persistFractalViewState({
+      selectedType,
+      activeParams,
+      viewport,
+    })
+  }
+
+  const classroomStatus = useMemo(() => {
+    const checklist = defaultChecklistStatus([
+      'Choose a fractal family',
+      'Capture a meaningful zoom or parameter shift',
+      'Run the research panel or export a report',
+      'Save or share the result card',
+    ])
+
+    checklist[0].complete = true
+    checklist[0].detail = selectedType
+    checklist[1].complete = !!researchData || !!shareCard.sourceRunId
+    checklist[1].detail = shareCard.tags[1] ?? 'No zoom tag yet'
+    checklist[2].complete = !!researchData
+    checklist[2].detail = researchData ? `D ${researchData.dimension.estimatedDimension.toFixed(4)}` : 'Open the research panel'
+    checklist[3].complete = true
+    checklist[3].detail = shareCard.title
+
+    return buildClassroomStatus(
+      'fractals',
+      [
+        { label: 'Family', value: selectedType },
+        { label: 'Palette', value: activeParams.colorScheme },
+        { label: 'Iterations', value: String(activeParams.maxIter) },
+        { label: 'Viewport', value: viewport.xMax - viewport.xMin > 0 ? (2.5 / Math.max(1e-9, viewport.xMax - viewport.xMin)).toFixed(2) + 'x' : '—' },
+      ],
+      checklist,
+      {
+        submissionStatus: researchData ? 'ready-to-submit' : 'in-progress',
+        progressLabel: researchData ? 'Research notes ready' : 'Exploration in progress',
+        summary: researchData
+          ? `Fractal exploration is ready for classroom discussion.`
+          : 'Explore, zoom, and export a report for class.',
+      },
+    )
+  }, [activeParams.colorScheme, activeParams.maxIter, researchData, selectedType, shareCard.sourceRunId, shareCard.tags, shareCard.title, viewport.xMax, viewport.xMin])
+
+  const exportFractalHandout = () => {
+    downloadTextAsFile(
+      'fractals-classroom-handout.md',
+      buildHandoutMarkdown('fractals', classroomStatus, ['Use the share card or research report as the student submission artifact.']),
+      'text/markdown',
+    )
+    trackWorkbenchEvent('fractals_classroom_handout_exported', { type: selectedType, palette: activeParams.colorScheme })
+  }
+
+  const exportFractalSlides = () => {
+    downloadTextAsFile(
+      'fractals-slide-summary.md',
+      buildSlideSummaryMarkdown('fractals', classroomStatus, [
+        `Current family: ${selectedType}`,
+        `Palette: ${activeParams.colorScheme}`,
+        researchData ? `Fractal D: ${researchData.dimension.estimatedDimension.toFixed(4)}` : 'Research panel not yet run',
+      ]),
+      'text/markdown',
+    )
+    trackWorkbenchEvent('fractals_classroom_slides_exported', { type: selectedType, palette: activeParams.colorScheme })
+  }
 
   // ── Canvas / GL refs ───────────────────────────────────────────────────────
   const glCanvasRef = useRef<HTMLCanvasElement | null>(null)   // WebGL canvas
@@ -229,6 +454,7 @@ export function FractalsPage() {
   const animationStartRef  = useRef(0)                          // Animation start timestamp
   const zoomSequenceRef    = useRef<ZoomKeyframe[]>([])         // Current zoom sequence
   const infiniteZoomCycleRef = useRef(0)                        // Number of infinite loops completed
+  const shareHydratedRef = useRef(false)
 
   // ── Interaction refs (mutations never need React re-render) ───────────────
   const panRef             = useRef<{ pointerId: number; x: number; y: number; viewport: Viewport } | null>(null)
@@ -303,6 +529,32 @@ export function FractalsPage() {
       if (renderOverlayTimerRef.current) clearTimeout(renderOverlayTimerRef.current)
       if (fullPageControlsTimerRef.current) clearTimeout(fullPageControlsTimerRef.current)
     }
+  }, [])
+
+  useEffect(() => {
+    if (shareHydratedRef.current) {
+      return
+    }
+    shareHydratedRef.current = true
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const url = new URL(window.location.href)
+    const encodedShare = url.searchParams.get('share')
+    if (!encodedShare) {
+      return
+    }
+
+    const decodedShare = decodeWorkbenchShareRecord(encodedShare)
+    const shareState = decodedShare?.card.shareState as { params?: RenderParams; viewport?: Viewport } | undefined
+    if (!shareState?.params || !shareState.viewport) {
+      return
+    }
+
+    setSelectedType(shareState.params.type)
+    setActiveParams(shareState.params)
+    setViewport(shareState.viewport)
   }, [])
 
   const scheduleFullPageControlsHide = () => {
@@ -605,6 +857,40 @@ export function FractalsPage() {
     URL.revokeObjectURL(url)
   }
 
+  const exportResearchMethodsSnapshot = () => {
+    if (!researchSnapshot) {
+      return
+    }
+
+    downloadTextAsFile(
+      `fractal-methods-snapshot-${activeParams.type.toLowerCase().replace(/ /g, '-')}.md`,
+      buildMethodsSnapshotMarkdown(researchSnapshot),
+      'text/markdown',
+    )
+  }
+
+  const exportResearchJson = () => {
+    if (!researchSnapshot) {
+      return
+    }
+
+    downloadJson(
+      `fractal-methods-snapshot-${activeParams.type.toLowerCase().replace(/ /g, '-')}.json`,
+      researchSnapshot,
+    )
+  }
+
+  const exportFigureManifest = () => {
+    if (!researchSnapshot) {
+      return
+    }
+
+    downloadJson(
+      `fractal-figure-manifest-${activeParams.type.toLowerCase().replace(/ /g, '-')}.json`,
+      buildPublicationFigureManifest(researchSnapshot),
+    )
+  }
+
   // ── Inertial wheel zoom ────────────────────────────────────────────────────
   const handleWheel: React.WheelEventHandler<HTMLDivElement> = (event) => {
     if (!isZoomEnabled) return
@@ -708,6 +994,30 @@ export function FractalsPage() {
 
   return (
     <div className={`tool-grid ${isFullPageMode ? 'tool-grid-single full-page-mode' : ''}`}>
+      {!isFullPageMode ? (
+        <GuidedKickoffPanel
+          title="Fractal Studio"
+          subtitle="Choose a shape, render it, and then zoom into the part worth sharing."
+          steps={[
+            'Pick a fractal type that matches the idea you want to explore.',
+            'Tune image size, iterations, and palette for a clean first render.',
+            'Zoom, pan, and save the most interesting view before moving on.',
+          ]}
+          actions={[
+            {
+              label: 'Open discovery feed',
+              to: '/workbench/discover',
+              description: 'See bookmarkable examples and challenge pages.',
+            },
+            {
+              label: 'Review runs',
+              to: '/workbench/runs',
+              description: 'Keep track of saved examples and provenance.',
+            },
+          ]}
+          note="If you are teaching, turn on classroom mode first so the guidance and sharing tools stay visible."
+        />
+      ) : null}
 
       {!isFullPageMode && <Panel title="Fractal Generator" subtitle="Fast path to visual complexity experiments.">
         <form className="form-grid" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit() }}>
@@ -986,12 +1296,75 @@ export function FractalsPage() {
               <button
                 type="button"
                 className="action research-action-button"
+                onClick={exportResearchMethodsSnapshot}
+              >
+                🧾 Export Methods Snapshot
+              </button>
+              <button
+                type="button"
+                className="action research-action-button"
+                onClick={exportResearchJson}
+              >
+                Export JSON
+              </button>
+              <button
+                type="button"
+                className="action research-action-button"
+                onClick={exportFigureManifest}
+              >
+                🧩 Export Figure Manifest
+              </button>
+              <button
+                type="button"
+                className="action research-action-button"
                 onClick={() => setShowResearchPanel(false)}
               >
                 Close
               </button>
             </div>
           </div>
+        </Panel>
+      )}
+
+      {!isFullPageMode && educatorMode ? (
+        <ClassroomPanel
+          moduleId="fractals"
+          status={classroomStatus}
+          educatorMode={educatorMode}
+          onExportHandout={exportFractalHandout}
+          onExportSlides={exportFractalSlides}
+        />
+      ) : null}
+
+      {!isFullPageMode && (
+        <Panel title="Share This Exploration" subtitle="Save the current state, copy a share link, or remix the exploration from this exact viewport.">
+          <ResultCardPanel
+            card={shareCard}
+            shareUrl={shareUrl}
+            cardText={shareText}
+            primaryActionLabel="Save example"
+            secondaryActionLabel="Remix current state"
+            onPrimaryAction={handleSaveShareCard}
+            onSecondaryAction={remixShareCard}
+            onCopyText={handleCopyShareText}
+            onCopyLink={handleCopyShareLink}
+          />
+          <div className="edu-note">
+            <p className="edu-note-title">Share status</p>
+            <p>
+              {shareCopyStatus === 'copied'
+                ? 'Copied to clipboard.'
+                : shareCopyStatus === 'saved'
+                  ? 'Saved to the local gallery.'
+                  : shareCopyStatus === 'error'
+                    ? 'Clipboard unavailable, but the card is still visible below.'
+                  : 'Use the buttons above to create a reusable link and local example.'}
+            </p>
+          </div>
+          <CommentThreadPanel
+            target={{ kind: 'card', id: shareCard.id, title: shareCard.title, module: 'fractals' }}
+            subject="fractal result card"
+          />
         </Panel>
       )}
     </div>

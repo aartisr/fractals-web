@@ -14,6 +14,7 @@
 
 import { clamp } from './viewport'
 import type { RenderParams } from './fractal-types'
+import { downloadDataUrl, downloadTextAsFile } from '../../core/services/export'
 
 // ── SVG builders ──────────────────────────────────────────────────────────────
 
@@ -112,42 +113,6 @@ export const buildFernSvg = (width: number, height: number, maxIter: number): st
     `  <polyline points="${points.join(' ')}" fill="none" stroke="#007a65" stroke-width="0.35" stroke-linecap="round" stroke-linejoin="round"/>`,
     `</svg>`,
   ].join('\n')
-}
-
-// ── Download triggers ─────────────────────────────────────────────────────────
-
-/**
- * Trigger a browser download for a text payload (SVG, JSON, etc.).
- *
- * @param fileName - Suggested download file name including extension.
- * @param content  - Text content to save.
- * @param mime     - MIME type string. Defaults to image/svg+xml.
- */
-export const downloadTextAsFile = (
-  fileName: string,
-  content: string,
-  mime = 'image/svg+xml',
-): void => {
-  const blob = new Blob([content], { type: mime })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = fileName
-  link.click()
-  URL.revokeObjectURL(url)
-}
-
-/**
- * Trigger a browser download for a data URL (e.g. canvas.toDataURL output).
- *
- * @param fileName - Suggested download file name including extension.
- * @param dataUrl  - Data URL string (e.g. "data:image/png;base64,…").
- */
-export const downloadDataUrl = (fileName: string, dataUrl: string): void => {
-  const link = document.createElement('a')
-  link.href = dataUrl
-  link.download = fileName
-  link.click()
 }
 
 // ── Convenience facade ────────────────────────────────────────────────────────
