@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 import { Topbar } from './Topbar'
 import { Footer } from './Footer'
 import { SeoManager } from './SeoManager'
+import { ClarityTracker } from './ClarityTracker'
 import { workbenchModules } from './plugins/modules'
 import { trackWorkbenchEvent } from './services/workbenchSharing'
 
@@ -27,6 +28,7 @@ export function AppShell() {
   return (
     <div className="app-shell">
       <SeoManager />
+      <ClarityTracker />
       <a className="skip-link" href="#workspace-content">
         Skip to workbench content
       </a>

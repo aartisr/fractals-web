@@ -178,6 +178,7 @@ Before deploying, run the production build locally to validate routing and bundl
 - Run history and sharing use localStorage fallbacks when backend data is unavailable
 - Tumor detection runs in the browser using bundled ONNX weights under `public/models/`
 - The ONNX Runtime browser bundle is vendored under `public/vendor/ort/` so the app works without a CDN dependency
+- Microsoft Clarity is supported through the optional `VITE_CLARITY_PROJECT_ID` environment variable
 - The homepage and discovery surfaces are designed to feel polished on first visit and useful on repeat visits
 
 ## Documentation

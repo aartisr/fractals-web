@@ -147,6 +147,10 @@ export function Topbar() {
   const activeModule = workbenchModules.find(
     (m) => pathname === m.path || pathname.startsWith(`${m.path}/`),
   )
+  const activeModuleTitle = activeModule?.title ?? 'Home'
+  const activeModuleTagline =
+    activeModule?.tagline ??
+    'Choose a path, launch a module, and keep the workbench calm, legible, and fast.'
 
   // ── Keyboard shortcuts 1–9 ─────────────────────────────────────────────────
   useEffect(() => {
@@ -178,78 +182,82 @@ export function Topbar() {
 
   return (
     <>
-      {/* ── Header bar ──────────────────────────────────────────────────────── */}
-      <header
-        className="topbar"
-        data-active-module={activeModule?.id ?? 'fractals'}
-      >
-        {/* Brand */}
-        <Link to="/" className="tb-brand" aria-label="Nexus Fractal Lab — home">
-          <FractalHexIcon />
-          <div className="tb-brand-text">
-            <span className="tb-brand-name">Nexus Fractal Lab</span>
-            <span className="tb-brand-sub">Visual Research Workbench</span>
+      <header className="topbar" data-active-module={activeModule?.id ?? 'fractals'}>
+        <div className="tb-primary">
+          <Link to="/" className="tb-brand" aria-label="Nexus Fractal Lab — home">
+            <FractalHexIcon />
+            <div className="tb-brand-text">
+              <span className="tb-brand-name">Nexus Fractal Lab</span>
+              <span className="tb-brand-sub">Visual Research Workbench</span>
+            </div>
+          </Link>
+
+          <div className="tb-context" aria-label="Current workspace context">
+            <span className="tb-context-kicker">Live workbench</span>
+            <strong className="tb-context-title">{activeModuleTitle}</strong>
+            <span
+              className="tb-context-subtitle"
+              title={activeModuleTagline}
+              aria-label={activeModuleTagline}
+            >
+              {activeModuleTagline}
+            </span>
           </div>
-        </Link>
 
-        <div className="tb-sep" aria-hidden="true" />
+          <div className="tb-meta">
+            <span className="tb-pulse" title="Backend status" aria-label="Backend connected" />
+            <button
+              type="button"
+              className={`tb-classroom-toggle${educatorMode ? ' is-active' : ''}`}
+              aria-pressed={educatorMode}
+              aria-label={educatorMode ? 'Turn classroom mode off' : 'Turn classroom mode on'}
+              onClick={() => setEducatorMode((value) => !value)}
+            >
+              {educatorMode ? 'Classroom mode on' : 'Classroom mode off'}
+            </button>
+          </div>
+        </div>
 
-        {/* Module Tabs */}
-        <nav className="tb-nav" aria-label="Workbench modules">
-          {workbenchModules.map((mod, i) => {
-            const active = pathname === mod.path || pathname.startsWith(`${mod.path}/`)
-            return (
-              <div key={mod.id} className="tb-tab-wrap">
-                <Link
-                  to={mod.path}
-                  className={`tb-tab${active ? ' tb-tab--active' : ''}`}
-                  data-module-id={mod.id}
-                  aria-current={active ? 'page' : undefined}
-                  onMouseEnter={() => showTooltip(mod.id)}
-                  onMouseLeave={hideTooltip}
-                  onFocus={() => showTooltip(mod.id)}
-                  onBlur={hideTooltip}
-                >
-                  <span className="tb-tab-icon">{MODULE_ICONS[mod.id]}</span>
-                  <span className="tb-tab-label">{mod.title}</span>
-                  <kbd className="tb-tab-kbd" aria-label={`Keyboard shortcut: ${i + 1}`}>
-                    {i + 1}
-                  </kbd>
-                </Link>
+        <div className="tb-secondary">
+          <div className="tb-nav-shell">
+            <nav className="tb-nav" aria-label="Workbench modules">
+              {workbenchModules.map((mod, i) => {
+                const active = pathname === mod.path || pathname.startsWith(`${mod.path}/`)
+                return (
+                  <div key={mod.id} className="tb-tab-wrap">
+                    <Link
+                      to={mod.path}
+                      className={`tb-tab${active ? ' tb-tab--active' : ''}`}
+                      data-module-id={mod.id}
+                      aria-current={active ? 'page' : undefined}
+                      onMouseEnter={() => showTooltip(mod.id)}
+                      onMouseLeave={hideTooltip}
+                      onFocus={() => showTooltip(mod.id)}
+                      onBlur={hideTooltip}
+                    >
+                      <span className="tb-tab-icon">{MODULE_ICONS[mod.id]}</span>
+                      <span className="tb-tab-label">{mod.title}</span>
+                      <kbd className="tb-tab-kbd" aria-label={`Keyboard shortcut: ${i + 1}`}>
+                        {i + 1}
+                      </kbd>
+                    </Link>
 
-                {/* Tooltip */}
-                {tooltipId === mod.id && (
-                  <div className="tb-tooltip" role="tooltip" data-module-id={mod.id}>
-                    <span className="tb-tooltip-dot" />
-                    <span>{mod.tagline}</span>
+                    {tooltipId === mod.id ? (
+                      <div className="tb-tooltip" role="tooltip" data-module-id={mod.id}>
+                        <span className="tb-tooltip-dot" />
+                        <span>{mod.tagline}</span>
+                      </div>
+                    ) : null}
                   </div>
-                )}
-              </div>
-            )
-          })}
-        </nav>
+                )
+              })}
+            </nav>
+          </div>
 
-        <div className="tb-spacer" aria-hidden="true" />
-
-        {/* Meta — right side */}
-        <div className="tb-meta">
-          <span className="tb-pulse" title="Backend status" aria-label="Backend connected" />
-          <button
-            type="button"
-            className={`tb-classroom-toggle${educatorMode ? ' is-active' : ''}`}
-            aria-pressed={educatorMode}
-            aria-label={educatorMode ? 'Turn classroom mode off' : 'Turn classroom mode on'}
-            onClick={() => setEducatorMode((value) => !value)}
-          >
-            {educatorMode ? 'Classroom mode on' : 'Classroom mode off'}
-          </button>
-          <span className="tb-meta-text">
-            <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
-            <a href="https://ai-aarti.com" target="_blank" rel="noreferrer">Aarti S Ravikumar</a>
-            <span aria-hidden="true"> · </span>
-            <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer">Pioneer Charter School of Science II</a>
-            <span aria-hidden="true"> · WIP</span>
-          </span>
+          <div className="tb-surface-note">
+            <span className="tb-surface-note-label">Keyboard-first</span>
+            <span className="tb-surface-note-text">Press 1-{workbenchModules.length} to jump modules, Esc to close menus.</span>
+          </div>
         </div>
 
         {/* Mobile hamburger */}

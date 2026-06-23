@@ -41,6 +41,20 @@ export function Footer() {
   const activeModule = workbenchModules.find(
     (m) => pathname === m.path || pathname.startsWith(`${m.path}/`),
   )
+  const currentYear = CURRENT_YEAR
+
+  const audienceLinks = [
+    { label: 'Students', to: '/workbench/fractals', note: 'Explore visually' },
+    { label: 'Educators', to: '/workbench/discover', note: 'Teach with structure' },
+    { label: 'Researchers', to: '/workbench/runs', note: 'Track and compare' },
+  ]
+
+  const referenceLinks = [
+    { label: 'Original project', href: 'https://github.com/aartisr/fractals' },
+    { label: 'Project wiki', href: 'https://github.com/aartisr/fractals/wiki' },
+    { label: 'Author site', href: 'https://ai-aarti.com' },
+    { label: 'School site', href: 'https://saugus.pioneercss.org' },
+  ]
 
   return (
     <footer
@@ -51,15 +65,13 @@ export function Footer() {
       <AccentStripe />
 
       <div className="ft-inner">
-        {/* ── Left — brand block ── */}
         <div className="ft-brand-block">
           <Link to="/" className="ft-brand-link" aria-label="Nexus Fractal Lab home">
             <FooterGlyph />
             <span className="ft-brand-name">Nexus Fractal Lab</span>
           </Link>
           <p className="ft-brand-desc">
-            Compact, figure-first environment for exploratory analysis,
-            reproducible runs, and educational interpretation of fractal geometry.
+            A compact web version of the original fractal project for students, educators, and researchers.
           </p>
           <div className="ft-status-row">
             <span className="tb-pulse" title="Backend status" aria-label="Backend connected" />
@@ -67,7 +79,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* ── Center — module quick-links ── */}
         <nav className="ft-nav-block" aria-label="Footer module navigation">
           <p className="ft-nav-heading">Modules</p>
           <ul className="ft-nav-list">
@@ -90,41 +101,46 @@ export function Footer() {
           </ul>
         </nav>
 
-        {/* ── Right — meta / stack info ── */}
         <div className="ft-meta-block">
-          <p className="ft-nav-heading">Stack</p>
-          <ul className="ft-stack-list">
-            <li>React 19 + TanStack Router</li>
-            <li>Vite 8 · TypeScript 6</li>
-            <li>WebGL fractal renderer</li>
-            <li>TanStack Query + Table</li>
+          <p className="ft-nav-heading">Audiences</p>
+          <ul className="ft-stack-list ft-stack-list--compact">
+            {audienceLinks.map((link) => (
+              <li key={link.label}>
+                <Link to={link.to} className="ft-audience-link">
+                  <strong>{link.label}</strong>
+                  <span>{link.note}</span>
+                </Link>
+              </li>
+            ))}
           </ul>
-          <p className="ft-nav-heading ft-nav-heading--spaced">Keyboard</p>
+        </div>
+
+        <div className="ft-meta-block">
+          <p className="ft-nav-heading ft-nav-heading--spaced">Reference</p>
           <ul className="ft-stack-list">
-            <li>
-              <kbd className="ft-kbd">1</kbd>–<kbd className="ft-kbd">{workbenchModules.length}</kbd> Jump to module
-            </li>
-            <li><kbd className="ft-kbd">Esc</kbd> Close menus</li>
+            {referenceLinks.map((link) => (
+              <li key={link.label}>
+                <a href={link.href} target="_blank" rel="noreferrer" className="ft-reference-link">
+                  {link.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
 
-      {/* ── Bottom bar ── */}
       <div className="ft-bottom">
         <span className="ft-copy ft-copy-brand">
           <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
-          © {CURRENT_YEAR}{' '}
+          © {currentYear}{' '}
           <a href="https://ai-aarti.com" target="_blank" rel="noreferrer">Aarti S Ravikumar</a>
           <span aria-hidden="true"> · </span>
           <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer">
             Pioneer Charter School of Science II
           </a>
-          <span aria-hidden="true"> · Work in Progress</span>
         </span>
         <span className="ft-pipe" aria-hidden="true" />
-        <span className="ft-copy ft-copy--muted">
-          Built with curiosity and too much caffeine
-        </span>
+        <span className="ft-copy ft-copy--muted">Fast exploration, classroom clarity, reproducible research</span>
       </div>
     </footer>
   )
