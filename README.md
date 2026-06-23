@@ -1,109 +1,119 @@
 # Fractals Web
 
-Author: ![Pioneer Charter School of Science II](public/pcssii-logo.jpg) Aarti S Ravikumar · Pioneer Charter School of Science II  
-Status: Work in Progress
+<p align="center">
+  <img src="public/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" width="220" />
+</p>
 
-Fractals Web is a visual science workbench for learning, teaching, and research. It helps people move from curiosity to explanation with interactive fractals, box counting, image comparison, tumor detection, shareable result cards, and a growing discovery layer.
+<p align="center">
+  <strong>Visual science, made teachable, measurable, and shareable.</strong>
+</p>
 
-If the original [aartisr/fractals](https://github.com/aartisr/fractals) project is about exploring the beauty and rigor of fractals, this app takes that idea further by making it easier to use in a classroom, easier to present in a lab, and easier to share with other people.
+<p align="center">
+  Built by Aarti S Ravikumar for Pioneer Charter School of Science II
+</p>
 
-## Why This Exists
+---
 
-Fractals Web is designed around one simple loop:
+Fractals Web is the web version of the original `aartisr/fractals` project by the same author. It is a modular research and learning environment for exploring fractals, comparing visual evidence, documenting methods, and sharing results. It combines interactive geometry, reproducible analysis, and classroom-ready workflows in a responsive web application designed to serve students, educators, and researchers with equal care.
 
-1. Explore something visual.
+The project is grounded in a simple idea: when visual inquiry is easy to start, easy to explain, and easy to share, it becomes more powerful.
+
+## Executive Summary
+
+Fractals Web turns exploratory science into a complete workflow.
+
+- Students can investigate patterns and produce work they are proud to show.
+- Educators can guide learning with clarity, safety, and reusable structure.
+- Researchers can preserve provenance, compare methods, and export evidence.
+
+The result is a product that behaves like a learning studio, a teaching surface, and a research notebook at the same time.
+
+## Why It Matters
+
+The strongest scientific tools do more than display output. They help people move from observation to interpretation without friction.
+
+Fractals Web is built around that standard:
+
+1. Explore a concept or dataset.
 2. Measure or compare what changed.
 3. Explain the evidence.
-4. Share the result.
-5. Let someone else remix it.
+4. Save the result in a reusable form.
+5. Share it with someone else who can learn from it.
 
-That loop is what makes the product useful for students, credible for educators, and reproducible for researchers.
+That workflow is the backbone of the application and the reason it can serve classrooms, labs, and independent learners without feeling like three separate products.
 
-## Who It Is For
+## Audience Value
 
 ### Students
 
-Students get a fast, rewarding place to experiment with patterns and transformations.
+Students get a visual environment that rewards curiosity and iteration.
 
 They can:
 
-- Generate fractals and zoom into details
-- Compare results side by side
-- Save interesting outputs as share cards
-- Use guided prompts to explain what they observed
-- Build a portfolio of work they are actually proud to show
+- Generate and zoom into fractals
+- Compare outputs side by side
+- Save compelling results as share cards
+- Use prompts to explain what they observed
+- Build a portfolio of work that feels meaningful and personal
 
 ### Educators
 
-Educators get a classroom-friendly workflow that reduces setup and increases clarity.
+Educators get a structured environment that reduces friction and increases clarity.
 
 They can:
 
 - Launch lessons from a clean workspace
 - Use guided kickoff panels and challenge pages
-- Share examples, rubrics, and prompts
-- Keep language safe and instructional
-- Review student work with context instead of guesswork
+- Share examples, bookmarks, and prompts
+- Keep interpretation language safe and instructional
+- Review student work with more context and less administrative overhead
 
 ### Researchers
 
-Researchers get a reproducible analysis environment with exportable evidence.
+Researchers get a reproducible environment for documenting methods and results.
 
 They can:
 
-- Track runs and compare settings over time
-- Export methods snapshots, CSV, JSON, and markdown summaries
-- Preserve provenance for future review
-- Document image comparison and box-counting workflows
-- Turn exploratory work into something that can support a paper, poster, or report
+- Track runs and revisit prior settings
+- Export CSV, JSON, markdown, and share cards
+- Preserve provenance and parameter state
+- Compare runs, cohorts, and evidence summaries
+- Turn exploratory work into lab-ready output
 
-## What Makes It Convincing
+## Core Capabilities
 
-Fractals Web is trying to be more than a demo.
+Fractals Web is organized around a set of linked surfaces:
 
-It is built around a few product principles:
+- Home: a premium launchpad that routes users into the right workflow
+- Fractals: interactive geometry generation and analysis
+- Discovery: shared examples, bookmarks, challenge pages, and analytics
+- Box Count: ROI-based complexity estimation
+- Compare: structured image comparison with interpretation support
+- Tumor Detection: evidence-first biomedical visualization
+- Runs: searchable history and export hub
 
-- Every result should be teachable.
-- Every result should be shareable.
-- Every result should be reproducible.
-- Every result should be remixable.
-- The advanced path should feel as easy as the beginner path.
+## Product Principles
 
-That is the difference between a nice visualization tool and a product people return to.
+Fractals Web is designed to stay maintainable as it grows.
 
-## What You Can Do
+- Keep modules plug-and-play
+- Use shared service contracts instead of one-off data shapes
+- Make each page responsive by default
+- Separate exploration, comparison, and research concerns
+- Keep sharing useful rather than performative
+- Ensure every exported artifact carries context
 
-- Explore Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski variants
-- Run box-counting analysis on image regions of interest
-- Compare images and surface a complexity story
-- Inspect tumor detection outputs with evidence and caution
-- Save and reopen runs from the history view
-- Share result cards and challenge pages
-- Bookmark examples and revisit them later
+## Feature Set
 
-## Product Story
+- Interactive fractal generation and zoom exploration
+- ROI-based box-counting analysis
+- Side-by-side image comparison and interpretation
+- Tumor detection evidence views with cautious framing
+- Shareable result cards and discovery pages
+- Run history, bookmarks, and reusable artifacts
+- Classroom-friendly prompts and guided launch surfaces
 
-The original fractals project established a powerful story: mathematical beauty can become a rigorous, practical tool when you combine visualization, measurement, and interpretation.
-
-This web version makes that story more accessible:
-
-- It starts with interactive discovery instead of documentation-first navigation.
-- It packages outputs as cards that can be shown, shared, and reused.
-- It supports classroom use without making the interface feel like a training manual.
-- It keeps the research trail intact so the work can stand up to review.
-
-In short: it is a learning studio, a teaching surface, and a research notebook in one place.
-
-## Quick Start
-
-```bash
-npm install
-npm run dev
-```
-
-Then open the local URL Vite prints in the terminal.
-
-## Stack
+## Technology Stack
 
 - React 19
 - TypeScript
@@ -112,9 +122,26 @@ Then open the local URL Vite prints in the terminal.
 - TanStack Query
 - TanStack Form
 - TanStack Table
-- ONNX Runtime for browser-side tumor inference
+- ONNX Runtime in the browser for tumor inference
 
-## Project Structure
+## Local Development
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the local URL printed by Vite.
+
+## Available Scripts
+
+- `npm run dev` starts the development server
+- `npm run build` creates a production build
+- `npm run preview` serves the build locally
+- `npm run lint` runs ESLint
+- `npm run test` runs the Node test suite
+
+## Repository Structure
 
 ```text
 src/
@@ -133,41 +160,23 @@ src/
     runs/
 ```
 
-## Key Surfaces
+## Deployment Notes
 
-- Home: a launchpad for students, educators, and researchers
-- Fractals: interactive generation and analysis
-- Discovery: shared examples, challenge pages, bookmarks, and analytics
-- Box Count: ROI-based fractal dimension analysis
-- Compare: structured image comparison and interpretation
-- Tumor Detection: guided, caution-aware biomedical evidence view
-- Runs: searchable run history and export hub
-
-## Scripts
-
-- `npm run dev` starts local development
-- `npm run build` compiles and bundles production assets
-- `npm run preview` serves the built app locally
-- `npm run lint` runs ESLint checks
-- `npm run test` runs the Node test suite
-
-## Deployment
-
-This repo is Vercel-ready for SPA routing.
+This repository is ready for Vercel-style SPA deployment.
 
 - Build command: `npm run build`
 - Output directory: `dist`
-- Dynamic routes such as `/workbench/fractals`, `/workbench/discover`, and `/workbench/runs/:id` are rewritten to `index.html`
+- Routes such as `/workbench/fractals`, `/workbench/discover`, and `/workbench/runs/:id` are configured to resolve through `index.html`
 
-Before deploying, run the production build locally to verify the bundle and route setup.
+Before deploying, run the production build locally to validate routing and bundle integrity.
 
-## Notes
+## Implementation Notes
 
-- API-backed features connect through `src/core/services/api.ts`.
-- Run history and shared artifacts use localStorage fallbacks so the app stays usable even when backend state is limited.
-- Tumor detection runs in the browser with bundled ONNX weights under `public/models/`.
-- The ONNX Runtime browser bundle is vendored under `public/vendor/ort/` so the app can work offline without a CDN dependency.
-- The homepage, discovery feed, and result cards are designed to keep the product easy to understand on first visit and easy to revisit later.
+- API-backed features connect through `src/core/services/api.ts`
+- Run history and sharing use localStorage fallbacks when backend data is unavailable
+- Tumor detection runs in the browser using bundled ONNX weights under `public/models/`
+- The ONNX Runtime browser bundle is vendored under `public/vendor/ort/` so the app works without a CDN dependency
+- The homepage and discovery surfaces are designed to feel polished on first visit and useful on repeat visits
 
 ## Documentation
 
@@ -179,6 +188,11 @@ Before deploying, run the production build locally to verify the bundle and rout
 
 ## Acknowledgments
 
-This project builds on the spirit of the original fractals work: use math to explore the world, but package the results so other people can learn from them too.
+This project is a web implementation and extension of the original fractals work created by Aarti S Ravikumar:
 
-Special thanks to the original project direction, its wiki-driven documentation approach, and the broader science-education community that makes tools like this worth building.
+- Original repository: [aartisr/fractals](https://github.com/aartisr/fractals)
+- Original wiki: [aartisr/fractals/wiki](https://github.com/aartisr/fractals/wiki)
+
+Fractals Web builds on that foundation while adapting the experience for modern browsers, classroom use, and shareable research workflows.
+
+The aim is simple: make the work beautiful enough to invite attention, rigorous enough to earn trust, and clear enough to be used again.
