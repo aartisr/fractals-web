@@ -1,6 +1,6 @@
 # Image Compare User Guide
 
-![Pioneer Charter School of Science II](../public/pcssii-logo.jpg) Aarti S Ravikumar · Pioneer Charter School of Science II
+![Pioneer Charter School of Science II](../public/pcssii-logo.jpg) [Aarti S Ravikumar](https://ai-aarti.com) · [Pioneer Charter School of Science II](https://saugus.pioneercss.org)
 
 This guide explains how to use Image Compare in the Fractals TanStack Workbench.
 

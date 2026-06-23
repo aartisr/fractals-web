@@ -1,6 +1,6 @@
 # Fractals Web Phase Roadmap
 
-Author: Aarti S Ravikumar · Pioneer Charter School of Science II
+Author: [Aarti S Ravikumar](https://ai-aarti.com) · [Pioneer Charter School of Science II](https://saugus.pioneercss.org)
 
 This roadmap breaks the feature strategy into phases so we can ship value early, reduce risk, and keep the app coherent as it grows.
 

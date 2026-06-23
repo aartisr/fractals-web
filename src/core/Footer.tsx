@@ -113,7 +113,13 @@ export function Footer() {
       <div className="ft-bottom">
         <span className="ft-copy ft-copy-brand">
           <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
-          © {CURRENT_YEAR} Aarti S Ravikumar · Pioneer Charter School of Science II · Work in Progress
+          © {CURRENT_YEAR}{' '}
+          <a href="https://ai-aarti.com" target="_blank" rel="noreferrer">Aarti S Ravikumar</a>
+          <span aria-hidden="true"> · </span>
+          <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer">
+            Pioneer Charter School of Science II
+          </a>
+          <span aria-hidden="true"> · Work in Progress</span>
         </span>
         <span className="ft-pipe" aria-hidden="true" />
         <span className="ft-copy ft-copy--muted">

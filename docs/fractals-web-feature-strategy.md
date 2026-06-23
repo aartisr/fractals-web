@@ -1,6 +1,6 @@
 # Fractals Web Feature Strategy
 
-Author: Aarti S Ravikumar · Pioneer Charter School of Science II
+Author: [Aarti S Ravikumar](https://ai-aarti.com) · [Pioneer Charter School of Science II](https://saugus.pioneercss.org)
 
 This document turns Fractals Web into a research-grade learning studio for students, educators, and researchers.
 

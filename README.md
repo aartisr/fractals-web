@@ -1,7 +1,9 @@
 # Fractals Web
 
 <p align="center">
-  <img src="public/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" width="220" />
+  <a href="https://saugus.pioneercss.org">
+    <img src="public/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" width="220" />
+  </a>
 </p>
 
 <p align="center">
@@ -9,12 +11,12 @@
 </p>
 
 <p align="center">
-  Built by Aarti S Ravikumar for Pioneer Charter School of Science II
+  Built by <a href="https://ai-aarti.com">Aarti S Ravikumar</a> for <a href="https://saugus.pioneercss.org">Pioneer Charter School of Science II</a>
 </p>
 
 ---
 
-Fractals Web is the web version of the original `aartisr/fractals` project by the same author. It is a modular research and learning environment for exploring fractals, comparing visual evidence, documenting methods, and sharing results. It combines interactive geometry, reproducible analysis, and classroom-ready workflows in a responsive web application designed to serve students, educators, and researchers with equal care.
+Fractals Web is the web version of the original `aartisr/fractals` project by the same author, <a href="https://ai-aarti.com">Aarti S Ravikumar</a>. It is a modular research and learning environment for exploring fractals, comparing visual evidence, documenting methods, and sharing results. It combines interactive geometry, reproducible analysis, and classroom-ready workflows in a responsive web application designed to serve students, educators, and researchers with equal care.
 
 The project is grounded in a simple idea: when visual inquiry is easy to start, easy to explain, and easy to share, it becomes more powerful.
 
@@ -188,7 +190,7 @@ Before deploying, run the production build locally to validate routing and bundl
 
 ## Acknowledgments
 
-This project is a web implementation and extension of the original fractals work created by Aarti S Ravikumar:
+This project is a web implementation and extension of the original fractals work created by <a href="https://ai-aarti.com">Aarti S Ravikumar</a>:
 
 - Original repository: [aartisr/fractals](https://github.com/aartisr/fractals)
 - Original wiki: [aartisr/fractals/wiki](https://github.com/aartisr/fractals/wiki)

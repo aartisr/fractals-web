@@ -1,0 +1,18 @@
+# Fractals Web
+
+Fractals Web is the web version of the original fractals project by Aarti S Ravikumar.
+
+## Purpose
+A modular visual science workbench for students, educators, and researchers.
+
+## Key Pages
+- http://localhost:5173
+- http://localhost:5173/workbench/fractals
+- http://localhost:5173/workbench/discover
+- http://localhost:5173/workbench/box-count
+- http://localhost:5173/workbench/compare
+- http://localhost:5173/workbench/tumor-detection
+- http://localhost:5173/workbench/runs
+
+## Summary
+Use this site to explore fractals, compare image evidence, document reproducible analysis, and share results.

@@ -245,7 +245,10 @@ export function Topbar() {
           </button>
           <span className="tb-meta-text">
             <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
-            Aarti S Ravikumar · Pioneer Charter School of Science II · WIP
+            <a href="https://ai-aarti.com" target="_blank" rel="noreferrer">Aarti S Ravikumar</a>
+            <span aria-hidden="true"> · </span>
+            <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer">Pioneer Charter School of Science II</a>
+            <span aria-hidden="true"> · WIP</span>
           </span>
         </div>
 
@@ -294,7 +297,10 @@ export function Topbar() {
             <span className="tb-pulse" />
             <span className="tb-meta-text">
               <img src="/pcssii-logo.jpg" alt="Pioneer Charter School of Science II" className="pcssii-logo-inline" />
-              Aarti S Ravikumar · Pioneer Charter School of Science II · Work in Progress
+              <a href="https://ai-aarti.com" target="_blank" rel="noreferrer">Aarti S Ravikumar</a>
+              <span aria-hidden="true"> · </span>
+              <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer">Pioneer Charter School of Science II</a>
+              <span aria-hidden="true"> · Work in Progress</span>
             </span>
           </div>
         </nav>

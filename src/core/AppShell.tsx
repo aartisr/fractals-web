@@ -2,6 +2,7 @@ import { Outlet, useRouterState } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { Topbar } from './Topbar'
 import { Footer } from './Footer'
+import { SeoManager } from './SeoManager'
 import { workbenchModules } from './plugins/modules'
 import { trackWorkbenchEvent } from './services/workbenchSharing'
 
@@ -25,6 +26,7 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
+      <SeoManager />
       <a className="skip-link" href="#workspace-content">
         Skip to workbench content
       </a>

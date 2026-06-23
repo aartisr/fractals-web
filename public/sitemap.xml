@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://localhost:5173</loc></url>
+  <url><loc>http://localhost:5173/workbench/fractals</loc></url>
+  <url><loc>http://localhost:5173/workbench/discover</loc></url>
+  <url><loc>http://localhost:5173/workbench/box-count</loc></url>
+  <url><loc>http://localhost:5173/workbench/compare</loc></url>
+  <url><loc>http://localhost:5173/workbench/tumor-detection</loc></url>
+  <url><loc>http://localhost:5173/workbench/runs</loc></url>
+</urlset>

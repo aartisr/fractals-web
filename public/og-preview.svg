@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Fractals Web visual preview</title>
+  <desc id="desc">A premium social preview for Fractals Web with the school logo, brand title, and audience-focused positioning.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7fbff" />
+      <stop offset="48%" stop-color="#edf6ff" />
+      <stop offset="100%" stop-color="#eef9f6" />
+    </linearGradient>
+    <linearGradient id="hero" x1="10%" y1="10%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#08121d" />
+      <stop offset="100%" stop-color="#035d8d" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00a896" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#00a896" stop-opacity="0" />
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="20" stdDeviation="25" flood-color="#08121d" flood-opacity="0.16" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1090" cy="80" r="180" fill="url(#glow)" />
+  <circle cx="130" cy="520" r="220" fill="url(#glow)" />
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="70" width="1060" height="490" rx="36" fill="rgba(255,255,255,0.9)" stroke="#cad5e2" />
+  </g>
+
+  <g transform="translate(110 120)">
+    <rect x="0" y="0" width="130" height="130" rx="26" fill="url(#hero)" />
+    <path d="M65 18 106 42v46l-41 24-41-24V42l41-24Z" fill="none" stroke="#fff" stroke-width="5" />
+    <path d="M65 40 86 52v24L65 88 44 76V52l21-12Z" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="4" />
+    <circle cx="65" cy="64" r="8" fill="#fff" />
+    <text x="156" y="52" fill="#08121d" font-family="Sora, IBM Plex Sans, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="-1.2">Fractals Web</text>
+    <text x="156" y="100" fill="#2b4659" font-family="IBM Plex Sans, Arial, sans-serif" font-size="28" font-weight="600">
+      Visual science, made teachable, measurable, and shareable.
+    </text>
+
+    <g transform="translate(0 170)">
+      <rect x="0" y="0" width="420" height="78" rx="22" fill="#f5f9ff" stroke="#cad5e2" />
+      <text x="28" y="32" fill="#035d8d" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="700">Students</text>
+      <text x="28" y="56" fill="#2b4659" font-family="IBM Plex Sans, Arial, sans-serif" font-size="19">Explore, compare, explain, and share</text>
+    </g>
+
+    <g transform="translate(448 170)">
+      <rect x="0" y="0" width="308" height="78" rx="22" fill="#f5fdfb" stroke="#cad5e2" />
+      <text x="28" y="32" fill="#035d8d" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="700">Educators</text>
+      <text x="28" y="56" fill="#2b4659" font-family="IBM Plex Sans, Arial, sans-serif" font-size="19">Lessons, prompts, and safe review</text>
+    </g>
+
+    <g transform="translate(776 170)">
+      <rect x="0" y="0" width="238" height="78" rx="22" fill="#f8f5ff" stroke="#cad5e2" />
+      <text x="28" y="32" fill="#035d8d" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="700">Research</text>
+      <text x="28" y="56" fill="#2b4659" font-family="IBM Plex Sans, Arial, sans-serif" font-size="19">Provenance, exports, and reuse</text>
+    </g>
+  </g>
+</svg>
