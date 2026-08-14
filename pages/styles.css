@@ -61,5 +61,8 @@ footer { border-top: 1px solid #d8e0e6; padding-top: 2rem; padding-bottom: 2.5re
 footer div { display: grid; gap: .25rem; }
 footer strong { color: #1c2c3b; }
 footer a { color: #075b9f; font-weight: 750; text-decoration: none; white-space: nowrap; }
-@media (max-width: 720px) { .header-action { font-size: .85rem; } .path-grid, .learn-links, .principle { grid-template-columns: 1fr; } .path-card { min-height: 220px; } .path-number { margin-bottom: 1.8rem; } .principle { gap: 1.5rem; padding: 3.5rem 0; } footer { flex-direction: column; } }
+.footer-actions { display: flex; align-items: center; gap: 1rem; }
+.page-share { appearance: none; border: 1px solid #9eb3c3; border-radius: .45rem; background: #fff; color: #075b9f; padding: .5rem .65rem; font: inherit; font-weight: 750; cursor: pointer; white-space: nowrap; }
+.page-share:hover { background: #eef7fc; border-color: #4c7b9d; }
+@media (max-width: 720px) { .header-action { font-size: .85rem; } .path-grid, .learn-links, .principle { grid-template-columns: 1fr; } .path-card { min-height: 220px; } .path-number { margin-bottom: 1.8rem; } .principle { gap: 1.5rem; padding: 3.5rem 0; } footer { flex-direction: column; } .footer-actions { align-items: flex-start; flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .path-card { transition: none; } .path-card:hover { transform: none; } }

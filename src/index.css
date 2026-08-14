@@ -6112,7 +6112,7 @@ pre {
 }
 
 .tb-primary {
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
   max-width: 1280px;
   margin: 0 auto;
   gap: clamp(0.6rem, 2vw, 1.6rem);
@@ -6180,6 +6180,22 @@ pre {
 .tb-more-menu span { color: var(--ink-600); font-size: 0.7rem; line-height: 1.35; }
 
 .tb-classroom-toggle { padding: 0.46rem 0.62rem; font-size: 0.66rem; letter-spacing: 0.02em; text-transform: none; }
+.tb-site-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  min-height: 2rem;
+  border: 1px solid rgba(3, 93, 141, 0.22);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--signal-deep);
+  padding: 0.35rem 0.58rem;
+  font: 700 0.7rem/1 var(--font-ui);
+  cursor: pointer;
+}
+.tb-site-share:hover { border-color: rgba(3, 93, 141, 0.42); background: rgba(233, 247, 255, 0.96); }
+.tb-site-share--drawer { display: none; }
 .tb-hamburger { margin: 0; }
 
 .site-footer { margin-top: 2rem; background: #f4f8fb; box-shadow: none; }
@@ -6197,6 +6213,8 @@ pre {
   .topbar { padding: 0.5rem 0.85rem; }
   .tb-primary { grid-template-columns: 1fr auto auto; gap: 0.5rem; }
   .tb-nav { display: none; }
+  .tb-site-share--top { display: none; }
+  .tb-site-share--drawer { display: inline-flex; justify-self: start; margin: 0.35rem 0.3rem 0.1rem; }
   .tb-hamburger { display: flex; }
   .tb-drawer { margin: 0.55rem auto 0; max-width: 1280px; }
   .ft-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; }

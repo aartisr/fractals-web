@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useEducatorMode } from './hooks/useEducatorMode'
 import { workbenchModules } from './plugins/modules'
+import { SiteShareButton } from './SiteShareButton'
 
 function FractalMark() {
   return (
@@ -88,6 +89,8 @@ export function Topbar() {
           Classroom
         </button>
 
+        <SiteShareButton className="tb-site-share--top" />
+
         <button
           type="button"
           className={`tb-hamburger${drawerOpen ? ' tb-hamburger--open' : ''}`}
@@ -115,6 +118,7 @@ export function Topbar() {
               <span className="tb-drawer-tagline">{module.tagline}</span>
             </Link>
           ))}
+          <SiteShareButton className="tb-site-share--drawer" />
         </nav>
       ) : null}
     </header>
