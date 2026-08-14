@@ -82,17 +82,33 @@ export function HomePage() {
     <div className="home-page home-page-calm">
       <section className="home-calm-hero" aria-labelledby="home-title">
         <div className="home-calm-hero-copy">
-          <p className="home-calm-eyebrow">Nexus Fractal Lab</p>
-          <h1 id="home-title">Explore complexity, one clear step at a time.</h1>
-          <p>
-            Make a fractal, follow what catches your eye, and keep only the result you want to return to.
+          <p className="home-calm-eyebrow">A visual science workbench</p>
+          <h1 id="home-title">Make invisible structure visible.</h1>
+          <p className="home-calm-lede">
+            Start with a pattern. Find what changes across scale. Keep the evidence that makes your observation worth sharing.
           </p>
-          <Link to="/workbench/fractals" className="home-calm-primary">
-            Start exploring <span aria-hidden="true">→</span>
-          </Link>
-          <span className="home-calm-hint">No account. No setup. Your work stays in this browser.</span>
+          <div className="home-calm-actions">
+            <Link to="/workbench/fractals" className="home-calm-primary">
+              Enter the Fractal Lab <span aria-hidden="true">→</span>
+            </Link>
+            <Link to="/workbench/discover" className="home-calm-secondary">See what others explored</Link>
+          </div>
+          <ul className="home-hero-proof" aria-label="What you can do">
+            <li><strong>Create</strong> a living pattern</li>
+            <li><strong>Measure</strong> its complexity</li>
+            <li><strong>Explain</strong> what you found</li>
+          </ul>
+          <span className="home-calm-hint">Free to explore. No account. Your work stays in this browser.</span>
         </div>
-        <HomeFractalPreview />
+        <div className="home-calm-hero-art">
+          <HomeFractalPreview />
+          <div className="home-hero-field-note" aria-label="Fractal field note">
+            <span>Field note</span>
+            <strong>Rule → form → evidence</strong>
+            <small>Complexity becomes inspectable.</small>
+          </div>
+          <p><span aria-hidden="true">↳</span> A simple rule can hold a world of detail.</p>
+        </div>
       </section>
 
       {returnThread ? (
