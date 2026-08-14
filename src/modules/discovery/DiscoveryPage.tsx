@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Panel } from '../../components/Panel'
 import { ResultCardPanel } from '../../components/ResultCardPanel'
 import { useEducatorMode } from '../../core/hooks/useEducatorMode'
@@ -26,7 +26,7 @@ export function DiscoveryPage() {
   const origin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin
   const [sharedCards, setSharedCards] = useState(() => loadSharedCards().map((record) => record.card))
   const [bookmarks, setBookmarks] = useState(() => loadDiscoveryBookmarks())
-  const [, setAnalyticsRefreshTick] = useState(0)
+  const hasTrackedView = useRef(false)
 
   useEffect(() => {
     const refresh = () => {
@@ -40,13 +40,16 @@ export function DiscoveryPage() {
   }, [])
 
   useEffect(() => {
+    if (hasTrackedView.current) {
+      return
+    }
+    hasTrackedView.current = true
     trackWorkbenchEvent('discovery_page_viewed', {
       examples: sharedCards.length,
       bookmarks: bookmarks.length,
       challenges: DISCOVERY_CHALLENGES.length,
     })
-    setAnalyticsRefreshTick((value) => value + 1)
-  }, [])
+  }, [bookmarks.length, sharedCards.length])
 
   const feed = useMemo(() => buildDiscoveryFeed(sharedCards), [sharedCards])
   const analytics = useMemo(
@@ -230,8 +233,7 @@ export function DiscoveryPage() {
         </div>
       </Panel>
 
-      <Panel title="Bookmarks" subtitle="Keep examples and challenges close for demos, portfolios, or next-step exploration.">
-        {bookmarks.length > 0 ? (
+      {bookmarks.length > 0 ? <Panel title="Saved items" subtitle="Return to something you chose to keep.">
           <ul className="discovery-bookmark-list">
             {bookmarks.map((bookmark) => (
               <li key={`${bookmark.kind}-${bookmark.id}`} className="discovery-bookmark-item">
@@ -250,11 +252,11 @@ export function DiscoveryPage() {
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="muted">Bookmarks will appear here after you save an example or challenge page.</p>
-        )}
-      </Panel>
+      </Panel> : null}
 
+      <details className="calm-disclosure">
+        <summary>Usage and privacy details</summary>
+        <div className="calm-disclosure-content">
       <Panel title="Usage Analytics" subtitle="A lightweight funnel view that shows discovery, bookmarking, and export behavior.">
         <div className="analytics-grid">
           <div className="insight-card">
@@ -315,6 +317,8 @@ export function DiscoveryPage() {
         </div>
         {educatorMode ? <p className="muted">Educator mode is on, so moderation controls remain visible across shared surfaces.</p> : null}
       </Panel>
+        </div>
+      </details>
     </div>
   )
 }

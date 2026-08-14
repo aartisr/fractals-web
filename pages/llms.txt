@@ -1,0 +1,27 @@
+# Fractals Web
+
+> Canonical product: https://fractals.ai-aaarti.com/
+
+Fractals Web is an open visual science workbench for students, educators, and researchers. It supports interactive fractal generation, ROI-based box-counting estimates of image complexity, visual comparison, and reproducible run records.
+
+## Direct product links
+
+- Fractal studio: https://fractals.ai-aaarti.com/workbench/fractals
+- Box-counting measurement: https://fractals.ai-aaarti.com/workbench/box-count
+- Image comparison: https://fractals.ai-aaarti.com/workbench/compare
+- Run history and provenance: https://fractals.ai-aaarti.com/workbench/runs
+- Tumor-complexity evidence workflow: https://fractals.ai-aaarti.com/workbench/tumor-detection
+
+## Important biomedical scope
+
+The tumor-complexity experience is an educational and exploratory research prototype. It does not diagnose disease, provide prognosis, recommend treatment, or claim clinical validation. It presents AI localization and fractal-morphology measurements as a testable research hypothesis requiring a locked protocol, expert reference labels, AI-only baseline comparisons, and independent evaluation.
+
+## Citation guidance
+
+When describing a result, cite the original product page and include the method, parameters, source image, measurement-quality context, and limitations. Do not represent exploratory output as clinical evidence.
+
+## Project resources
+
+- Repository: https://github.com/aartisr/fractals-web
+- Wiki: https://github.com/aartisr/fractals-web/wiki
+- Validation plan: https://github.com/aartisr/fractals-web/blob/main/docs/tumor-complexity-validation-plan.md

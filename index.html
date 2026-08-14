@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/pcssii-logo.jpg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="description" content="Fractals Web is a modular visual science workbench for fractal generation, box counting, image comparison, tumor evidence, and shareable research workflows." />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="application-name" content="Fractals Web" />
@@ -14,11 +15,39 @@
     <meta property="og:title" content="Fractals Web | Visual Science Workbench" />
     <meta property="og:description" content="Visual science, made teachable, measurable, and shareable." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og-preview.svg" />
+    <meta property="og:url" content="https://fractals.ai-aaarti.com/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://fractals.ai-aaarti.com/og-preview.svg" />
+    <meta property="og:image:alt" content="Fractals Web visual science workbench preview" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Fractals Web | Visual Science Workbench" />
     <meta name="twitter:description" content="Visual science, made teachable, measurable, and shareable." />
-    <meta name="twitter:image" content="/og-preview.svg" />
+    <meta name="twitter:image" content="https://fractals.ai-aaarti.com/og-preview.svg" />
+    <meta name="twitter:image:alt" content="Fractals Web visual science workbench preview" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Fractals Web",
+            "url": "https://fractals.ai-aaarti.com/",
+            "description": "Visual science, made teachable, measurable, and shareable.",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": ["WebApplication", "EducationalApplication"],
+            "name": "Fractals Web",
+            "url": "https://fractals.ai-aaarti.com/",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "description": "An open visual science workbench for fractal generation, box counting, image comparison, reproducible research workflows, and cautious biomedical hypothesis exploration."
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
 import { CommentThreadPanel } from '../../components/CommentThreadPanel'
 import { ClassroomPanel } from '../../components/ClassroomPanel'
 import { Panel } from '../../components/Panel'
@@ -226,29 +225,6 @@ export function BoxCountPage() {
 
   return (
     <div className="tool-grid">
-      <GuidedKickoffPanel
-        title="Box Counting"
-        subtitle="Choose a region, scan the occupied boxes, and keep the result reproducible."
-        steps={[
-          'Upload an image with a boundary or texture worth measuring.',
-          'Place the ROI carefully so the count ladder sees the structure you care about.',
-          'Run the analysis, then save or export the evidence before moving on.',
-        ]}
-        actions={[
-          {
-            label: 'Open compare',
-            to: '/workbench/compare',
-            description: 'Use the comparison lab for side-by-side structure checks.',
-          },
-          {
-            label: 'Review runs',
-            to: '/workbench/runs',
-            description: 'Keep your ROI and exports in the run history.',
-          },
-        ]}
-        note="If the ROI feels ambiguous, shrink the view and pick the clearest structural boundary first."
-      />
-
       <Panel title="Box Counter" subtitle="Quantify surface complexity and roughness patterns in images.">
         <BoxCountControls
           file={file}
@@ -293,8 +269,8 @@ export function BoxCountPage() {
         />
       </Panel>
 
-      <Panel title="Share This ROI" subtitle="Copy the current analysis, save it to the local gallery, or remix the ROI and run it again.">
-        {boxCountShareCard ? (
+      {boxCountShareCard ? (
+      <Panel title="Save or share this ROI" subtitle="Keep this analysis only when it is worth returning to.">
           <ResultCardPanel
             card={boxCountShareCard}
             shareUrl={boxCountShareUrl}
@@ -306,9 +282,6 @@ export function BoxCountPage() {
             onCopyText={copyBoxCountShareText}
             onCopyLink={copyBoxCountShareLink}
           />
-        ) : (
-          <p className="muted">Run an analysis to generate a share card.</p>
-        )}
         <div className="edu-note">
           <p className="edu-note-title">Share status</p>
           <p>
@@ -343,6 +316,7 @@ export function BoxCountPage() {
           />
         ) : null}
       </Panel>
+      ) : null}
 
       {educatorMode ? (
         <ClassroomPanel

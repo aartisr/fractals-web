@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { buildCompareImageVisuals } from '../compare/compareVisuals'
 import { combineFractalQuality, type FractalQualityAssessment } from '../compare/fractalQuality'
 
-type FractalEvidence = {
+export type FractalEvidence = {
   status: 'idle' | 'loading' | 'ready' | 'error'
   message: string
   source: { fractalDimension: number; fitR2: number; quality: FractalQualityAssessment } | null

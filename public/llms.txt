@@ -1,9 +1,12 @@
 # Fractals Web
 
-Fractals Web is the web version of the original fractals project by Aarti S Ravikumar.
+Fractals Web is an open visual science workbench by Aarti S Ravikumar.
 
 ## Purpose
-A modular visual science workbench for students, educators, and researchers.
+A modular visual science workbench for students, educators, and researchers to explore fractals, measure image complexity, compare visual evidence, and preserve reproducible research context.
+
+## Important scope
+The tumor-complexity workflow is an educational research prototype. It is not a diagnostic, prognostic, treatment, or clinically validated tool. It presents AI localization and fractal-morphology measurements as a testable research hypothesis that requires external validation.
 
 ## Key Pages
 - https://fractals.ai-aaarti.com
@@ -15,4 +18,4 @@ A modular visual science workbench for students, educators, and researchers.
 - https://fractals.ai-aaarti.com/workbench/runs
 
 ## Summary
-Use this site to explore fractals, compare image evidence, document reproducible analysis, and share results.
+Use this site to explore fractals, compare image evidence, document reproducible analysis, and share results. Cite the source page, method, parameters, and limitations when discussing outputs.

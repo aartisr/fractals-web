@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
 import { CommentThreadPanel } from '../../components/CommentThreadPanel'
 import { FilePicker } from '../../components/FilePicker'
 import { ClassroomPanel } from '../../components/ClassroomPanel'
@@ -847,7 +846,7 @@ export function ComparePage() {
 
   useEffect(() => {
     if (educatorMode) {
-      setSafeInterpretationMode(true)
+      queueMicrotask(() => setSafeInterpretationMode(true))
     }
   }, [educatorMode])
 
@@ -880,26 +879,28 @@ export function ComparePage() {
       return
     }
 
-    if (typeof shareState.slotCount === 'number') {
-      setSlotCount(Math.min(MAX_IMAGES, Math.max(MIN_IMAGES, shareState.slotCount)))
-    }
-    if (Array.isArray(shareState.labels)) {
-      setCustomLabels((prev) => {
-        const next = [...prev]
-        shareState.labels?.forEach((label, index) => {
-          if (index < MAX_IMAGES) {
-            next[index] = label
-          }
+    queueMicrotask(() => {
+      if (typeof shareState.slotCount === 'number') {
+        setSlotCount(Math.min(MAX_IMAGES, Math.max(MIN_IMAGES, shareState.slotCount)))
+      }
+      if (Array.isArray(shareState.labels)) {
+        setCustomLabels((prev) => {
+          const next = [...prev]
+          shareState.labels?.forEach((label, index) => {
+            if (index < MAX_IMAGES) {
+              next[index] = label
+            }
+          })
+          return next
         })
-        return next
-      })
-    }
-    if (typeof shareState.safeInterpretationMode === 'boolean') {
-      setSafeInterpretationMode(shareState.safeInterpretationMode)
-    }
-    if (typeof shareState.activeEducationStage === 'number') {
-      setActiveEducationStage(shareState.activeEducationStage)
-    }
+      }
+      if (typeof shareState.safeInterpretationMode === 'boolean') {
+        setSafeInterpretationMode(shareState.safeInterpretationMode)
+      }
+      if (typeof shareState.activeEducationStage === 'number') {
+        setActiveEducationStage(shareState.activeEducationStage)
+      }
+    })
   }, [])
 
   const setFileAt = (index: number, file: File | null) => {
@@ -927,29 +928,6 @@ export function ComparePage() {
 
   return (
     <div className="tool-grid compare-tool-grid">
-      <GuidedKickoffPanel
-        title="Image Comparison Studio"
-        subtitle="Load matching images, keep the interpretation safe, and compare the scaling story."
-        steps={[
-          'Upload at least two images that answer the same question.',
-          'Use the built-in labels and preprocessing controls to align the comparison.',
-          'Read the fit quality before you treat the dimension estimate as meaningful.',
-        ]}
-        actions={[
-          {
-            label: 'Try discovery feed',
-            to: '/workbench/discover',
-            description: 'Pick a challenge or open a shared example.',
-          },
-          {
-            label: 'Open run history',
-            to: '/workbench/runs',
-            description: 'Inspect previous comparisons and exports.',
-          },
-        ]}
-        note="Safe interpretation mode keeps the story grounded in evidence, which is especially useful in classroom settings."
-      />
-
       <div className="compare-column compare-column-left">
         <div className="compare-step compare-step-1">
           <Panel title="Step 1: Load and align" subtitle="Use matched images so the comparison measures structure, not capture drift.">
@@ -1128,7 +1106,7 @@ export function ComparePage() {
         </div>
       </div>
 
-      <div className="compare-column compare-column-right">
+      {analyses.length ? <div className="compare-column compare-column-right">
         <div className="compare-step compare-step-2">
           <Panel title="Step 2: Preprocess and count" subtitle="The algorithm scans a stable box-size ladder and counts occupied boxes at each step.">
             {analyses.length ? (
@@ -1422,7 +1400,7 @@ export function ComparePage() {
             )}
           </Panel>
         </div>
-      </div>
+      </div> : null}
     </div>
   )
 }

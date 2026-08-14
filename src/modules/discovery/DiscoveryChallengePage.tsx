@@ -111,6 +111,9 @@ export function DiscoveryChallengePage() {
           </button>
         </div>
 
+        <details className="calm-disclosure">
+          <summary>Challenge details</summary>
+          <div className="calm-disclosure-content">
         <div className="analytics-grid">
           <div className="insight-card">
             <p className="insight-label">Success criteria</p>
@@ -129,6 +132,8 @@ export function DiscoveryChallengePage() {
             <p className="insight-value">{bookmarked ? 'saved' : 'available'}</p>
           </div>
         </div>
+          </div>
+        </details>
       </Panel>
 
       <Panel title="Success Criteria" subtitle="Students can use these checkpoints as a self-check before submitting work.">
@@ -163,12 +168,15 @@ export function DiscoveryChallengePage() {
         )}
       </Panel>
 
-      <Panel title="Sharing Note" subtitle="Keep challenge language precise and classroom-friendly.">
+      <details className="calm-disclosure">
+        <summary>Teaching note</summary>
+        <div className="calm-disclosure-content">
         <div className="edu-note">
           <p className="edu-note-title">Teacher guidance</p>
           <p>Use the prompt as a launch point, not a verdict. Ask students to point to evidence before they explain what it means.</p>
         </div>
-      </Panel>
+        </div>
+      </details>
     </div>
   )
 }

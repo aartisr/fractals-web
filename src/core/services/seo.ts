@@ -10,7 +10,7 @@ export type SeoPage = {
 export const SITE_NAME = 'Fractals Web'
 export const SITE_TAGLINE = 'Visual science, made teachable, measurable, and shareable.'
 export const DEFAULT_DESCRIPTION =
-  'Fractals Web is a modular visual science workbench for fractal generation, box counting, image comparison, tumor evidence, and shareable research workflows.'
+  'Fractals Web is an open visual science workbench for fractal generation, box counting, image comparison, reproducible research workflows, and cautious biomedical hypothesis exploration.'
 export const DEFAULT_IMAGE = '/og-preview.svg'
 
 const withBrand = (value: string) => `${value} | ${SITE_NAME}`
@@ -85,7 +85,7 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand('Tumor Detection Evidence'),
       description:
-        'Review model outputs, confidence overlays, and evidence summaries in a caution-aware biomedical visualization workflow.',
+        'Explore AI localization and fractal-morphology measurements in a transparent, non-diagnostic biomedical research workflow.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'website',
@@ -133,12 +133,27 @@ export const buildStructuredData = (pathname: string) => {
   return [
     {
       '@context': 'https://schema.org',
-      '@type': 'WebApplication',
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      url: getSiteUrl(),
+      description: SITE_TAGLINE,
+      inLanguage: 'en-US',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Pioneer Charter School of Science II',
+        url: publisherUrl,
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': ['WebApplication', 'EducationalApplication'],
       name: SITE_NAME,
       url: canonicalUrl,
       description: DEFAULT_DESCRIPTION,
       applicationCategory: 'EducationalApplication',
       operatingSystem: 'Web',
+      isAccessibleForFree: true,
+      inLanguage: 'en-US',
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -156,6 +171,14 @@ export const buildStructuredData = (pathname: string) => {
         'Tumor evidence review',
         'Run history and provenance',
         'Shareable result cards',
+      ],
+      keywords: 'fractals, fractal dimension, box counting, image analysis, visual science, STEM education, reproducible research, AI literacy',
+      knowsAbout: [
+        'Fractal geometry',
+        'Box-counting dimension',
+        'Image analysis',
+        'Reproducible research',
+        'STEM education',
       ],
       author: {
         '@type': 'Person',

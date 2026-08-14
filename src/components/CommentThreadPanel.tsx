@@ -26,9 +26,9 @@ const moderationOptions = [
 ] as const
 
 export function CommentThreadPanel({ target, subject }: CommentThreadPanelProps) {
-  const [commentsTick, setCommentsTick] = useState(0)
-  const [moderationTick, setModerationTick] = useState(0)
-  const [rubricTick, setRubricTick] = useState(0)
+  const [, setCommentsTick] = useState(0)
+  const [, setModerationTick] = useState(0)
+  const [, setRubricTick] = useState(0)
   const [author, setAuthor] = useState('Teacher')
   const [commentRole, setCommentRole] = useState<CollaborationRole>('teacher')
   const [reviewerRole, setReviewerRole] = useState<CollaborationRole>('teacher')
@@ -41,10 +41,10 @@ export function CommentThreadPanel({ target, subject }: CommentThreadPanelProps)
   const [moderationNote, setModerationNote] = useState('')
   const [moderatedBy, setModeratedBy] = useState('Teacher')
 
-  const comments = useMemo(() => loadCollaborationComments(target), [target, commentsTick])
-  const rubric = useMemo(() => loadCollaborationRubric(target), [target, rubricTick])
+  const comments = loadCollaborationComments(target)
+  const rubric = loadCollaborationRubric(target)
   const defaultRubric = useMemo(() => buildDefaultPeerReviewRubric(subject), [subject])
-  const moderation = useMemo(() => loadCollaborationModeration(target), [target, moderationTick])
+  const moderation = loadCollaborationModeration(target)
 
   const visibleRubric = rubric ?? {
     id: '',

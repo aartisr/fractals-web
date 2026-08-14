@@ -113,6 +113,24 @@ export function SeoManager() {
       return meta
     }).setAttribute('content', seo.type ?? 'website')
 
+    ensureMeta('meta[property="og:site_name"]', () => {
+      const meta = document.createElement('meta')
+      meta.setAttribute('property', 'og:site_name')
+      return meta
+    }).setAttribute('content', SITE_NAME)
+
+    ensureMeta('meta[property="og:locale"]', () => {
+      const meta = document.createElement('meta')
+      meta.setAttribute('property', 'og:locale')
+      return meta
+    }).setAttribute('content', 'en_US')
+
+    ensureMeta('meta[property="og:image:alt"]', () => {
+      const meta = document.createElement('meta')
+      meta.setAttribute('property', 'og:image:alt')
+      return meta
+    }).setAttribute('content', 'Fractals Web visual science workbench preview')
+
     ensureMeta('meta[name="twitter:card"]', () => {
       const meta = document.createElement('meta')
       meta.name = 'twitter:card'
@@ -136,6 +154,12 @@ export function SeoManager() {
       meta.name = 'twitter:image'
       return meta
     }).setAttribute('content', imageUrl)
+
+    ensureMeta('meta[name="twitter:image:alt"]', () => {
+      const meta = document.createElement('meta')
+      meta.name = 'twitter:image:alt'
+      return meta
+    }).setAttribute('content', 'Fractals Web visual science workbench preview')
 
     ensureMeta('meta[name="theme-color"]', () => {
       const meta = document.createElement('meta')

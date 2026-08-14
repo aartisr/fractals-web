@@ -1,0 +1,44 @@
+name: Sync Wiki source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/sync-wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fractals-web-wiki
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Check that the GitHub Wiki is enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }} --jq '.has_wiki' | grep -qx true || {
+            echo "Enable Wikis in this repository's Settings, then run this workflow again."
+            exit 1
+          }
+      - name: Clone the Wiki
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git clone "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki-publish
+      - name: Update managed Wiki pages
+        run: |
+          cp wiki/*.md wiki-publish/
+          cd wiki-publish
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.md'
+          git diff --cached --quiet || git commit -m "docs: sync Wiki source"
+          git push

@@ -24,7 +24,6 @@
 
 import { useForm } from '@tanstack/react-form'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
 import { CommentThreadPanel } from '../../components/CommentThreadPanel'
 import { ClassroomPanel } from '../../components/ClassroomPanel'
 import { Panel } from '../../components/Panel'
@@ -994,31 +993,6 @@ export function FractalsPage() {
 
   return (
     <div className={`tool-grid ${isFullPageMode ? 'tool-grid-single full-page-mode' : ''}`}>
-      {!isFullPageMode ? (
-        <GuidedKickoffPanel
-          title="Fractal Studio"
-          subtitle="Choose a shape, render it, and then zoom into the part worth sharing."
-          steps={[
-            'Pick a fractal type that matches the idea you want to explore.',
-            'Tune image size, iterations, and palette for a clean first render.',
-            'Zoom, pan, and save the most interesting view before moving on.',
-          ]}
-          actions={[
-            {
-              label: 'Open discovery feed',
-              to: '/workbench/discover',
-              description: 'See bookmarkable examples and challenge pages.',
-            },
-            {
-              label: 'Review runs',
-              to: '/workbench/runs',
-              description: 'Keep track of saved examples and provenance.',
-            },
-          ]}
-          note="If you are teaching, turn on classroom mode first so the guidance and sharing tools stay visible."
-        />
-      ) : null}
-
       {!isFullPageMode && <Panel title="Fractal Generator" subtitle="Fast path to visual complexity experiments.">
         <form className="form-grid" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit() }}>
 
@@ -1041,6 +1015,9 @@ export function FractalsPage() {
             <p>{selectedGuide.learningUse}</p>
           </div>
 
+          <details className="form-advanced-options">
+            <summary>Fine-tune this render</summary>
+            <div className="form-advanced-options-grid">
           <form.Field name="width" children={(field) => (
             <label className="field"><span>Width</span>
               <input type="number" min={256} max={2048} value={field.state.value} onChange={(e) => field.handleChange(Number(e.target.value))} />
@@ -1088,6 +1065,8 @@ export function FractalsPage() {
               </select>
             </label>
           )} />
+            </div>
+          </details>
 
           <button className="action" type="submit" disabled={isDisplayLoading}>
             {isDisplayLoading ? <><span className="button-spinner" aria-hidden="true" /> Rendering...</> : 'Render Explorer'}
@@ -1118,7 +1097,9 @@ export function FractalsPage() {
             {isFullPageMode ? 'Exit Full Page (Esc)' : 'Full Page'}
           </button>
           {!isFullPageMode && (
-            <>
+            <details className="explorer-advanced-tools">
+              <summary>More tools</summary>
+              <div>
           <button type="button" className="overlay-toggle" 
             onClick={isAnimating ? stopInfiniteZoom : startInfiniteZoom}
             disabled={!isZoomEnabled || isDisplayLoading}
@@ -1138,7 +1119,8 @@ export function FractalsPage() {
           <button type="button" className="overlay-toggle" onClick={() => setShowOverlays((v) => !v)}>
             {showOverlays ? 'Hide overlays' : 'Show overlays'}
           </button>
-            </>
+              </div>
+            </details>
           )}
         </div>
 

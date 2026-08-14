@@ -1,0 +1,37 @@
+{
+  "name": "Fractals Web",
+  "canonicalUrl": "https://fractals.ai-aaarti.com",
+  "description": "Open visual science workbench for fractals, box counting, image comparison, and reproducible research exploration.",
+  "audiences": [
+    "students",
+    "educators",
+    "researchers"
+  ],
+  "capabilities": [
+    "Interactive fractal generation",
+    "ROI-based box-counting dimension estimates",
+    "Image comparison with fit-quality checks",
+    "Run provenance and research exports",
+    "Cautious AI-plus-morphology research demonstration"
+  ],
+  "biomedicalScope": {
+    "status": "educational research prototype",
+    "allowedClaim": "Fractal morphology is a candidate complementary imaging feature to study alongside AI localization.",
+    "disallowedClaims": [
+      "diagnosis",
+      "prognosis",
+      "treatment recommendation",
+      "clinical validation"
+    ],
+    "validationPlan": "See the repository documentation for the tumor-complexity validation protocol."
+  },
+  "keyPages": [
+    "https://fractals.ai-aaarti.com",
+    "https://fractals.ai-aaarti.com/workbench/fractals",
+    "https://fractals.ai-aaarti.com/workbench/discover",
+    "https://fractals.ai-aaarti.com/workbench/box-count",
+    "https://fractals.ai-aaarti.com/workbench/compare",
+    "https://fractals.ai-aaarti.com/workbench/tumor-detection",
+    "https://fractals.ai-aaarti.com/workbench/runs"
+  ]
+}

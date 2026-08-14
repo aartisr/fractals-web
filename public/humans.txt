@@ -1,0 +1,10 @@
+/* TEAM */
+Creator: Aarti S Ravikumar
+Project: Fractals Web
+School: Pioneer Charter School of Science II
+
+/* TECHNOLOGY */
+React, TypeScript, Vite, TanStack, ONNX Runtime Web
+
+/* RESEARCH STATUS */
+Educational and exploratory research prototype; not a clinical decision-support system.

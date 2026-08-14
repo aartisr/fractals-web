@@ -4,6 +4,7 @@ import { Topbar } from './Topbar'
 import { Footer } from './Footer'
 import { SeoManager } from './SeoManager'
 import { ClarityTracker } from './ClarityTracker'
+import { RouteVisual } from './RouteVisual'
 import { workbenchModules } from './plugins/modules'
 import { trackWorkbenchEvent } from './services/workbenchSharing'
 
@@ -34,6 +35,7 @@ export function AppShell() {
       </a>
       <Topbar />
       <main id="workspace-content" className="workspace" tabIndex={-1}>
+        <RouteVisual />
         <Outlet />
       </main>
       <Footer />

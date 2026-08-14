@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
 import { downloadJson, downloadTextAsFile } from '../../core/services/export'
 import { Panel } from '../../components/Panel'
 import { PeerComparisonPanel } from '../../components/PeerComparisonPanel'
@@ -102,6 +101,8 @@ export function RunsPage() {
   )
   const normalizedRunCsv = useMemo(() => buildNormalizedRunsCsv(rows), [rows])
 
+  // TanStack Table intentionally exposes a mutable table instance; React Compiler skips memoization for it.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: rows,
     columns,
@@ -197,29 +198,6 @@ export function RunsPage() {
 
   return (
     <div className="tool-grid tool-grid-single">
-      <GuidedKickoffPanel
-        title="Run History Workspace"
-        subtitle="Start here if you want provenance, reusable examples, or a clean research paper trail."
-        steps={[
-          'Open the run history to find the output you want to revisit.',
-          'Save or duplicate a shared example so you can keep working from a known-good state.',
-          'Use the research exports and peer review tools when you need a reproducible record.',
-        ]}
-        actions={[
-          {
-            label: 'Browse discovery',
-            to: '/workbench/discover',
-            description: 'Find bookmarkable examples and challenge pages.',
-          },
-          {
-            label: 'Open fractals',
-            to: '/workbench/fractals',
-            description: 'Create a fresh example and share it back into the gallery.',
-          },
-        ]}
-        note="This page is the best home for returning users because it keeps the evidence, reuse, and export workflow in one place."
-      />
-
       <Panel title="Run History" subtitle="Unified run registry from API endpoint with local fallback.">
         <div className="edu-chip-row" aria-label="Status legend">
           <span className="edu-chip">queued: accepted, waiting</span>

@@ -64,11 +64,16 @@ export function RunDetailPage() {
 
         {run ? (
           <div className="detail-stack">
+            <details className="calm-disclosure">
+              <summary>How to read this record</summary>
+              <div className="calm-disclosure-content">
             <div className="edu-note">
               <p className="edu-note-title">How to read this record</p>
               <p>Summary captures operational context, Parameters capture experiment setup, and Artifacts capture generated files.</p>
               <p>Use Result as the final evidence block for interpretation and reproducibility checks.</p>
             </div>
+              </div>
+            </details>
 
             <div className="metrics detail-grid">
               <span>Run ID: {run.id}</span>
@@ -96,17 +101,22 @@ export function RunDetailPage() {
               </button>
             </div>
 
-            <h3 className="detail-heading">Summary</h3>
-            <pre>{JSON.stringify({ detail: run.detail, errorMessage: run.errorMessage ?? null }, null, 2)}</pre>
-
-            <h3 className="detail-heading">Parameters</h3>
-            <pre>{JSON.stringify(run.parameters ?? null, null, 2)}</pre>
-
-            <h3 className="detail-heading">Artifacts</h3>
-            <pre>{JSON.stringify(run.artifacts ?? null, null, 2)}</pre>
-
-            <h3 className="detail-heading">Result</h3>
-            <pre>{JSON.stringify(run.result ?? run.payload ?? null, null, 2)}</pre>
+            <details className="calm-disclosure" open>
+              <summary>Summary</summary>
+              <pre>{JSON.stringify({ detail: run.detail, errorMessage: run.errorMessage ?? null }, null, 2)}</pre>
+            </details>
+            <details className="calm-disclosure">
+              <summary>Parameters</summary>
+              <pre>{JSON.stringify(run.parameters ?? null, null, 2)}</pre>
+            </details>
+            <details className="calm-disclosure">
+              <summary>Artifacts</summary>
+              <pre>{JSON.stringify(run.artifacts ?? null, null, 2)}</pre>
+            </details>
+            <details className="calm-disclosure">
+              <summary>Result data</summary>
+              <pre>{JSON.stringify(run.result ?? run.payload ?? null, null, 2)}</pre>
+            </details>
 
             <CommentThreadPanel
               target={{ kind: 'run', id: run.id, title: run.detail, module: run.type }}

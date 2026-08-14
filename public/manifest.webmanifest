@@ -1,0 +1,17 @@
+{
+  "name": "Fractals Web — Visual Science Workbench",
+  "short_name": "Fractals Web",
+  "description": "An open visual science workbench for fractals, image analysis, and reproducible exploration.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7fbff",
+  "theme_color": "#08121d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

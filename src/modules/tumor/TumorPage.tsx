@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { GuidedKickoffPanel } from '../../components/GuidedKickoffPanel'
 import { CommentThreadPanel } from '../../components/CommentThreadPanel'
 import { ClassroomPanel } from '../../components/ClassroomPanel'
 import { FilePicker } from '../../components/FilePicker'
@@ -27,6 +26,7 @@ import {
   buildResearchSnapshot,
 } from '../../core/services/researchWorkbench'
 import { TumorComparisonPanel } from './TumorComparisonPanel'
+import { TumorComplexityEvidencePanel } from './TumorComplexityEvidencePanel'
 import { TumorStatusCard } from './TumorStatusCard'
 import { formatConfidence, summarizeConfidence } from './tumorDisplay'
 import { useTumorFractalEvidence } from './useTumorFractalEvidence'
@@ -216,7 +216,7 @@ export function TumorPage() {
         cropImageUrl: detectionData.cropImageUrl ?? '',
       },
     })
-  }, [confidenceThreshold, detectionData, evidenceSummary.cautions, evidenceSummary.summary, strongestConfidence, view])
+  }, [confidenceThreshold, detectionCount, detectionData, evidenceSummary.cautions, evidenceSummary.summary, strongestConfidence, view])
   const figureManifest = useMemo(
     () =>
       researchSnapshot
@@ -301,29 +301,6 @@ export function TumorPage() {
 
   return (
     <div className="tool-grid tumor-tool-grid">
-      <GuidedKickoffPanel
-        title="Tumor Evidence Review"
-        subtitle="Upload a scan, choose a view, and keep the interpretation cautious and evidence-first."
-        steps={[
-          'Start by uploading the scan you want to review.',
-          'Pick the anatomical view that matches the question you need to answer.',
-          'Run detection, then read the confidence and safety notes before sharing anything.',
-        ]}
-        actions={[
-          {
-            label: 'Open runs',
-            to: '/workbench/runs',
-            description: 'Keep the output and provenance together.',
-          },
-          {
-            label: 'Open discovery',
-            to: '/workbench/discover',
-            description: 'See classroom-safe examples and challenge pages.',
-          },
-        ]}
-        note="This surface is educational only. Always keep the language descriptive, cautious, and non-diagnostic."
-      />
-
       <Panel title="Tumor Detection" subtitle="Load a scan, choose the anatomical view, and review the candidate region summary.">
         <div className="tumor-control-grid">
           <div className="form-grid">
@@ -403,6 +380,16 @@ export function TumorPage() {
         />
       </Panel>
 
+      {detectionData && fractalEvidence.status === 'ready' ? (
+        <Panel title="Complexity evidence" subtitle="A transparent research layer that supplements AI localization with a measurable geometric feature.">
+          <TumorComplexityEvidencePanel
+            detectionData={detectionData}
+            fractalEvidence={fractalEvidence}
+            strongestConfidence={strongestConfidence}
+          />
+        </Panel>
+      ) : null}
+
       {educatorMode ? (
         <ClassroomPanel
           moduleId="tumor-detection"
@@ -413,8 +400,8 @@ export function TumorPage() {
         />
       ) : null}
 
-      <Panel title="Share This Evidence" subtitle="Turn the current tumor detection and fractal evidence into a shareable, classroom-safe summary.">
-        {tumorShareCard ? (
+      {tumorShareCard ? (
+      <Panel title="Save or share this evidence" subtitle="Keep the result only when it is useful for a classroom-safe review.">
           <ResultCardPanel
             card={tumorShareCard}
             shareUrl={tumorShareUrl}
@@ -426,9 +413,6 @@ export function TumorPage() {
             onCopyText={copyTumorShareText}
             onCopyLink={copyTumorShareLink}
           />
-        ) : (
-          <p className="muted">Run detection to create a share card.</p>
-        )}
         <div className="edu-note">
           <p className="edu-note-title">Share status</p>
           <p>
@@ -463,6 +447,7 @@ export function TumorPage() {
           />
         ) : null}
       </Panel>
+      ) : null}
     </div>
   )
 }
