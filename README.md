@@ -212,7 +212,7 @@ After the first merge, set **Settings → Pages → Build and deployment → Sou
 
 ### Wiki sync credential
 
-GitHub stores a Wiki as a separate Git repository. Before using the **Sync Wiki source** workflow, create a fine-grained personal access token owned by a maintainer, limit it to `aartisr/fractals-web`, grant **Contents: Read and write**, and save it as the repository Actions secret `WIKI_SYNC_TOKEN` under **Settings → Secrets and variables → Actions**. The workflow intentionally requires this separate credential because the built-in Actions token cannot reliably clone the Wiki repository. After adding the secret, run **Actions → Sync Wiki source → Run workflow** once; subsequent changes to `wiki/*.md` synchronize automatically.
+GitHub stores a Wiki as a separate Git repository. Before using the **Sync Wiki source** workflow, use an active personal access token owned by a maintainer, limit a fine-grained token to `aartisr/fractals-web`, grant **Contents: Read and write**, and save it as the repository Actions secret `WIKI_SYNC_TOKEN` under **Settings → Secrets and variables → Actions**. A classic PAT must have the `repo` scope. The workflow intentionally requires this separate credential because the built-in Actions token cannot reliably clone the Wiki repository. After adding the secret, run **Actions → Sync Wiki source → Run workflow** once; subsequent changes to `wiki/*.md` synchronize automatically.
 
 ### Discoverability
 
