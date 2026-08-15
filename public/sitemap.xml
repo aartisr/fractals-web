@@ -3,8 +3,11 @@
   <url><loc>https://fractals.ai-aarti.com</loc></url>
   <url><loc>https://fractals.ai-aarti.com/workbench/fractals</loc></url>
   <url><loc>https://fractals.ai-aarti.com/workbench/discover</loc></url>
+  <url><loc>https://fractals.ai-aarti.com/workbench/discover/fractals-self-similarity</loc></url>
+  <url><loc>https://fractals.ai-aarti.com/workbench/discover/compare-evidence-story</loc></url>
+  <url><loc>https://fractals.ai-aarti.com/workbench/discover/box-count-methods</loc></url>
+  <url><loc>https://fractals.ai-aarti.com/workbench/discover/tumor-safety-audit</loc></url>
   <url><loc>https://fractals.ai-aarti.com/workbench/box-count</loc></url>
   <url><loc>https://fractals.ai-aarti.com/workbench/compare</loc></url>
   <url><loc>https://fractals.ai-aarti.com/workbench/tumor-detection</loc></url>
-  <url><loc>https://fractals.ai-aarti.com/workbench/runs</loc></url>
 </urlset>

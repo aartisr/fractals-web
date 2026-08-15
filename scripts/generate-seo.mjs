@@ -8,15 +8,50 @@ const siteUrl = (
   (process.env.URL ?? 'https://fractals.ai-aarti.com')
 ).replace(/\/+$/, '')
 
-const routes = [
-  '/',
-  '/workbench/fractals',
-  '/workbench/discover',
-  '/workbench/box-count',
-  '/workbench/compare',
-  '/workbench/tumor-detection',
-  '/workbench/runs',
+const publicPages = [
+  {
+    path: '/',
+    summary: 'Start a visual science exploration with fractals, image complexity measurement, evidence comparison, and reproducible context.',
+  },
+  {
+    path: '/workbench/fractals',
+    summary: 'Explore interactive Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski fractals.',
+  },
+  {
+    path: '/workbench/discover',
+    summary: 'Browse curated learning challenges and shared visual-science examples.',
+  },
+  {
+    path: '/workbench/discover/fractals-self-similarity',
+    summary: 'Find and explain repeated structure across scale in a guided fractal challenge.',
+  },
+  {
+    path: '/workbench/discover/compare-evidence-story',
+    summary: 'Build a clear, evidence-led comparison between two visual artifacts.',
+  },
+  {
+    path: '/workbench/discover/box-count-methods',
+    summary: 'Practice a reproducible ROI-based box-counting workflow and export a method record.',
+  },
+  {
+    path: '/workbench/discover/tumor-safety-audit',
+    summary: 'Practice cautious, non-diagnostic interpretation of an AI image overlay.',
+  },
+  {
+    path: '/workbench/box-count',
+    summary: 'Estimate image-region fractal dimension with visible box counts and fit-quality checks.',
+  },
+  {
+    path: '/workbench/compare',
+    summary: 'Compare matched images with consistent settings and a careful evidence summary.',
+  },
+  {
+    path: '/workbench/tumor-detection',
+    summary: 'Explore a clearly scoped educational prototype for AI localization and complementary fractal-morphology research.',
+  },
 ]
+
+const routes = publicPages.map(({ path }) => path)
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -32,7 +67,7 @@ const llms = `# Fractals Web\n\n` +
   `## Important scope\n` +
   `The tumor-complexity workflow is an educational research prototype. It is not a diagnostic, prognostic, treatment, or clinically validated tool. It presents AI localization and fractal-morphology measurements as a testable research hypothesis that requires external validation.\n\n` +
   `## Key Pages\n` +
-  routes.map((route) => `- ${siteUrl}${route === '/' ? '' : route}`).join('\n') +
+  publicPages.map(({ path, summary }) => `- [${siteUrl}${path === '/' ? '' : path}](${siteUrl}${path === '/' ? '' : path}): ${summary}`).join('\n') +
   '\n\n## Summary\n' +
   `Use this site to explore fractals, compare image evidence, document reproducible analysis, and share results. Cite the source page, method, parameters, and limitations when discussing outputs.\n`
 
@@ -54,7 +89,10 @@ const aiContext = JSON.stringify({
     disallowedClaims: ['diagnosis', 'prognosis', 'treatment recommendation', 'clinical validation'],
     validationPlan: 'See the repository documentation for the tumor-complexity validation protocol.',
   },
-  keyPages: routes.map((route) => `${siteUrl}${route === '/' ? '' : route}`),
+  keyPages: publicPages.map(({ path, summary }) => ({
+    url: `${siteUrl}${path === '/' ? '' : path}`,
+    summary,
+  })),
 }, null, 2) + '\n'
 
 const humans = `/* TEAM */\nCreator: Aarti S Ravikumar\nProject: Fractals Web\nSchool: Pioneer Charter School of Science II\n\n/* TECHNOLOGY */\nReact, TypeScript, Vite, TanStack, ONNX Runtime Web\n\n/* RESEARCH STATUS */\nEducational and exploratory research prototype; not a clinical decision-support system.\n`

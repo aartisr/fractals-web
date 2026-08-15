@@ -9,13 +9,16 @@ A modular visual science workbench for students, educators, and researchers to e
 The tumor-complexity workflow is an educational research prototype. It is not a diagnostic, prognostic, treatment, or clinically validated tool. It presents AI localization and fractal-morphology measurements as a testable research hypothesis that requires external validation.
 
 ## Key Pages
-- https://fractals.ai-aarti.com
-- https://fractals.ai-aarti.com/workbench/fractals
-- https://fractals.ai-aarti.com/workbench/discover
-- https://fractals.ai-aarti.com/workbench/box-count
-- https://fractals.ai-aarti.com/workbench/compare
-- https://fractals.ai-aarti.com/workbench/tumor-detection
-- https://fractals.ai-aarti.com/workbench/runs
+- [https://fractals.ai-aarti.com](https://fractals.ai-aarti.com): Start a visual science exploration with fractals, image complexity measurement, evidence comparison, and reproducible context.
+- [https://fractals.ai-aarti.com/workbench/fractals](https://fractals.ai-aarti.com/workbench/fractals): Explore interactive Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski fractals.
+- [https://fractals.ai-aarti.com/workbench/discover](https://fractals.ai-aarti.com/workbench/discover): Browse curated learning challenges and shared visual-science examples.
+- [https://fractals.ai-aarti.com/workbench/discover/fractals-self-similarity](https://fractals.ai-aarti.com/workbench/discover/fractals-self-similarity): Find and explain repeated structure across scale in a guided fractal challenge.
+- [https://fractals.ai-aarti.com/workbench/discover/compare-evidence-story](https://fractals.ai-aarti.com/workbench/discover/compare-evidence-story): Build a clear, evidence-led comparison between two visual artifacts.
+- [https://fractals.ai-aarti.com/workbench/discover/box-count-methods](https://fractals.ai-aarti.com/workbench/discover/box-count-methods): Practice a reproducible ROI-based box-counting workflow and export a method record.
+- [https://fractals.ai-aarti.com/workbench/discover/tumor-safety-audit](https://fractals.ai-aarti.com/workbench/discover/tumor-safety-audit): Practice cautious, non-diagnostic interpretation of an AI image overlay.
+- [https://fractals.ai-aarti.com/workbench/box-count](https://fractals.ai-aarti.com/workbench/box-count): Estimate image-region fractal dimension with visible box counts and fit-quality checks.
+- [https://fractals.ai-aarti.com/workbench/compare](https://fractals.ai-aarti.com/workbench/compare): Compare matched images with consistent settings and a careful evidence summary.
+- [https://fractals.ai-aarti.com/workbench/tumor-detection](https://fractals.ai-aarti.com/workbench/tumor-detection): Explore a clearly scoped educational prototype for AI localization and complementary fractal-morphology research.
 
 ## Summary
 Use this site to explore fractals, compare image evidence, document reproducible analysis, and share results. Cite the source page, method, parameters, and limitations when discussing outputs.

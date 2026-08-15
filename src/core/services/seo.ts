@@ -10,10 +10,33 @@ export type SeoPage = {
 export const SITE_NAME = 'Fractals Web'
 export const SITE_TAGLINE = 'Visual science, made teachable, measurable, and shareable.'
 export const DEFAULT_DESCRIPTION =
-  'Fractals Web is an open visual science workbench for fractal generation, box counting, image comparison, reproducible research workflows, and cautious biomedical hypothesis exploration.'
+  'Fractals Web is a science workbench for generating fractals, measuring image complexity, comparing visual evidence, and documenting reproducible research.'
 export const DEFAULT_IMAGE = '/og-preview.svg'
 
 const withBrand = (value: string) => `${value} | ${SITE_NAME}`
+
+const DISCOVERY_CHALLENGE_SEO: Record<string, Pick<SeoPage, 'title' | 'description'>> = {
+  'fractals-self-similarity': {
+    title: withBrand('Self-Similarity Challenge'),
+    description:
+      'Practice finding repeated structure at a new scale in Mandelbrot or Julia boundaries, then name the region, point to evidence, and explain it cautiously.',
+  },
+  'compare-evidence-story': {
+    title: withBrand('Visual Evidence Challenge'),
+    description:
+      'Use a guided image-comparison challenge to identify what changed, what stayed consistent, and which visible evidence supports a careful, qualified conclusion.',
+  },
+  'box-count-methods': {
+    title: withBrand('Box-Counting Methods Challenge'),
+    description:
+      'Define an image region, inspect box-count fit quality, compare fractal-dimension estimates, and export a reproducible record for another learner or researcher.',
+  },
+  'tumor-safety-audit': {
+    title: withBrand('AI Claim Safety Challenge'),
+    description:
+      'Review an AI image overlay with evidence-first, non-diagnostic language; separate visible observations from interpretation in this educational safety challenge.',
+  },
+}
 
 export const buildSeoForPath = (pathname: string): SeoPage => {
   if (pathname === '/') {
@@ -30,7 +53,7 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand('Fractal Generator'),
       description:
-        'Generate Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski variants in an interactive fractal studio.',
+        'Generate and investigate Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski fractals; zoom, pan, analyze patterns, and export settings.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'website',
@@ -41,7 +64,7 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand('Discovery Feed and Shared Examples'),
       description:
-        'Browse shared fractal examples, bookmarkable challenge pages, and trust-first discovery tools for classrooms and research.',
+        'Browse fractal examples and evidence-led learning challenges for classrooms and research; bookmark a prompt, inspect method, and continue in the source tool.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'website',
@@ -49,13 +72,26 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
   }
 
   if (pathname.startsWith('/workbench/discover/')) {
+    const challengeId = pathname.slice('/workbench/discover/'.length)
+    const challenge = DISCOVERY_CHALLENGE_SEO[challengeId]
+
+    if (challenge) {
+      return {
+        ...challenge,
+        path: pathname,
+        image: DEFAULT_IMAGE,
+        type: 'article',
+      }
+    }
+
     return {
-      title: withBrand('Discovery Challenge'),
+      title: withBrand('Challenge Not Found'),
       description:
-        'Open a bookmarkable challenge page that helps students and educators explain visual evidence with clarity.',
+        'This challenge is not part of the public Fractals Web catalog. Return to Discovery to choose a current, evidence-led activity.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'article',
+      noindex: true,
     }
   }
 
@@ -63,7 +99,7 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand('Box Counter'),
       description:
-        'Measure fractal dimension from a selected region of interest with repeatable box-counting workflows and exportable results.',
+        'Estimate fractal dimension from an image region using repeatable box counting; inspect occupied boxes and fit quality, export a reproducible methods record.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'website',
@@ -74,7 +110,7 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand('Image Compare'),
       description:
-        'Compare two images side by side, quantify complexity shifts, and produce a clear interpretation of the evidence.',
+        'Compare matched images with the same preprocessing and box-count scales; inspect complexity differences, fit quality, limitations, and an evidence-led summary.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'website',
@@ -85,7 +121,7 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand('Tumor Detection Evidence'),
       description:
-        'Explore AI localization and fractal-morphology measurements in a transparent, non-diagnostic biomedical research workflow.',
+        'Explore AI localization alongside fractal-morphology measurements in a transparent biomedical research workflow; educational only, not a diagnostic tool.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'website',
@@ -96,19 +132,24 @@ export const buildSeoForPath = (pathname: string): SeoPage => {
     return {
       title: withBrand(pathname.includes('/runs/') ? 'Run Detail' : 'Run History and Provenance'),
       description:
-        'Inspect reusable run records, compare analysis settings, and export reproducible history for classroom or research use.',
+        'Open locally saved analysis records, inspect provenance, and export a reproducible methods note for your own classroom or research workflow.',
       path: pathname,
       image: DEFAULT_IMAGE,
       type: 'article',
+      // Saved runs are browser-local, often empty for first-time visitors, and do not
+      // represent a stable public resource. Keeping them out of search avoids thin,
+      // duplicate detail URLs while preserving the feature for users who need it.
+      noindex: true,
     }
   }
 
   return {
-    title: withBrand('Visual Science Workbench'),
-    description: DEFAULT_DESCRIPTION,
+    title: withBrand('Page Not Found'),
+    description: 'This route is not a public Fractals Web page. Use the workbench navigation to continue your visual science exploration.',
     path: pathname,
     image: DEFAULT_IMAGE,
     type: 'website',
+    noindex: true,
   }
 }
 
@@ -126,6 +167,7 @@ export const getSiteUrl = () => {
 export const getCanonicalUrl = (pathname: string) => `${getSiteUrl()}${pathname === '/' ? '' : pathname}`
 
 export const buildStructuredData = (pathname: string) => {
+  const seo = buildSeoForPath(pathname)
   const canonicalUrl = getCanonicalUrl(pathname)
   const authorUrl = 'https://ai-aarti.com'
   const publisherUrl = 'https://saugus.pioneercss.org'
@@ -149,7 +191,7 @@ export const buildStructuredData = (pathname: string) => {
       '@type': ['WebApplication', 'EducationalApplication'],
       name: SITE_NAME,
       url: canonicalUrl,
-      description: DEFAULT_DESCRIPTION,
+      description: seo.description,
       applicationCategory: 'EducationalApplication',
       operatingSystem: 'Web',
       isAccessibleForFree: true,

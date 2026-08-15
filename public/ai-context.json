@@ -26,12 +26,45 @@
     "validationPlan": "See the repository documentation for the tumor-complexity validation protocol."
   },
   "keyPages": [
-    "https://fractals.ai-aarti.com",
-    "https://fractals.ai-aarti.com/workbench/fractals",
-    "https://fractals.ai-aarti.com/workbench/discover",
-    "https://fractals.ai-aarti.com/workbench/box-count",
-    "https://fractals.ai-aarti.com/workbench/compare",
-    "https://fractals.ai-aarti.com/workbench/tumor-detection",
-    "https://fractals.ai-aarti.com/workbench/runs"
+    {
+      "url": "https://fractals.ai-aarti.com",
+      "summary": "Start a visual science exploration with fractals, image complexity measurement, evidence comparison, and reproducible context."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/fractals",
+      "summary": "Explore interactive Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski fractals."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/discover",
+      "summary": "Browse curated learning challenges and shared visual-science examples."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/discover/fractals-self-similarity",
+      "summary": "Find and explain repeated structure across scale in a guided fractal challenge."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/discover/compare-evidence-story",
+      "summary": "Build a clear, evidence-led comparison between two visual artifacts."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/discover/box-count-methods",
+      "summary": "Practice a reproducible ROI-based box-counting workflow and export a method record."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/discover/tumor-safety-audit",
+      "summary": "Practice cautious, non-diagnostic interpretation of an AI image overlay."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/box-count",
+      "summary": "Estimate image-region fractal dimension with visible box counts and fit-quality checks."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/compare",
+      "summary": "Compare matched images with consistent settings and a careful evidence summary."
+    },
+    {
+      "url": "https://fractals.ai-aarti.com/workbench/tumor-detection",
+      "summary": "Explore a clearly scoped educational prototype for AI localization and complementary fractal-morphology research."
+    }
   ]
 }

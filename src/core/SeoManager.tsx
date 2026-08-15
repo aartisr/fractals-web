@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useRouterState } from '@tanstack/react-router'
-import { buildSeoForPath, buildStructuredData, getCanonicalUrl, getSiteUrl, SITE_NAME, SITE_TAGLINE } from './services/seo'
+import { buildSeoForPath, buildStructuredData, DEFAULT_DESCRIPTION, getCanonicalUrl, getSiteUrl, SITE_NAME } from './services/seo'
 
 const META_IDS = {
   description: 'seo-description',
@@ -81,7 +81,7 @@ export function SeoManager() {
       const meta = document.createElement('meta')
       meta.name = 'robots'
       return meta
-    }).setAttribute('content', seo.noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
+    }).setAttribute('content', seo.noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
 
     ensureMeta(titleSelector, () => {
       const meta = document.createElement('meta')
@@ -221,16 +221,16 @@ export function SeoManager() {
 export function SeoHeadDefaults() {
   return (
     <>
-      <meta name="description" content={SITE_TAGLINE} />
+      <meta name="description" content={DEFAULT_DESCRIPTION} />
       <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:title" content={SITE_NAME} />
-      <meta property="og:description" content={SITE_TAGLINE} />
+      <meta property="og:description" content={DEFAULT_DESCRIPTION} />
       <meta property="og:type" content="website" />
       <meta property="og:image" content={`${getSiteUrl()}/og-preview.svg`} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={SITE_NAME} />
-      <meta name="twitter:description" content={SITE_TAGLINE} />
+      <meta name="twitter:description" content={DEFAULT_DESCRIPTION} />
       <meta name="twitter:image" content={`${getSiteUrl()}/og-preview.svg`} />
       <meta name="theme-color" content="#08121d" />
       <link rel="canonical" href={getSiteUrl()} />
