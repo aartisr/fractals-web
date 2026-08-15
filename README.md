@@ -210,6 +210,10 @@ The GitHub Pages guide is intentionally a concise orientation surface. It points
 
 After the first merge, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, and enable **Settings → General → Features → Wikis**. The included workflows then publish the Pages guide and synchronize the repository-managed Wiki pages without deleting manually authored Wiki material.
 
+### Wiki sync credential
+
+GitHub stores a Wiki as a separate Git repository. Before using the **Sync Wiki source** workflow, create a fine-grained personal access token owned by a maintainer, limit it to `aartisr/fractals-web`, grant **Contents: Read and write**, and save it as the repository Actions secret `WIKI_SYNC_TOKEN` under **Settings → Secrets and variables → Actions**. The workflow intentionally requires this separate credential because the built-in Actions token cannot reliably clone the Wiki repository. After adding the secret, run **Actions → Sync Wiki source → Run workflow** once; subsequent changes to `wiki/*.md` synchronize automatically.
+
 ### Discoverability
 
 The Pages guide is indexable, has its own canonical URL, and publishes a sitemap, crawl rules, social metadata, structured data, and AI-readable `llms.txt` and `ai-context.json` files. Its content points readers to the canonical Fractal Lab for product use.
