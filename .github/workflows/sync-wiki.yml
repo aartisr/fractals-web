@@ -42,7 +42,10 @@ jobs:
             echo "WIKI_SYNC_TOKEN cannot access ${{ github.repository }}. Check that it is active, belongs to a collaborator, and has Contents: Read and write access to this repository."
             exit 1
           }
-          git clone "https://${WIKI_SYNC_USERNAME}:${WIKI_SYNC_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki-publish
+          git clone "https://${WIKI_SYNC_USERNAME}:${WIKI_SYNC_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki-publish || {
+            echo "The Wiki Git repository is not initialized yet. Open the repository's Wiki tab, create and save one initial page, then run this workflow again."
+            exit 1
+          }
       - name: Update managed Wiki pages
         run: |
           cp wiki/*.md wiki-publish/
