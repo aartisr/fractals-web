@@ -461,6 +461,9 @@ export function FractalsPage() {
   const pendingViewportRef = useRef<Viewport | null>(null)
   const wheelRafRef        = useRef<number | null>(null)
   const wheelZoomRef       = useRef<{ velocity: number; tx: number; ty: number } | null>(null)
+  const wheelPixelRef      = useRef(new Uint8Array(4))
+  const wheelHandlerRef    = useRef<(canvas: HTMLCanvasElement, event: WheelEvent) => void>(() => undefined)
+  const wheelScrollLockTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null)
 
   // ── Timer / render-token refs ──────────────────────────────────────────────
   const renderDebounceRef     = useRef<ReturnType<typeof window.setTimeout> | null>(null)
@@ -891,10 +894,75 @@ export function FractalsPage() {
   }
 
   // ── Inertial wheel zoom ────────────────────────────────────────────────────
-  const handleWheel: React.WheelEventHandler<HTMLDivElement> = (event) => {
-    if (!isZoomEnabled) return
-    event.preventDefault()
-    const rect = event.currentTarget.getBoundingClientRect()
+  const lockPageScrollForWheelZoom = () => {
+    document.documentElement.classList.add('fractal-wheel-zoom-active')
+    if (wheelScrollLockTimerRef.current) clearTimeout(wheelScrollLockTimerRef.current)
+    wheelScrollLockTimerRef.current = window.setTimeout(() => {
+      document.documentElement.classList.remove('fractal-wheel-zoom-active')
+      wheelScrollLockTimerRef.current = null
+    }, 180)
+  }
+
+  useEffect(() => () => {
+    if (wheelScrollLockTimerRef.current) clearTimeout(wheelScrollLockTimerRef.current)
+    document.documentElement.classList.remove('fractal-wheel-zoom-active')
+  }, [])
+
+  const isColoredFractalPixel = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
+    const rect = canvas.getBoundingClientRect()
+    const scale = Math.min(rect.width / Math.max(1, canvas.width), rect.height / Math.max(1, canvas.height))
+    const renderedWidth = canvas.width * scale
+    const renderedHeight = canvas.height * scale
+    const renderedLeft = rect.left + (rect.width - renderedWidth) / 2
+    const renderedTop = rect.top + (rect.height - renderedHeight) / 2
+
+    // The canvas uses object-fit: contain. Its DOM box can be wider than the
+    // rendered fractal, leaving neutral letterbox space on the left and right.
+    if (
+      clientX < renderedLeft || clientX > renderedLeft + renderedWidth
+      || clientY < renderedTop || clientY > renderedTop + renderedHeight
+    ) return false
+
+    const x = clamp(Math.floor((clientX - renderedLeft) * canvas.width / Math.max(1, renderedWidth)), 0, canvas.width - 1)
+    const y = clamp(Math.floor((clientY - renderedTop) * canvas.height / Math.max(1, renderedHeight)), 0, canvas.height - 1)
+    const pixel = wheelPixelRef.current
+
+    try {
+      if (canvas === glCanvasRef.current) {
+        const gl = glStateRef.current?.gl
+        if (!gl) return false
+        gl.readPixels(x, canvas.height - y - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel)
+      } else {
+        const context = canvas.getContext('2d')
+        if (!context) return false
+        pixel.set(context.getImageData(x, y, 1, 1).data)
+      }
+    } catch {
+      return false
+    }
+
+    const [red, green, blue, alpha] = pixel
+    const brightest = Math.max(red, green, blue)
+    const darkest = Math.min(red, green, blue)
+    // Only visibly chromatic pixels belong to the zoom target. This excludes
+    // the white/neutral field and the near-black background on either side.
+    return alpha > 16 && brightest - darkest >= 24
+  }
+
+  useEffect(() => {
+    wheelHandlerRef.current = (canvas, event) => {
+    if (!isZoomEnabled || isDisplayLoading || !isColoredFractalPixel(canvas, event.clientX, event.clientY)) {
+      wheelZoomRef.current = null
+      if (wheelRafRef.current !== null) {
+        cancelAnimationFrame(wheelRafRef.current)
+        wheelRafRef.current = null
+      }
+      return
+    }
+    if (event.cancelable) event.preventDefault()
+    event.stopPropagation()
+    lockPageScrollForWheelZoom()
+    const rect = canvas.getBoundingClientRect()
     const tx = clamp((event.clientX - rect.left) / Math.max(1, rect.width),  0, 1)
     const ty = clamp((event.clientY - rect.top)  / Math.max(1, rect.height), 0, 1)
 
@@ -913,7 +981,19 @@ export function FractalsPage() {
       pending.velocity *= 0.8
       wheelRafRef.current = requestAnimationFrame(step)
     })
-  }
+    }
+  })
+
+  useEffect(() => {
+    const canvas = isGLType ? glCanvasRef.current : canvasRef.current
+    if (!canvas) return
+
+    // Capture before the page scroll chain. The handler itself rejects neutral
+    // pixels and the letterbox margins, so ordinary scrolling remains intact.
+    const onWheel = (event: WheelEvent) => wheelHandlerRef.current(canvas, event)
+    document.addEventListener('wheel', onWheel, { capture: true, passive: false })
+    return () => document.removeEventListener('wheel', onWheel, { capture: true })
+  }, [isGLType])
 
   // ── Pointer drag pan ───────────────────────────────────────────────────────
   const scheduleViewportUpdate = (next: Viewport) => {
@@ -1071,7 +1151,7 @@ export function FractalsPage() {
           <button className="action" type="submit" disabled={isDisplayLoading}>
             {isDisplayLoading ? <><span className="button-spinner" aria-hidden="true" /> Rendering...</> : 'Render Explorer'}
           </button>
-          <p className="muted">Mouse wheel to zoom, drag to pan, and use Home or keyboard shortcuts (+/-/0/arrows).</p>
+          <p className="muted">Wheel over the colored fractal to zoom, drag to pan, and use Home or keyboard shortcuts (+/-/0/arrows).</p>
         </form>
       </Panel>}
 
@@ -1144,7 +1224,6 @@ export function FractalsPage() {
 
         <div
           className={`image-stage stage-grid fractal-canvas-stage ${showOverlays ? 'stage-reticle' : ''}`}
-          onWheel={handleWheel}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -1170,7 +1249,7 @@ export function FractalsPage() {
             {controlsExpanded && (
               <div id="explorer-control-hints" className="explorer-controls-panel">
                 <strong>Controls</strong>
-                <span>Wheel: zoom</span><span>Drag: pan</span>
+                <span>Wheel on fractal: zoom</span><span>Drag: pan</span>
                 <span>+ / - : zoom</span><span>Arrows: pan</span><span>0 or H: home</span>
               </div>
             )}
@@ -1195,7 +1274,7 @@ export function FractalsPage() {
         </div>
 
         {!isFullPageMode && <div className="overlay-legend" aria-label="Fractal interaction legend">
-          <span className="overlay-legend-item" tabIndex={0} title="Use mouse wheel or Zoom In/Out controls to navigate scales quickly.">Wheel zoom</span>
+          <span className="overlay-legend-item" tabIndex={0} title="Use the mouse wheel over the colored fractal, or use Zoom In/Out controls.">Wheel on fractal</span>
           <span className="overlay-legend-item" tabIndex={0} title="Drag on the canvas to pan while keeping magnification fixed.">Drag pan</span>
           <span className="overlay-legend-item" tabIndex={0} title="Home resets viewport to the canonical range for the selected fractal family.">Home reset</span>
           <span className="overlay-legend-item" tabIndex={0} title="SVG is vector-native for Fern and Sierpinski, and image-embedded SVG for escape-time fractals.">SVG export</span>

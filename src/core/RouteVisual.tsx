@@ -3,7 +3,7 @@ import { useRouterState } from '@tanstack/react-router'
 type RouteArt = { asset: string; alt: string }
 
 const routeArt: Array<{ matches: (pathname: string) => boolean; art: RouteArt }> = [
-  { matches: (pathname) => pathname === '/workbench/fractals', art: { asset: 'fractal-atmosphere', alt: 'Abstract Mandelbrot-inspired fractal boundary' } },
+  { matches: (pathname) => pathname === '/workbench/fractals', art: { asset: 'fractal-construction', alt: 'Recursive branching fractal emerging from a geometric construction field' } },
   { matches: (pathname) => pathname.startsWith('/workbench/discover'), art: { asset: 'discovery', alt: 'Curated collection of abstract fractal specimens' } },
   { matches: (pathname) => pathname === '/workbench/box-count', art: { asset: 'box-count', alt: 'Irregular boundary shown at several box-counting scales' } },
   { matches: (pathname) => pathname === '/workbench/compare', art: { asset: 'compare', alt: 'Two abstract patterns prepared for visual comparison' } },

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useEducatorMode } from './hooks/useEducatorMode'
 import { workbenchModules } from './plugins/modules'
@@ -20,9 +20,36 @@ export function Topbar() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [moreOpenForPath, setMoreOpenForPath] = useState<string | null>(null)
+  const moreRef = useRef<HTMLDivElement>(null)
+  const moreButtonRef = useRef<HTMLButtonElement>(null)
   const { educatorMode, setEducatorMode } = useEducatorMode()
   const primaryModules = workbenchModules.filter((module) => primaryModuleIds.includes(module.id))
   const moreModules = workbenchModules.filter((module) => !primaryModuleIds.includes(module.id))
+  const moreOpen = moreOpenForPath === pathname
+
+  const closeMore = useCallback((returnFocus = false) => {
+    setMoreOpenForPath(null)
+    if (returnFocus) requestAnimationFrame(() => moreButtonRef.current?.focus())
+  }, [])
+
+  useEffect(() => {
+    if (!moreOpen) return
+
+    const closeWhenLeaving = (target: EventTarget | null) => {
+      if (target instanceof Node && !moreRef.current?.contains(target)) closeMore()
+    }
+
+    const onPointerDown = (event: PointerEvent) => closeWhenLeaving(event.target)
+    const onFocusIn = (event: FocusEvent) => closeWhenLeaving(event.target)
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('focusin', onFocusIn)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('focusin', onFocusIn)
+    }
+  }, [moreOpen, closeMore])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -34,13 +61,17 @@ export function Topbar() {
       if (index >= 0 && index < workbenchModules.length) {
         navigate({ to: workbenchModules[index].path })
         setDrawerOpen(false)
+        closeMore()
       }
-      if (event.key === 'Escape') setDrawerOpen(false)
+      if (event.key === 'Escape') {
+        setDrawerOpen(false)
+        closeMore(true)
+      }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [navigate])
+  }, [navigate, closeMore])
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`)
 
@@ -62,21 +93,51 @@ export function Topbar() {
               to={module.path}
               className={`tb-tab${isActive(module.path) ? ' tb-tab--active' : ''}`}
               aria-current={isActive(module.path) ? 'page' : undefined}
+              onFocus={() => closeMore()}
+              onPointerEnter={() => closeMore()}
+              onClick={() => closeMore()}
             >
               {module.id === 'fractals' ? 'Create' : module.id === 'box-count' ? 'Measure' : module.id === 'compare' ? 'Compare' : 'Explore'}
             </Link>
           ))}
-          <details className="tb-more">
-            <summary>More</summary>
-            <div className="tb-more-menu">
+          <div className="tb-more" ref={moreRef}>
+            <button
+              ref={moreButtonRef}
+              type="button"
+              className="tb-more-button"
+              aria-expanded={moreOpen}
+              aria-controls="tb-more-menu"
+              onClick={() => setMoreOpenForPath(moreOpen ? null : pathname)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  closeMore(true)
+                }
+                if (event.key === 'ArrowDown' && !moreOpen) {
+                  event.preventDefault()
+                  setMoreOpenForPath(pathname)
+                  requestAnimationFrame(() => {
+                    moreRef.current?.querySelector<HTMLAnchorElement>('.tb-more-menu a')?.focus()
+                  })
+                }
+              }}
+            >
+              More
+            </button>
+            <div id="tb-more-menu" className="tb-more-menu" hidden={!moreOpen}>
               {moreModules.map((module) => (
-                <Link key={module.id} to={module.path} className={isActive(module.path) ? 'is-active' : undefined}>
+                <Link
+                  key={module.id}
+                  to={module.path}
+                  className={isActive(module.path) ? 'is-active' : undefined}
+                  onClick={() => closeMore()}
+                >
                   <strong>{module.title}</strong>
                   <span>{module.tagline}</span>
                 </Link>
               ))}
             </div>
-          </details>
+          </div>
         </nav>
 
         <button
@@ -94,7 +155,10 @@ export function Topbar() {
         <button
           type="button"
           className={`tb-hamburger${drawerOpen ? ' tb-hamburger--open' : ''}`}
-          onClick={() => setDrawerOpen((value) => !value)}
+          onClick={() => {
+            closeMore()
+            setDrawerOpen((value) => !value)
+          }}
           aria-label={drawerOpen ? 'Close navigation' : 'Open navigation'}
           aria-expanded={drawerOpen}
           aria-controls="tb-drawer"
