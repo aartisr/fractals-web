@@ -6,7 +6,7 @@ type SiteShareButtonProps = {
   className?: string
 }
 
-const SITE_URL = 'https://fractals.ai-aaarti.com'
+const SITE_URL = 'https://fractals.ai-aarti.com'
 const SHARE_TITLE = 'Fractals Web — Visual Science Workbench'
 const SHARE_TEXT = 'Explore fractals, measure image complexity, and compare visual evidence with Fractals Web.'
 

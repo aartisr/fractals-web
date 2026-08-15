@@ -1,6 +1,6 @@
 ### Fractals Web
 
-- [Open Fractal Lab](https://fractals.ai-aaarti.com/)
+- [Open Fractal Lab](https://fractals.ai-aarti.com/)
 - [Home](Home)
 - [Box counting](Box-Counting)
 - [Comparing visual evidence](Comparing-Visual-Evidence)
@@ -10,4 +10,4 @@
 
 - [Repository](https://github.com/aartisr/fractals-web)
 - [Public guide](https://aartisr.github.io/fractals-web/)
-- [Canonical Fractal Lab](https://fractals.ai-aaarti.com/)
+- [Canonical Fractal Lab](https://fractals.ai-aarti.com/)

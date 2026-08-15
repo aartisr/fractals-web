@@ -5,7 +5,7 @@ const siteUrl = (
   process.env.VITE_SITE_URL ||
   process.env.SITE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
-  (process.env.URL ?? 'https://fractals.ai-aaarti.com')
+  (process.env.URL ?? 'https://fractals.ai-aarti.com')
 ).replace(/\/+$/, '')
 
 const routes = [

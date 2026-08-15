@@ -1,7 +1,7 @@
 {
   "name": "Fractals Web",
   "publicGuideUrl": "https://aartisr.github.io/fractals-web/",
-  "canonicalProductUrl": "https://fractals.ai-aaarti.com/",
+  "canonicalProductUrl": "https://fractals.ai-aarti.com/",
   "repositoryUrl": "https://github.com/aartisr/fractals-web",
   "description": "Open visual science workbench for fractal generation, box counting, image comparison, and reproducible research exploration.",
   "audiences": ["students", "educators", "researchers"],

@@ -1,16 +1,16 @@
 # Fractals Web
 
-> Canonical product: https://fractals.ai-aaarti.com/
+> Canonical product: https://fractals.ai-aarti.com/
 
 Fractals Web is an open visual science workbench for students, educators, and researchers. It supports interactive fractal generation, ROI-based box-counting estimates of image complexity, visual comparison, and reproducible run records.
 
 ## Direct product links
 
-- Fractal studio: https://fractals.ai-aaarti.com/workbench/fractals
-- Box-counting measurement: https://fractals.ai-aaarti.com/workbench/box-count
-- Image comparison: https://fractals.ai-aaarti.com/workbench/compare
-- Run history and provenance: https://fractals.ai-aaarti.com/workbench/runs
-- Tumor-complexity evidence workflow: https://fractals.ai-aaarti.com/workbench/tumor-detection
+- Fractal studio: https://fractals.ai-aarti.com/workbench/fractals
+- Box-counting measurement: https://fractals.ai-aarti.com/workbench/box-count
+- Image comparison: https://fractals.ai-aarti.com/workbench/compare
+- Run history and provenance: https://fractals.ai-aarti.com/workbench/runs
+- Tumor-complexity evidence workflow: https://fractals.ai-aarti.com/workbench/tumor-detection
 
 ## Important biomedical scope
 

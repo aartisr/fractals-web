@@ -1,14 +1,14 @@
 # Fractals Web
 
-**[Open the Fractal Lab](https://fractals.ai-aaarti.com/)**
+**[Open the Fractal Lab](https://fractals.ai-aarti.com/)**
 
 Fractals Web is a visual science workbench for exploring fractals, measuring image complexity, comparing visual evidence, and retaining a reproducible record of the work.
 
 ## Start with one task
 
-1. **[Create a fractal](https://fractals.ai-aaarti.com/workbench/fractals)** — explore mathematical rules visually.
-2. **[Measure an image](https://fractals.ai-aaarti.com/workbench/box-count)** — estimate complexity in a selected region with box counting.
-3. **[Compare evidence](https://fractals.ai-aaarti.com/workbench/compare)** — assess two visual methods side by side.
+1. **[Create a fractal](https://fractals.ai-aarti.com/workbench/fractals)** — explore mathematical rules visually.
+2. **[Measure an image](https://fractals.ai-aarti.com/workbench/box-count)** — estimate complexity in a selected region with box counting.
+3. **[Compare evidence](https://fractals.ai-aarti.com/workbench/compare)** — assess two visual methods side by side.
 
 ## What the workbench preserves
 

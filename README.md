@@ -202,7 +202,7 @@ Before deploying, run the production build locally to validate routing and bundl
 
 ## Public Guide and Wiki
 
-The GitHub Pages guide is intentionally a concise orientation surface. It points every action back to the canonical [Fractals Web site](https://fractals.ai-aaarti.com/) so that learners and search engines reach the current product rather than a duplicate experience.
+The GitHub Pages guide is intentionally a concise orientation surface. It points every action back to the canonical [Fractals Web site](https://fractals.ai-aarti.com/) so that learners and search engines reach the current product rather than a duplicate experience.
 
 - Public guide: [aartisr.github.io/fractals-web](https://aartisr.github.io/fractals-web/)
 - Project Wiki: [aartisr/fractals-web/wiki](https://github.com/aartisr/fractals-web/wiki)

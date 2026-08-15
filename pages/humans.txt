@@ -4,7 +4,7 @@ Project: Fractals Web
 School: Pioneer Charter School of Science II
 
 /* CANONICAL PRODUCT */
-https://fractals.ai-aaarti.com/
+https://fractals.ai-aarti.com/
 
 /* TECHNOLOGY */
 React, TypeScript, Vite, TanStack, ONNX Runtime Web

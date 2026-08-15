@@ -1,6 +1,6 @@
 # Comparing visual evidence
 
-**[Open Image Compare](https://fractals.ai-aaarti.com/workbench/compare)**
+**[Open Image Compare](https://fractals.ai-aarti.com/workbench/compare)**
 
 Comparison is strongest when it answers one precise question at a time. Use the comparison workspace to keep the two sources, settings, and interpretation together.
 
@@ -13,4 +13,4 @@ Comparison is strongest when it answers one precise question at a time. Use the 
 
 For an image-analysis walk-through, see the [image comparison guide](https://github.com/aartisr/fractals-web/blob/main/docs/image-compare-guide.md).
 
-Return to **[Fractals Web](https://fractals.ai-aaarti.com/)**.
+Return to **[Fractals Web](https://fractals.ai-aarti.com/)**.

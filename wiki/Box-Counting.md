@@ -1,6 +1,6 @@
 # Box counting
 
-**[Open the Box Counter](https://fractals.ai-aaarti.com/workbench/box-count)**
+**[Open the Box Counter](https://fractals.ai-aarti.com/workbench/box-count)**
 
 Box counting estimates how the occupied detail of an image changes as the observation scale changes. In Fractals Web, use it as a transparent measurement workflow:
 
@@ -11,4 +11,4 @@ Box counting estimates how the occupied detail of an image changes as the observ
 
 An estimate is a measurement, not an interpretation of cause or clinical meaning. The visible method and saved provenance make it possible for another person to inspect what was done.
 
-Continue in the **[Fractal Lab](https://fractals.ai-aaarti.com/workbench/box-count)**.
+Continue in the **[Fractal Lab](https://fractals.ai-aarti.com/workbench/box-count)**.

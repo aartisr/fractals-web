@@ -9,13 +9,13 @@ A modular visual science workbench for students, educators, and researchers to e
 The tumor-complexity workflow is an educational research prototype. It is not a diagnostic, prognostic, treatment, or clinically validated tool. It presents AI localization and fractal-morphology measurements as a testable research hypothesis that requires external validation.
 
 ## Key Pages
-- https://fractals.ai-aaarti.com
-- https://fractals.ai-aaarti.com/workbench/fractals
-- https://fractals.ai-aaarti.com/workbench/discover
-- https://fractals.ai-aaarti.com/workbench/box-count
-- https://fractals.ai-aaarti.com/workbench/compare
-- https://fractals.ai-aaarti.com/workbench/tumor-detection
-- https://fractals.ai-aaarti.com/workbench/runs
+- https://fractals.ai-aarti.com
+- https://fractals.ai-aarti.com/workbench/fractals
+- https://fractals.ai-aarti.com/workbench/discover
+- https://fractals.ai-aarti.com/workbench/box-count
+- https://fractals.ai-aarti.com/workbench/compare
+- https://fractals.ai-aarti.com/workbench/tumor-detection
+- https://fractals.ai-aarti.com/workbench/runs
 
 ## Summary
 Use this site to explore fractals, compare image evidence, document reproducible analysis, and share results. Cite the source page, method, parameters, and limitations when discussing outputs.
