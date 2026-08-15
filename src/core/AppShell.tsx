@@ -5,7 +5,7 @@ import { Footer } from './Footer'
 import { SeoManager } from './SeoManager'
 import { ClarityTracker } from './ClarityTracker'
 import { RouteVisual } from './RouteVisual'
-import { workbenchModules } from './plugins/modules'
+import { getWorkbenchModuleForPath } from './plugins/modules'
 import { trackWorkbenchEvent } from './services/workbenchSharing'
 
 export function AppShell() {
@@ -18,7 +18,7 @@ export function AppShell() {
     }
 
     lastTrackedPath.current = pathname
-    const activeModule = workbenchModules.find((module) => pathname === module.path || pathname.startsWith(`${module.path}/`))
+    const activeModule = getWorkbenchModuleForPath(pathname)
 
     trackWorkbenchEvent('module_viewed', {
       path: pathname,

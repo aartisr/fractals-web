@@ -60,6 +60,7 @@ import { renderIFS } from './ifs-renderer'
 import { exportPng, exportSvg } from './export'
 import { generateResearchSummary, type FractalResearchSummary } from './research-analysis'
 import { generateResearchReport } from './research-guides'
+import { isChromaticPixel, mapPointToContainedCanvas } from './wheelZoomTarget'
 
 // ── Default form / initial render values ─────────────────────────────────────
 
@@ -910,21 +911,10 @@ export function FractalsPage() {
 
   const isColoredFractalPixel = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
     const rect = canvas.getBoundingClientRect()
-    const scale = Math.min(rect.width / Math.max(1, canvas.width), rect.height / Math.max(1, canvas.height))
-    const renderedWidth = canvas.width * scale
-    const renderedHeight = canvas.height * scale
-    const renderedLeft = rect.left + (rect.width - renderedWidth) / 2
-    const renderedTop = rect.top + (rect.height - renderedHeight) / 2
+    const point = mapPointToContainedCanvas(rect, canvas.width, canvas.height, clientX, clientY)
+    if (!point) return false
 
-    // The canvas uses object-fit: contain. Its DOM box can be wider than the
-    // rendered fractal, leaving neutral letterbox space on the left and right.
-    if (
-      clientX < renderedLeft || clientX > renderedLeft + renderedWidth
-      || clientY < renderedTop || clientY > renderedTop + renderedHeight
-    ) return false
-
-    const x = clamp(Math.floor((clientX - renderedLeft) * canvas.width / Math.max(1, renderedWidth)), 0, canvas.width - 1)
-    const y = clamp(Math.floor((clientY - renderedTop) * canvas.height / Math.max(1, renderedHeight)), 0, canvas.height - 1)
+    const { x, y } = point
     const pixel = wheelPixelRef.current
 
     try {
@@ -941,12 +931,7 @@ export function FractalsPage() {
       return false
     }
 
-    const [red, green, blue, alpha] = pixel
-    const brightest = Math.max(red, green, blue)
-    const darkest = Math.min(red, green, blue)
-    // Only visibly chromatic pixels belong to the zoom target. This excludes
-    // the white/neutral field and the near-black background on either side.
-    return alpha > 16 && brightest - darkest >= 24
+    return isChromaticPixel(pixel[0], pixel[1], pixel[2], pixel[3])
   }
 
   useEffect(() => {

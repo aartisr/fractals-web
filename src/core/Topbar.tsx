@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useEducatorMode } from './hooks/useEducatorMode'
-import { workbenchModules } from './plugins/modules'
+import { getWorkbenchModuleForPath, workbenchModules } from './plugins/modules'
 import { SiteShareButton } from './SiteShareButton'
 
 function FractalMark() {
@@ -14,8 +14,6 @@ function FractalMark() {
   )
 }
 
-const primaryModuleIds = ['fractals', 'box-count', 'compare', 'discover']
-
 export function Topbar() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const navigate = useNavigate()
@@ -24,8 +22,9 @@ export function Topbar() {
   const moreRef = useRef<HTMLDivElement>(null)
   const moreButtonRef = useRef<HTMLButtonElement>(null)
   const { educatorMode, setEducatorMode } = useEducatorMode()
-  const primaryModules = workbenchModules.filter((module) => primaryModuleIds.includes(module.id))
-  const moreModules = workbenchModules.filter((module) => !primaryModuleIds.includes(module.id))
+  const byNavigationOrder = (left: typeof workbenchModules[number], right: typeof workbenchModules[number]) => left.navigationOrder - right.navigationOrder
+  const primaryModules = workbenchModules.filter((module) => module.primaryNavigation).sort(byNavigationOrder)
+  const moreModules = workbenchModules.filter((module) => !module.primaryNavigation).sort(byNavigationOrder)
   const moreOpen = moreOpenForPath === pathname
 
   const closeMore = useCallback((returnFocus = false) => {
@@ -76,7 +75,7 @@ export function Topbar() {
   const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`)
 
   return (
-    <header className="topbar" data-active-module={workbenchModules.find((module) => isActive(module.path))?.id ?? 'home'}>
+    <header className="topbar" data-active-module={getWorkbenchModuleForPath(pathname)?.id ?? 'home'}>
       <div className="tb-primary">
         <Link to="/" className="tb-brand" aria-label="Nexus Fractal Lab home">
           <FractalMark />
@@ -97,7 +96,7 @@ export function Topbar() {
               onPointerEnter={() => closeMore()}
               onClick={() => closeMore()}
             >
-              {module.id === 'fractals' ? 'Create' : module.id === 'box-count' ? 'Measure' : module.id === 'compare' ? 'Compare' : 'Explore'}
+              {module.navLabel}
             </Link>
           ))}
           <div className="tb-more" ref={moreRef}>

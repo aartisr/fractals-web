@@ -1,0 +1,73 @@
+import type { WorkbenchModule } from './types'
+
+export const workbenchModules: WorkbenchModule[] = [
+  {
+    id: 'fractals',
+    title: 'Fractal Generator',
+    tagline: 'Generate Mandelbrot, Julia, Burning Ship, Newton, Fern, and Sierpinski variants.',
+    path: '/workbench/fractals',
+    accent: '#ff7b4a',
+    navLabel: 'Create',
+    primaryNavigation: true,
+    navigationOrder: 1,
+    routeVisual: { asset: 'fractal-construction', alt: 'Recursive branching fractal emerging from a geometric construction field' },
+  },
+  {
+    id: 'discover',
+    title: 'Discovery Feed',
+    tagline: 'Browse shared examples, challenge pages, and trust-first analytics.',
+    path: '/workbench/discover',
+    accent: '#00a896',
+    navLabel: 'Explore',
+    primaryNavigation: true,
+    navigationOrder: 4,
+    routeVisual: { asset: 'discovery', alt: 'Curated collection of abstract fractal specimens' },
+  },
+  {
+    id: 'box-count',
+    title: 'Box Counter',
+    tagline: 'ROI-based box counting with fractal dimension and processing metrics.',
+    path: '/workbench/box-count',
+    accent: '#ffd166',
+    navLabel: 'Measure',
+    primaryNavigation: true,
+    navigationOrder: 2,
+    routeVisual: { asset: 'box-count', alt: 'Irregular boundary shown at several box-counting scales' },
+  },
+  {
+    id: 'compare',
+    title: 'Image Compare',
+    tagline: 'Dual image analysis with complexity delta and interpretation output.',
+    path: '/workbench/compare',
+    accent: '#41d6a4',
+    navLabel: 'Compare',
+    primaryNavigation: true,
+    navigationOrder: 3,
+    routeVisual: { asset: 'compare', alt: 'Two abstract patterns prepared for visual comparison' },
+  },
+  {
+    id: 'tumor-detection',
+    title: 'Tumor Detection',
+    tagline: 'Axial/coronal/sagittal model views with confidence-box overlays.',
+    path: '/workbench/tumor-detection',
+    accent: '#64b5f6',
+    navLabel: 'Tumor research',
+    primaryNavigation: false,
+    navigationOrder: 5,
+    routeVisual: { asset: 'tumor-research', alt: 'Abstract volumetric image-morphology research visualization' },
+  },
+  {
+    id: 'runs',
+    title: 'Run History',
+    tagline: 'Searchable execution history for all modules and workflows.',
+    path: '/workbench/runs',
+    accent: '#b78dff',
+    navLabel: 'Run history',
+    primaryNavigation: false,
+    navigationOrder: 6,
+    routeVisual: { asset: 'runs', alt: 'Abstract trail of connected research artifacts and provenance' },
+  },
+]
+
+export const getWorkbenchModuleForPath = (pathname: string) =>
+  workbenchModules.find((module) => pathname === module.path || pathname.startsWith(`${module.path}/`))
