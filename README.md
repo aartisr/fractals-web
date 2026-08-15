@@ -137,6 +137,8 @@ Fractals Web is designed to stay maintainable as it grows.
 
 ## Local Development
 
+Use Node.js 22.19.0 and npm 9.9.4 (see `.nvmrc`). The GitHub Actions quality and Pages workflows pin the same runtime and npm version so `npm ci` resolves consistently across developer and CI environments.
+
 ```bash
 npm install
 npm run dev
