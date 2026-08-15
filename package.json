@@ -19,7 +19,7 @@
     "benchmark:validate": "node scripts/validate-benchmark-manifest.mjs"
   },
   "dependencies": {
-    "@tanstack/react-form": "^1.33.0",
+    "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-query": "^5.101.0",
     "@tanstack/react-router": "^1.170.13",
     "@tanstack/react-table": "^8.21.3",
