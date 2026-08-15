@@ -204,6 +204,7 @@ Before deploying, run the production build locally to validate routing and bundl
 - Image compare guide: [docs/image-compare-guide.md](docs/image-compare-guide.md)
 - Tumor-complexity validation plan: [docs/tumor-complexity-validation-plan.md](docs/tumor-complexity-validation-plan.md)
 - Research-readiness dossier: [docs/research-readiness.md](docs/research-readiness.md)
+- 3D volumetric fractal tumor-complexity blueprint: [docs/3d-volumetric-fractal-tumor-complexity-blueprint.md](docs/3d-volumetric-fractal-tumor-complexity-blueprint.md)
 - Evidence hub: [docs/evidence-hub.md](docs/evidence-hub.md)
 - Reproducible benchmark scaffold: [research/benchmark/](research/benchmark/)
 - Contribution guidance: [CONTRIBUTING.md](CONTRIBUTING.md)
