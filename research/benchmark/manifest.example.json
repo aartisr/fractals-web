@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "studyId": "replace-with-preregistered-study-id",
+  "dataStatus": "example-only",
+  "cohorts": [
+    {
+      "id": "development",
+      "role": "development",
+      "source": "replace-with-approved-deidentified-source",
+      "referenceStandard": "replace-with-expert-reference-standard",
+      "participantCount": 0
+    },
+    {
+      "id": "external",
+      "role": "external-validation",
+      "source": "replace-with-independent-approved-source",
+      "referenceStandard": "replace-with-expert-reference-standard",
+      "participantCount": 0
+    }
+  ],
+  "primaryQuestion": "Does a locked fractal-morphology feature add value beyond a pre-specified AI-only localization baseline for a defined imaging task?"
+}

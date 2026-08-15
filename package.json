@@ -10,8 +10,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "prebuild": "npm run generate:seo",
-    "test": "node --test --experimental-transform-types src/**/*.test.ts",
-    "test:watch": "node --test --watch --experimental-transform-types src/**/*.test.ts"
+    "test": "node --test --experimental-transform-types 'src/**/*.test.ts'",
+    "test:watch": "node --test --watch --experimental-transform-types 'src/**/*.test.ts'",
+    "check:links": "node scripts/check-links.mjs",
+    "check:a11y": "node scripts/check-accessibility.mjs",
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "check:quality": "npm run check:links && npm run check:a11y && npm run check:bundle",
+    "benchmark:validate": "node scripts/validate-benchmark-manifest.mjs"
   },
   "dependencies": {
     "@tanstack/react-form": "^1.33.0",

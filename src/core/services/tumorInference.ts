@@ -4,11 +4,20 @@ type View = DetectionResult['view']
 
 const MODEL_SIZE = 640
 const TUMOR_CLASS_INDEX = 1
+const MODEL_VERSION = '1'
 const MODEL_URLS: Record<View, string> = {
-  axial: '/models/tumor_detector_axial.onnx',
-  coronal: '/models/tumor_detector_coronal.onnx',
-  sagittal: '/models/tumor_detector_sagittal.onnx',
+  axial: `/models/tumor_detector_axial.onnx?v=${MODEL_VERSION}`,
+  coronal: `/models/tumor_detector_coronal.onnx?v=${MODEL_VERSION}`,
+  sagittal: `/models/tumor_detector_sagittal.onnx?v=${MODEL_VERSION}`,
 }
+
+export const TUMOR_MODEL_MANIFEST: Record<View, { bytes: number; label: string; version: string }> = {
+  axial: { bytes: 83_505_941, label: 'Axial model', version: MODEL_VERSION },
+  coronal: { bytes: 83_505_941, label: 'Coronal model', version: MODEL_VERSION },
+  sagittal: { bytes: 28_124_451, label: 'Sagittal model', version: MODEL_VERSION },
+}
+
+export const formatModelDownloadSize = (view: View) => `${Math.ceil(TUMOR_MODEL_MANIFEST[view].bytes / 1_000_000)} MB`
 
 const ORT_RUNTIME_URL = '/vendor/ort/ort.min.js'
 const ORT_WASM_BASE_URL = '/vendor/ort/'

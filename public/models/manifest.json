@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "1",
+  "purpose": "Browser-local educational research inference only; not a clinical device.",
+  "models": [
+    { "id": "axial", "path": "/models/tumor_detector_axial.onnx", "bytes": 83505941 },
+    { "id": "coronal", "path": "/models/tumor_detector_coronal.onnx", "bytes": 83505941 },
+    { "id": "sagittal", "path": "/models/tumor_detector_sagittal.onnx", "bytes": 28124451 }
+  ]
+}

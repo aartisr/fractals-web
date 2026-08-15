@@ -6295,6 +6295,8 @@ pre {
 .ft-nav-block > a { width: fit-content; color: var(--ink-700); font-size: 0.76rem; text-decoration: none; }
 .ft-nav-block > a:hover { color: var(--signal-deep); text-decoration: underline; text-underline-offset: 0.18rem; }
 .ft-bottom { justify-content: space-between; max-width: 1280px; padding: 0.75rem clamp(1rem, 3vw, 2rem); color: var(--ink-500); font-size: 0.7rem; }
+.ft-analytics-choice { display: inline-flex; align-items: center; gap: 0.38rem; color: var(--ink-600); cursor: pointer; }
+.ft-analytics-choice input { accent-color: var(--signal-deep); }
 
 @media (max-width: 780px) {
   .topbar { padding: 0.5rem 0.85rem; }

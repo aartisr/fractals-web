@@ -26,6 +26,18 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Verify application quality
+        run: |
+          npm ci
+          npm run lint
+          npm run test
+          npm run build
+          npm run check:quality
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload the public guide

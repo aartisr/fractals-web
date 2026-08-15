@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { AnalyticsPreference } from './AnalyticsPreference'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -8,13 +9,13 @@ export function Footer() {
       <div className="ft-inner">
         <div className="ft-brand-block">
           <Link to="/" className="ft-brand-link">
-            <span className="ft-brand-name">Nexus Fractal Lab</span>
+            <span className="ft-brand-name">Fractals Web</span>
           </Link>
           <p className="ft-brand-desc">A calm place to create, measure, and discuss visual complexity.</p>
           <p className="ft-safety-note">Educational exploration only. Medical-image outputs are not clinical advice.</p>
         </div>
 
-        <nav className="ft-nav-block" aria-label="Explore Nexus Fractal Lab">
+        <nav className="ft-nav-block" aria-label="Explore Fractals Web">
           <p className="ft-nav-heading">Explore</p>
           <Link to="/workbench/fractals">Create a fractal</Link>
           <Link to="/workbench/box-count">Measure an image</Link>
@@ -34,6 +35,7 @@ export function Footer() {
       <div className="ft-bottom">
         <span>© {CURRENT_YEAR} Aarti S Ravikumar</span>
         <span>Built for curious, careful inquiry.</span>
+        <AnalyticsPreference />
       </div>
     </footer>
   )

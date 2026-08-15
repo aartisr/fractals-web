@@ -151,6 +151,8 @@ Then open the local URL printed by Vite.
 - `npm run preview` serves the build locally
 - `npm run lint` runs ESLint
 - `npm run test` runs the Node test suite
+- `npm run check:quality` enforces publication links, accessibility contracts, and a JavaScript bundle budget after a production build
+- `npm run benchmark:validate -- research/benchmark/manifest.example.json` validates a research cohort manifest without touching clinical data
 
 ## Repository Structure
 
@@ -188,6 +190,9 @@ Before deploying, run the production build locally to validate routing and bundl
 - Tumor detection runs in the browser using bundled ONNX weights under `public/models/`
 - The ONNX Runtime browser bundle is vendored under `public/vendor/ort/` so the app works without a CDN dependency
 - Microsoft Clarity is supported through the optional `VITE_CLARITY_PROJECT_ID` environment variable
+- PostHog is available as an optional, provider-isolated integration through `VITE_POSTHOG_KEY`; it is opt-in, disables autocapture and replay, and sends only the allowlisted product events described in [docs/analytics-governance.md](docs/analytics-governance.md)
+- Optional analytics load only after a visitor explicitly grants anonymous analytics consent; uploaded images, filenames, measurements, and inferences are never product-analytics payloads
+- Tumor models load only after a visitor explicitly selects **Prepare model**; each view's model size is disclosed before download and its version is cache-addressable for safe model updates
 - The homepage and discovery surfaces are designed to feel polished on first visit and useful on repeat visits
 
 ## Documentation
@@ -197,6 +202,13 @@ Before deploying, run the production build locally to validate routing and bundl
 - Image compare guide: [docs/image-compare-guide.md](docs/image-compare-guide.md)
 - Tumor-complexity validation plan: [docs/tumor-complexity-validation-plan.md](docs/tumor-complexity-validation-plan.md)
 - Research-readiness dossier: [docs/research-readiness.md](docs/research-readiness.md)
+- Evidence hub: [docs/evidence-hub.md](docs/evidence-hub.md)
+- Reproducible benchmark scaffold: [research/benchmark/](research/benchmark/)
+- Contribution guidance: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Citation metadata: [CITATION.cff](CITATION.cff)
+- Release process: [docs/release-process.md](docs/release-process.md)
+- Analytics governance and PostHog setup: [docs/analytics-governance.md](docs/analytics-governance.md)
 - Original fractals project: [aartisr/fractals](https://github.com/aartisr/fractals)
 - Original project wiki: [aartisr/fractals/wiki](https://github.com/aartisr/fractals/wiki)
 

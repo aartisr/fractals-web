@@ -10,6 +10,8 @@ import { useEducatorMode } from '../../core/hooks/useEducatorMode'
 import { useWorkbenchShareArtifact } from '../../core/hooks/useWorkbenchShareArtifact'
 import { useOverlayPreference } from '../../core/hooks/useOverlayPreference'
 import { api } from '../../core/services/api'
+import { formatModelDownloadSize } from '../../core/services/tumorInference'
+import { trackProductEvent } from '../../core/services/productTelemetry'
 import {
   buildClassroomStatus,
   buildHandoutMarkdown,
@@ -42,43 +44,37 @@ export function TumorPage() {
   const [view, setView] = useState<View>('axial')
   const [confidenceThreshold, setConfidenceThreshold] = useState(0.25)
   const [modelStatus, setModelStatus] = useState<ModelStatus>('idle')
-  const [modelStatusMessage, setModelStatusMessage] = useState('')
+  const [modelStatusMessage, setModelStatusMessage] = useState(`Ready when you are. ${formatModelDownloadSize('axial')} downloads only after you choose Prepare model.`)
   const [showDetails, setShowDetails] = useOverlayPreference('tumor.overlay.visible')
   const previousFileRef = useRef<File | null>(null)
+  const selectedViewRef = useRef<View>(view)
 
-  useEffect(() => {
-    let cancelled = false
-    const timeout = window.setTimeout(() => {
-      if (cancelled) {
-        return
-      }
+  const selectView = (nextView: View) => {
+    selectedViewRef.current = nextView
+    setView(nextView)
+    setModelStatus('idle')
+    setModelStatusMessage(`Ready when you are. ${formatModelDownloadSize(nextView)} downloads only after you choose Prepare model.`)
+  }
 
-      setModelStatus('loading')
-      setModelStatusMessage('Loading tumor model...')
+  const prepareModel = async () => {
+    const requestedView = view
+    setModelStatus('loading')
+    setModelStatusMessage(`Preparing the ${requestedView} model locally…`)
+    trackProductEvent('tumor_model_prepare_started')
 
-      api
-        .preloadTumorModel(view)
-        .then(() => {
-          if (cancelled) {
-            return
-          }
-          setModelStatus('ready')
-          setModelStatusMessage('Model ready')
-        })
-        .catch((error) => {
-          if (cancelled) {
-            return
-          }
-          setModelStatus('error')
-          setModelStatusMessage(error instanceof Error ? error.message : 'Failed to load tumor model.')
-        })
-    }, 0)
-
-    return () => {
-      cancelled = true
-      window.clearTimeout(timeout)
+    try {
+      await api.preloadTumorModel(requestedView)
+      if (selectedViewRef.current !== requestedView) return
+      setModelStatus('ready')
+      setModelStatusMessage('Model ready. Your image remains in this browser.')
+      trackProductEvent('tumor_model_prepare_succeeded')
+    } catch (error) {
+      if (selectedViewRef.current !== requestedView) return
+      setModelStatus('error')
+      setModelStatusMessage(error instanceof Error ? error.message : 'Failed to prepare the tumor model.')
+      trackProductEvent('tumor_model_prepare_failed')
     }
-  }, [view])
+  }
 
   const detectMutation = useMutation({
     mutationFn: async () => {
@@ -307,7 +303,7 @@ export function TumorPage() {
             <FilePicker label="MRI/Scan Image" onChange={setFile} />
             <label className="field">
               <span>View</span>
-              <select value={view} onChange={(e) => setView(e.target.value as View)}>
+              <select value={view} onChange={(e) => selectView(e.target.value as View)}>
                 <option value="axial">axial</option>
                 <option value="coronal">coronal</option>
                 <option value="sagittal">sagittal</option>
@@ -335,7 +331,11 @@ export function TumorPage() {
               </div>
             </label>
 
-            <button className="action" type="button" disabled={!file || detectMutation.isPending} onClick={() => detectMutation.mutate()}>
+            <button className="overlay-toggle" type="button" disabled={modelStatus === 'loading'} onClick={prepareModel}>
+              {modelStatus === 'loading' ? 'Preparing model…' : `Prepare ${view} model (${formatModelDownloadSize(view)})`}
+            </button>
+
+            <button className="action" type="button" disabled={!file || modelStatus !== 'ready' || detectMutation.isPending} onClick={() => detectMutation.mutate()}>
               {detectMutation.isPending ? (
                 <>
                   <span className="button-spinner" aria-hidden="true" />
@@ -354,7 +354,7 @@ export function TumorPage() {
               </div>
             </div>
 
-            <p className="muted">Model-backed processing runs locally in the browser. If inference fails, we surface the error instead of inventing a box.</p>
+            <p className="muted">Model-backed processing runs locally in the browser. The model is not downloaded until you select Prepare model. If inference fails, we surface the error instead of inventing a box.</p>
           </div>
 
           <TumorStatusCard
