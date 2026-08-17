@@ -1,5 +1,5 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { Topbar } from './Topbar'
 import { Footer } from './Footer'
 import { SeoManager } from './SeoManager'
@@ -40,7 +40,12 @@ export function AppShell() {
         Skip to workbench content
       </a>
       <Topbar />
-      <main id="workspace-content" className="workspace" tabIndex={-1}>
+      <main id="workspace-content"
+        className="workspace"
+        data-active-module={activeModule?.id ?? 'home'}
+        style={{ '--module-accent': activeModule?.accent ?? '#0077b6' } as CSSProperties}
+        tabIndex={-1}
+      >
         <RouteVisual />
         {activeModule ? <ModuleWorkspaceHeader module={activeModule} /> : null}
         <Outlet />

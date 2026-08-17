@@ -44,8 +44,9 @@ if (manifest) {
 }
 
 expect(/rel="manifest" href="\/manifest\.webmanifest"/.test(document), 'The document must link the web manifest.')
+expect(/nexus-fractal-mark\.svg/.test(document), 'The document must use the Nexus mark as its SVG favicon.')
 expect(/apple-mobile-web-app-capable/.test(document), 'The document needs iOS standalone metadata.')
-expect(/pwa-icon-192\.png/.test(topbar), 'The product header must use the PWA brand icon.')
+expect(/tb-brand-icon-svg/.test(topbar), 'The product header must preserve the Nexus Fractal Lab brand mark.')
 expect(/navigator\.serviceWorker\.register\('\/sw\.js'/.test(manager), 'The app must register its service worker.')
 expect(/beforeinstallprompt/.test(manager), 'The app must support Chromium’s install prompt.')
 expect(/SKIP_WAITING/.test(manager) && /controllerchange/.test(manager), 'The app must provide a safe update path.')

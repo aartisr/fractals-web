@@ -189,13 +189,6 @@ textarea {
   flex-shrink: 0;
 }
 
-.tb-brand-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 0.32rem;
-  flex-shrink: 0;
-  object-fit: cover;
-}
 
 .tb-brand:hover .tb-brand-icon-svg {
   transform: rotate(30deg) scale(1.08);
@@ -6229,6 +6222,139 @@ pre {
   .tumor-evidence-verdict { max-width: none; }
 }
 
+/* ── Premium system layer: shared by every workbench route ─────────────── */
+.workspace {
+  position: relative;
+  isolation: isolate;
+  gap: clamp(0.85rem, 1.8vw, 1.35rem);
+  background:
+    radial-gradient(38rem 22rem at 100% -8%, color-mix(in srgb, var(--module-accent) 13%, transparent), transparent 65%),
+    radial-gradient(26rem 20rem at -5% 35%, color-mix(in srgb, var(--module-accent) 6%, transparent), transparent 70%);
+}
+
+.workspace > * { position: relative; z-index: 1; }
+
+.workspace::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.52;
+  background-image: linear-gradient(color-mix(in srgb, var(--module-accent) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--module-accent) 7%, transparent) 1px, transparent 1px);
+  background-size: 2.25rem 2.25rem;
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 62%);
+  mask-image: linear-gradient(to bottom, black, transparent 62%);
+}
+
+.route-visual {
+  border-color: color-mix(in srgb, var(--module-accent) 35%, rgba(14, 49, 73, 0.12));
+  box-shadow: 0 22px 54px color-mix(in srgb, var(--module-accent) 15%, rgba(8, 18, 29, 0.12));
+}
+
+.route-visual::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 15%, color-mix(in srgb, var(--module-accent) 16%, transparent) 48%, transparent 76%);
+  mix-blend-mode: screen;
+}
+
+.module-workspace-header {
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--module-accent) 11%, rgba(8, 18, 29, 0.1));
+}
+
+.tool-grid > .panel,
+.tool-grid-single > .panel,
+.home-page > .panel {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--module-accent, var(--signal)) 16%, rgba(14, 49, 73, 0.15));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), color-mix(in srgb, var(--module-accent, var(--signal)) 3%, rgba(247, 251, 255, 0.9)));
+  box-shadow: 0 18px 44px rgba(8, 18, 29, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.tool-grid > .panel::before,
+.tool-grid-single > .panel::before,
+.home-page > .panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, transparent, var(--module-accent, var(--signal)), transparent);
+  opacity: 0.72;
+}
+
+@media (hover: hover) {
+  .tool-grid > .panel:hover,
+  .tool-grid-single > .panel:hover,
+  .home-page > .panel:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--module-accent, var(--signal)) 35%, rgba(14, 49, 73, 0.15));
+    box-shadow: 0 24px 54px rgba(8, 18, 29, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+  }
+}
+
+.panel-header { position: relative; padding-bottom: 0.08rem; }
+.panel-header h2 { letter-spacing: -0.018em; }
+.panel-header p { max-width: 72ch; line-height: 1.48; }
+
+.action {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, white 24%, transparent);
+  box-shadow: 0 9px 20px color-mix(in srgb, var(--signal) 24%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.action::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 22%, rgba(255, 255, 255, 0.26) 50%, transparent 78%);
+  transform: translateX(-120%);
+  transition: transform 360ms ease;
+}
+
+@media (hover: hover) { .action:hover:enabled::after { transform: translateX(120%); } }
+
+input,
+select,
+textarea {
+  border-color: color-mix(in srgb, var(--module-accent, var(--signal)) 16%, var(--line));
+  box-shadow: inset 0 1px 1px rgba(8, 18, 29, 0.025);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--module-accent, var(--signal));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--module-accent, var(--signal)) 16%, transparent), inset 0 1px 1px rgba(8, 18, 29, 0.025);
+  outline: none;
+}
+
+:focus-visible { outline: 2px solid var(--module-accent, var(--signal)); outline-offset: 3px; }
+
+.edu-note {
+  border-color: color-mix(in srgb, var(--module-accent, var(--signal)) 28%, rgba(3, 93, 141, 0.22));
+  background: linear-gradient(125deg, color-mix(in srgb, var(--module-accent, var(--signal)) 8%, rgba(232, 246, 255, 0.78)), rgba(255, 255, 255, 0.7));
+}
+
+@media (max-width: 720px) {
+  .workspace { background-size: auto; }
+  .workspace::before { background-size: 2.8rem 2.8rem; opacity: 0.34; }
+  .route-visual { box-shadow: 0 14px 32px color-mix(in srgb, var(--module-accent) 12%, rgba(8, 18, 29, 0.1)); }
+  .module-workspace-header .workspace-facts { grid-template-columns: 1fr; }
+  .module-workspace-header .workspace-facts li { justify-content: flex-start; }
+}
+
 /* ── Product shell: intentional, task-led, and quiet ── */
 .topbar {
   display: block;
@@ -6247,7 +6373,6 @@ pre {
 
 .tb-brand { gap: 0.42rem; }
 .tb-brand-icon-svg { width: 25px; height: 25px; }
-.tb-brand-icon { width: 25px; height: 25px; }
 .tb-brand:hover .tb-brand-icon-svg { transform: none; color: var(--signal-deep); }
 .tb-brand-text { display: inline-flex; flex-direction: row; gap: 0.28rem; align-items: baseline; }
 .tb-brand-name { font-size: 0.88rem; }
