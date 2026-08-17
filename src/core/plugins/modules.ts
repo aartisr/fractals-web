@@ -11,6 +11,7 @@ export const workbenchModules: WorkbenchModule[] = [
     primaryNavigation: true,
     navigationOrder: 1,
     routeVisual: { asset: 'fractal-construction', alt: 'Recursive branching fractal emerging from a geometric construction field' },
+    workflow: { purpose: 'A visual studio for finding structure across scale.', steps: ['Choose a family', 'Explore its structure', 'Keep the evidence'] },
   },
   {
     id: 'discover',
@@ -22,6 +23,7 @@ export const workbenchModules: WorkbenchModule[] = [
     primaryNavigation: true,
     navigationOrder: 4,
     routeVisual: { asset: 'discovery', alt: 'Curated collection of abstract fractal specimens' },
+    workflow: { purpose: 'A calm place to find one worthwhile next idea.', steps: ['Browse one idea', 'Try a challenge', 'Save what matters'] },
   },
   {
     id: 'box-count',
@@ -33,6 +35,7 @@ export const workbenchModules: WorkbenchModule[] = [
     primaryNavigation: true,
     navigationOrder: 2,
     routeVisual: { asset: 'box-count', alt: 'Irregular boundary shown at several box-counting scales' },
+    workflow: { purpose: 'A focused workflow for measuring image complexity with context.', steps: ['Upload an image', 'Place one ROI', 'Read fit quality'] },
   },
   {
     id: 'compare',
@@ -44,6 +47,7 @@ export const workbenchModules: WorkbenchModule[] = [
     primaryNavigation: true,
     navigationOrder: 3,
     routeVisual: { asset: 'compare', alt: 'Two abstract patterns prepared for visual comparison' },
+    workflow: { purpose: 'A consistent comparison workflow that keeps interpretation grounded.', steps: ['Add 2–5 images', 'Keep protocol fixed', 'Explain with QC'] },
   },
   {
     id: 'tumor-detection',
@@ -55,6 +59,7 @@ export const workbenchModules: WorkbenchModule[] = [
     primaryNavigation: false,
     navigationOrder: 5,
     routeVisual: { asset: 'tumor-research', alt: 'Abstract volumetric image-morphology research visualization' },
+    workflow: { purpose: 'An evidence-first research demonstration, not a diagnostic tool.', steps: ['Prepare the model', 'Inspect evidence', 'Keep claims cautious'] },
   },
   {
     id: 'runs',
@@ -66,6 +71,7 @@ export const workbenchModules: WorkbenchModule[] = [
     primaryNavigation: false,
     navigationOrder: 6,
     routeVisual: { asset: 'runs', alt: 'Abstract trail of connected research artifacts and provenance' },
+    workflow: { purpose: 'One place to revisit work, provenance, and exports.', steps: ['Review artifacts', 'Compare provenance', 'Export a record'] },
   },
 ]
 

@@ -189,6 +189,14 @@ textarea {
   flex-shrink: 0;
 }
 
+.tb-brand-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 0.32rem;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
 .tb-brand:hover .tb-brand-icon-svg {
   transform: rotate(30deg) scale(1.08);
   color: var(--tb-accent, var(--signal));
@@ -772,6 +780,41 @@ textarea {
   font: 600 0.96rem/1.3 var(--font-heading);
   color: var(--ink-900);
 }
+
+.module-workspace-header {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--module-accent) 32%, rgba(0, 74, 114, 0.18));
+  background:
+    linear-gradient(105deg, color-mix(in srgb, var(--module-accent) 9%, white), rgba(255, 255, 255, 0.9) 48%, rgba(237, 246, 255, 0.84));
+}
+
+.module-workspace-header::after {
+  content: '';
+  position: absolute;
+  width: 10rem;
+  height: 10rem;
+  right: -4.5rem;
+  top: -6.5rem;
+  border: 1px solid color-mix(in srgb, var(--module-accent) 34%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.35rem color-mix(in srgb, var(--module-accent) 9%, transparent), 0 0 0 3.1rem color-mix(in srgb, var(--module-accent) 5%, transparent);
+  pointer-events: none;
+}
+
+.module-workspace-copy { display: grid; gap: 0.18rem; max-width: 66ch; }
+.module-workspace-copy h1 { margin: 0; font: 750 clamp(1.2rem, 2.2vw, 1.7rem)/1.15 var(--font-heading); color: var(--ink-950); letter-spacing: -0.025em; }
+.module-workspace-copy p { margin: 0; color: var(--ink-600); font: 500 0.84rem/1.45 var(--font-ui); }
+
+.module-workspace-header .workspace-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.module-workspace-header .workspace-facts li { display: flex; align-items: center; justify-content: center; gap: 0.38rem; min-width: 0; }
+.module-workspace-header .workspace-facts li span { display: inline-grid; place-items: center; width: 1.15rem; height: 1.15rem; flex: 0 0 auto; padding: 0; color: white; background: var(--module-accent, var(--signal-deep)); border: 0; }
 
 .workspace-facts {
   display: grid;
@@ -6204,10 +6247,19 @@ pre {
 
 .tb-brand { gap: 0.42rem; }
 .tb-brand-icon-svg { width: 25px; height: 25px; }
+.tb-brand-icon { width: 25px; height: 25px; }
 .tb-brand:hover .tb-brand-icon-svg { transform: none; color: var(--signal-deep); }
 .tb-brand-text { display: inline-flex; flex-direction: row; gap: 0.28rem; align-items: baseline; }
 .tb-brand-name { font-size: 0.88rem; }
 .tb-brand-sub { font-size: 0.72rem; color: var(--ink-600); }
+
+.pwa-notice { position: fixed; z-index: 100; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.72rem; max-width: min(26rem, calc(100vw - 2rem)); padding: 0.75rem; color: #f7fbff; background: #08121d; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 0.8rem; box-shadow: 0 18px 42px rgba(6, 22, 38, 0.28); }
+.pwa-notice img { border-radius: 0.42rem; }
+.pwa-notice div { display: grid; gap: 0.16rem; min-width: 0; }
+.pwa-notice strong { font: 750 0.84rem/1.2 var(--font-heading); }
+.pwa-notice span { color: rgba(247, 251, 255, 0.78); font: 500 0.72rem/1.35 var(--font-ui); }
+.pwa-notice button { min-height: 2.25rem; padding: 0.4rem 0.68rem; color: #08121d; background: #b9ee79; border: 0; border-radius: 0.42rem; font: 800 0.74rem/1 var(--font-ui); cursor: pointer; }
+@media (max-width: 520px) { .pwa-notice { left: 0.75rem; right: 0.75rem; max-width: none; } }
 
 .tb-nav {
   display: flex;

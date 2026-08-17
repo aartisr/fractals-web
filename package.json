@@ -20,7 +20,8 @@
     "check:links": "node scripts/check-links.mjs",
     "check:a11y": "node scripts/check-accessibility.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
-    "check:quality": "npm run check:links && npm run check:a11y && npm run check:bundle",
+    "check:pwa": "node scripts/check-pwa.mjs",
+    "check:quality": "npm run check:links && npm run check:a11y && npm run check:pwa && npm run check:bundle",
     "benchmark:validate": "node scripts/validate-benchmark-manifest.mjs"
   },
   "dependencies": {

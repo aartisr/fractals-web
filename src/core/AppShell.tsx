@@ -5,13 +5,16 @@ import { Footer } from './Footer'
 import { SeoManager } from './SeoManager'
 import { ClarityTracker } from './ClarityTracker'
 import { PostHogTracker } from './PostHogTracker'
+import { PwaManager } from './PwaManager'
 import { RouteVisual } from './RouteVisual'
+import { ModuleWorkspaceHeader } from './ModuleWorkspaceHeader'
 import { getWorkbenchModuleForPath } from './plugins/modules'
 import { trackWorkbenchEvent } from './services/workbenchSharing'
 import { trackProductEvent } from './services/productTelemetry'
 
 export function AppShell() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const activeModule = getWorkbenchModuleForPath(pathname)
   const lastTrackedPath = useRef<string | null>(null)
 
   useEffect(() => {
@@ -20,26 +23,26 @@ export function AppShell() {
     }
 
     lastTrackedPath.current = pathname
-    const activeModule = getWorkbenchModuleForPath(pathname)
-
     trackWorkbenchEvent('module_viewed', {
       path: pathname,
       module: activeModule?.id ?? (pathname === '/' ? 'home' : 'unknown'),
     })
     trackProductEvent('page_view')
-  }, [pathname])
+  }, [pathname, activeModule?.id])
 
   return (
     <div className="app-shell">
       <SeoManager />
       <ClarityTracker />
       <PostHogTracker />
+      <PwaManager />
       <a className="skip-link" href="#workspace-content">
         Skip to workbench content
       </a>
       <Topbar />
       <main id="workspace-content" className="workspace" tabIndex={-1}>
         <RouteVisual />
+        {activeModule ? <ModuleWorkspaceHeader module={activeModule} /> : null}
         <Outlet />
       </main>
       <Footer />

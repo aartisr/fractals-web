@@ -153,6 +153,7 @@ Then open the local URL printed by Vite.
 - `npm run preview` serves the build locally
 - `npm run lint` runs ESLint
 - `npm run test` runs the Node test suite
+- `npm run check:pwa` validates the install manifest, offline worker, install/update flow, icons, and deployment headers
 - `npm run check:quality` enforces publication links, accessibility contracts, and a JavaScript bundle budget after a production build
 - `npm run benchmark:validate -- research/benchmark/manifest.example.json` validates a research cohort manifest without touching clinical data
 
@@ -184,6 +185,12 @@ This repository is ready for Vercel-style SPA deployment.
 - Routes such as `/workbench/fractals`, `/workbench/discover`, and `/workbench/runs/:id` are configured to resolve through `index.html`
 
 Before deploying, run the production build locally to validate routing and bundle integrity.
+
+### Progressive Web App
+
+The production app is installable on supported browsers and provides an offline application shell. It uses the PCSSII logo for the installed app and in the product header, caches large local ONNX models only after they are requested, and checks for service-worker updates hourly. New releases never interrupt active work: users receive an explicit update action when a new worker is ready.
+
+PWA readiness is enforced by `npm run check:pwa` and included in the repository quality gate. Final release validation should still include a real-device install and offline navigation check over HTTPS.
 
 ## Implementation Notes
 

@@ -6,11 +6,7 @@ import { SiteShareButton } from './SiteShareButton'
 
 function FractalMark() {
   return (
-    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className="tb-brand-icon-svg">
-      <path d="M16 2 28.1 9v14L16 30 3.9 23V9L16 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="m16 8 6 3.5v7L16 22l-6-3.5v-7L16 8Z" stroke="currentColor" strokeWidth="1.1" opacity=".55" />
-      <circle cx="16" cy="16" r="2.35" fill="currentColor" />
-    </svg>
+    <img className="tb-brand-icon" src="/pwa-icon-192.png" width="25" height="25" alt="" aria-hidden="true" />
   )
 }
 

@@ -12,6 +12,9 @@ test('module registry has unique plug-in identities and complete presentation me
     assert.ok(module.navLabel)
     assert.ok(module.routeVisual.asset)
     assert.ok(module.routeVisual.alt)
+    assert.ok(module.workflow.purpose)
+    assert.equal(module.workflow.steps.length, 3)
+    assert.equal(new Set(module.workflow.steps).size, 3)
   }
 })
 

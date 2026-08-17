@@ -5,6 +5,11 @@ export interface ModuleRouteVisual {
   alt: string
 }
 
+export interface ModuleWorkflow {
+  purpose: string
+  steps: readonly [string, string, string]
+}
+
 export interface WorkbenchModule {
   id: ModuleId
   title: string
@@ -15,4 +20,5 @@ export interface WorkbenchModule {
   primaryNavigation: boolean
   navigationOrder: number
   routeVisual: ModuleRouteVisual
+  workflow: ModuleWorkflow
 }

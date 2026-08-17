@@ -1,17 +1,36 @@
 {
-  "name": "Fractals Web — Visual Science Workbench",
-  "short_name": "Fractals Web",
+  "id": "/",
+  "name": "Nexus Fractal Lab — Visual Science Workbench",
+  "short_name": "Nexus Lab",
   "description": "An open visual science workbench for fractals, image analysis, and reproducible exploration.",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
   "background_color": "#f7fbff",
   "theme_color": "#08121d",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pcssii-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     }
-  ]
+  ],
+  "categories": ["education", "science", "utilities"]
 }
