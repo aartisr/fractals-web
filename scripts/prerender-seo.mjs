@@ -20,6 +20,20 @@ const pages = [
     description: 'Generate and investigate Mandelbrot, Julia, Burning Ship, Newton, Barnsley Fern, and Sierpinski fractals; zoom, pan, analyze patterns, and export settings.',
     fallback: 'Choose a fractal family, move through the canvas, and preserve the settings behind an observation so another person can revisit it.',
     detail: 'The studio supports a range of mathematical systems, from complex-plane escape-time sets to iterated-function-system examples. Use it to make a specific observation about a boundary, repeated motif, symmetry, or change across scale—not simply to collect a visually striking image.',
+    sections: [
+      {
+        heading: 'How the fractal generator works',
+        content: 'A fractal is produced by repeatedly applying a small mathematical rule. Mandelbrot, Julia, Burning Ship, and Newton views use complex-number iteration: each canvas point follows the selected rule until it escapes or settles into a pattern. Barnsley Fern and Sierpinski Triangle use iterated transformations to place many points. Changing the family changes the rule; zooming and panning change the part of that rule you are examining.',
+      },
+      {
+        heading: 'What to investigate',
+        content: 'Start at a broad view, then move toward a boundary, spiral, ridge, or branching edge. Compare what remains recognizable at a new scale with what changes. For a Mandelbrot or Julia set, look for repeated miniature structures and thin boundary filaments. For Burning Ship, inspect asymmetric ridges and cusps. For Newton fractals, compare the colored convergence regions with the intricate boundary between them. A useful observation names the chosen family, the location or zoom level, and the visible feature that supports the claim.',
+      },
+      {
+        heading: 'From visual exploration to evidence',
+        content: 'The generator is designed for exploration first, then careful documentation. Save the chosen fractal family, parameter values, palette, iteration limit, and viewport before sharing an image. Those settings let another learner reproduce the same view and test whether the observation holds. To study a visual pattern quantitatively, continue with the Box Counter and compare a selected region across a visible scale ladder. To practice turning an observation into a concise explanation, use the guided self-similarity challenge in Discovery.',
+      },
+    ],
     type: 'website',
   },
   {
@@ -112,7 +126,8 @@ const renderPage = (template, page) => {
   html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">${structuredData}</script>`)
 
   const heading = page.title.replace(` | ${siteName}`, '')
-  const fallback = `<main aria-labelledby="seo-fallback-title"><h1 id="seo-fallback-title">${heading}</h1><p>${page.description}</p><p>${page.fallback}</p><p>${page.detail}</p><p>Fractals Web is free to explore in a browser. Keep the source image, settings, measurement quality, and limitations connected to any claim you share, so the work remains understandable and reproducible.</p><p><a href="${canonicalUrl}">Open ${heading}</a></p></main>`
+  const sections = (page.sections ?? []).map((section) => `<section><h2>${section.heading}</h2><p>${section.content}</p></section>`).join('')
+  const fallback = `<main aria-labelledby="seo-fallback-title"><h1 id="seo-fallback-title">${heading}</h1><p>${page.description}</p><p>${page.fallback}</p><p>${page.detail}</p>${sections}<p>Fractals Web is free to explore in a browser. Keep the source image, settings, measurement quality, and limitations connected to any claim you share, so the work remains understandable and reproducible.</p><p><a href="${canonicalUrl}">Open ${heading}</a></p></main>`
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${fallback}</div>`)
 
   return html.replace('</head>', `    <link rel="canonical" href="${canonicalUrl}" />\n  </head>`)

@@ -21,7 +21,8 @@
     "check:a11y": "node scripts/check-accessibility.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
     "check:pwa": "node scripts/check-pwa.mjs",
-    "check:quality": "npm run check:links && npm run check:a11y && npm run check:pwa && npm run check:bundle",
+    "check:seo-content": "node scripts/check-seo-content.mjs",
+    "check:quality": "npm run check:links && npm run check:a11y && npm run check:pwa && npm run check:seo-content && npm run check:bundle",
     "submit:indexnow": "node scripts/submit-indexnow.mjs",
     "benchmark:validate": "node scripts/validate-benchmark-manifest.mjs"
   },
