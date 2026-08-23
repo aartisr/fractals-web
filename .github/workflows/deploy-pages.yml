@@ -48,7 +48,7 @@ jobs:
           path: pages
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Submit sitemap URLs to IndexNow
         env:
           INDEXNOW_KEY: f3c0a1d3b2e4f56789ab0cdef1234567
