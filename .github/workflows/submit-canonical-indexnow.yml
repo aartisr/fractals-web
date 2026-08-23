@@ -1,0 +1,29 @@
+name: Submit Canonical Sitemap to IndexNow
+
+on:
+  deployment_status:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+      - name: Submit canonical sitemap URLs to IndexNow
+        env:
+          INDEXNOW_KEY: 6c72e91a4f8b3d50e6a1c9f2b7d4850a
+          INDEXNOW_KEY_LOCATION: https://fractals.ai-aarti.com/6c72e91a4f8b3d50e6a1c9f2b7d4850a.txt
+          INDEXNOW_SITEMAP: public/sitemap.xml
+        run: npm run submit:indexnow

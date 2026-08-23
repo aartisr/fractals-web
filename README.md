@@ -186,6 +186,16 @@ This repository is ready for Vercel-style SPA deployment.
 
 Before deploying, run the production build locally to validate routing and bundle integrity.
 
+### Production configuration
+
+The canonical application deploys to `https://fractals.ai-aarti.com`. Configure optional browser-safe values in the Vercel project environment before the production build, then redeploy:
+
+- `VITE_CLARITY_PROJECT_ID` to enable Microsoft Clarity after visitor consent.
+- `VITE_POSTHOG_KEY` to enable PostHog after visitor consent.
+- `VITE_POSTHOG_HOST` only when using a non-default PostHog ingestion host; `VITE_POSTHOG_ASSET_HOST` is optional for a reverse proxy or self-hosted asset host.
+
+These are public client-side identifiers, not secret API tokens. Do not add provider administration credentials to Vite variables or commit them to the repository.
+
 ### Progressive Web App
 
 The production app is installable on supported browsers and provides an offline application shell. It uses the PCSSII logo for the installed app and in the product header, caches large local ONNX models only after they are requested, and checks for service-worker updates hourly. New releases never interrupt active work: users receive an explicit update action when a new worker is ready.
@@ -219,6 +229,7 @@ PWA readiness is enforced by `npm run check:pwa` and included in the repository 
 - Citation metadata: [CITATION.cff](CITATION.cff)
 - Release process: [docs/release-process.md](docs/release-process.md)
 - Analytics governance and PostHog setup: [docs/analytics-governance.md](docs/analytics-governance.md)
+- Search discovery and IndexNow operations: [docs/search-discovery.md](docs/search-discovery.md)
 - Original fractals project: [aartisr/fractals](https://github.com/aartisr/fractals)
 - Original project wiki: [aartisr/fractals/wiki](https://github.com/aartisr/fractals/wiki)
 
@@ -240,12 +251,15 @@ GitHub stores a Wiki as a separate Git repository. First open the repository's *
 
 The Pages guide is indexable, has its own canonical URL, and publishes a sitemap, crawl rules, social metadata, structured data, and AI-readable `llms.txt` and `ai-context.json` files. Its content points readers to the canonical Fractal Lab for product use.
 
+Both published sites have separate IndexNow verification keys and sitemap-submission workflows. The Pages workflow submits after a successful Pages deployment. The canonical-site workflow submits after a successful `Production` deployment status from Vercel and can be run manually from GitHub Actions if the Vercel integration does not send that event. See [docs/search-discovery.md](docs/search-discovery.md) for verification and recovery steps.
+
 Repository-level discoverability still requires these GitHub settings after publication:
 
 - Set the repository description to: `Open visual science workbench for fractals, box counting, image comparison, and reproducible research.`
 - Add topics: `fractals`, `fractal-dimension`, `box-counting`, `image-analysis`, `stem-education`, `reproducible-research`, `visual-science`, `ai-literacy`.
 - Upload [pages/social-preview.png](pages/social-preview.png) in **Settings → Social preview** (1200 × 630 PNG, 114 KB).
 - Submit `https://aartisr.github.io/fractals-web/sitemap.xml` to Google Search Console and Bing Webmaster Tools after Pages is live.
+- Submit `https://fractals.ai-aarti.com/sitemap.xml` to the corresponding canonical-site properties in Google Search Console and Bing Webmaster Tools.
 
 ## Acknowledgments
 
