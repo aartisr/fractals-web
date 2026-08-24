@@ -2814,8 +2814,29 @@ input[type='file'] {
 }
 
 .action:disabled {
-  opacity: 0.58;
+  background: #c4d0da;
+  color: #536877;
+  box-shadow: inset 0 0 0 1px #aebdc8;
+  opacity: 1;
   cursor: not-allowed;
+}
+
+.fractal-render-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.68rem;
+  padding: 0.7rem;
+  border: 1px solid rgba(188, 75, 81, 0.45);
+  border-radius: 0.62rem;
+  background: #fff6f6;
+  color: #742b32;
+}
+
+.fractal-render-error p {
+  margin: 0;
+  flex: 1 1 18rem;
 }
 
 .button-spinner {

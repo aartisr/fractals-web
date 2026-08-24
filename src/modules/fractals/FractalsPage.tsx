@@ -296,6 +296,9 @@ export function FractalsPage() {
   const [isRendering, setIsRendering]          = useState(false)
   const [showRenderOverlay, setShowRenderOverlay] = useState(false)
   const [renderError, setRenderError]          = useState<string | null>(null)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
   const [activeParams, setActiveParams]        = useState<RenderParams>(initialFractalView?.activeParams ?? DEFAULT_PARAMS)
   const [viewport, setViewport]                = useState<Viewport>(initialFractalView?.viewport ?? defaultExtent('Mandelbrot'))
 
@@ -589,6 +592,20 @@ export function FractalsPage() {
   }, [isFullPageMode])
 
   useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const updatePreference = () => setPrefersReducedMotion(query.matches)
+    updatePreference()
+    query.addEventListener('change', updatePreference)
+    return () => query.removeEventListener('change', updatePreference)
+  }, [])
+
+  useEffect(() => {
+    if (prefersReducedMotion && isAnimating) {
+      setIsAnimating(false)
+    }
+  }, [isAnimating, prefersReducedMotion])
+
+  useEffect(() => {
     if (!isFullPageMode) {
       setIsFullPageControlsVisible(true)
       if (fullPageControlsTimerRef.current) {
@@ -786,7 +803,7 @@ export function FractalsPage() {
   const resetView = () => setViewport(defaultExtent(activeParams.type))
 
   const startInfiniteZoom = () => {
-    if (!isZoomEnabled || isAnimating) return
+    if (!isZoomEnabled || isAnimating || prefersReducedMotion) return
     // Stop any ongoing animation interactions
     if (animationRafRef.current !== null) {
       cancelAnimationFrame(animationRafRef.current)
@@ -1167,8 +1184,8 @@ export function FractalsPage() {
               <div>
           <button type="button" className="overlay-toggle" 
             onClick={isAnimating ? stopInfiniteZoom : startInfiniteZoom}
-            disabled={!isZoomEnabled || isDisplayLoading}
-            title={isAnimating ? 'Stop infinite zoom' : 'Continuously zoom in and out to demonstrate self-similarity and repeating patterns'}>
+            disabled={!isZoomEnabled || isDisplayLoading || prefersReducedMotion}
+            title={prefersReducedMotion ? 'Infinite zoom is disabled because reduced motion is enabled in your system settings.' : isAnimating ? 'Stop infinite zoom' : 'Continuously zoom in and out to demonstrate self-similarity and repeating patterns'}>
             {isAnimating ? '⏸ Stop ∞ Zoom' : '∞ Infinite Zoom'}
           </button>
           <button type="button" className="overlay-toggle" onClick={performResearchAnalysis} disabled={isDisplayLoading || isAnalyzing}
@@ -1266,7 +1283,26 @@ export function FractalsPage() {
           <span className="overlay-legend-item" tabIndex={0} title="Use + and - to zoom, arrows to pan, 0 or H for reset, Shift for finer control.">Keyboard nav</span>
         </div>}
 
-        {renderError && <p className="muted">{renderError}</p>}
+        {renderError && (
+          <div className="fractal-render-error" role="alert">
+            <p>{renderError}</p>
+            {isGLType ? (
+              <button
+                type="button"
+                className="overlay-toggle"
+                onClick={() => {
+                  form.setFieldValue('type', 'Barnsley Fern')
+                  setSelectedType('Barnsley Fern')
+                  setActiveParams((current) => ({ ...current, type: 'Barnsley Fern' }))
+                  setViewport(defaultExtent('Barnsley Fern'))
+                  setRenderError(null)
+                }}
+              >
+                Switch to Canvas 2D
+              </button>
+            ) : null}
+          </div>
+        )}
         {precisionMode && isZoomEnabled && <p className="muted">Precision mode adaptively increases iteration depth as magnification grows.</p>}
       </Panel>
       </div>

@@ -92,6 +92,7 @@ export function Topbar() {
               to={module.path}
               className={`tb-tab${isActive(module.path) ? ' tb-tab--active' : ''}`}
               aria-current={isActive(module.path) ? 'page' : undefined}
+              title={`${module.title} (${module.navigationOrder})`}
               onFocus={() => closeMore()}
               onPointerEnter={() => closeMore()}
               onClick={() => closeMore()}
@@ -175,6 +176,7 @@ export function Topbar() {
               key={module.id}
               to={module.path}
               className={`tb-drawer-row${isActive(module.path) ? ' tb-drawer-row--active' : ''}`}
+                title={`${module.title} (${module.navigationOrder})`}
               onClick={() => setDrawerOpen(false)}
             >
               <span className="tb-drawer-name">{module.title}</span>
