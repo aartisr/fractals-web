@@ -24,6 +24,7 @@ import {
 import { BoxCountControls } from './BoxCountControls'
 import { BoxCountResultPanel } from './BoxCountResultPanel'
 import { VolumetricBoxCountPanel } from './VolumetricBoxCountPanel'
+import { BatchBoxCountPanel } from './BatchBoxCountPanel'
 import { useBoxCountController } from './useBoxCountController'
 import type { RunSummary } from '../../core/services/contracts'
 
@@ -272,6 +273,10 @@ export function BoxCountPage() {
 
       <Panel title="3D Volumetric Box Counter" subtitle="Measure spatial complexity in meshes and DICOM volumes.">
         <VolumetricBoxCountPanel />
+      </Panel>
+
+      <Panel title="Batch Dataset Benchmarking" subtitle="Queue whole-slide or multi-image datasets without drawing individual ROIs.">
+        <BatchBoxCountPanel />
       </Panel>
 
       {boxCountShareCard ? (
