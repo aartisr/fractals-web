@@ -13,6 +13,9 @@ export function Footer() {
           </Link>
           <p className="ft-brand-desc">A calm place to create, measure, and discuss visual complexity.</p>
           <p className="ft-safety-note">Educational exploration only. Medical-image outputs are not clinical advice.</p>
+          <Link to="/workbench/fractals" className="ft-primary-link">
+            Open Fractal Lab <span aria-hidden="true">→</span>
+          </Link>
         </div>
 
         <nav className="ft-nav-block" aria-label="Explore Fractals Web">
@@ -26,15 +29,17 @@ export function Footer() {
         <nav className="ft-nav-block" aria-label="Project information">
           <p className="ft-nav-heading">Project</p>
           <Link to="/workbench/runs">Saved runs</Link>
-          <a href="https://github.com/aartisr/fractals" target="_blank" rel="noreferrer">Original project</a>
-          <a href="https://ai-aarti.com" target="_blank" rel="noreferrer">About the creator</a>
-          <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer">Pioneer Charter School</a>
+          <a href="https://github.com/aartisr/fractals" target="_blank" rel="noreferrer noopener">Original project</a>
+          <a href="https://ai-aarti.com" target="_blank" rel="noreferrer noopener">About the creator</a>
+          <a href="https://saugus.pioneercss.org" target="_blank" rel="noreferrer noopener">Pioneer Charter School</a>
         </nav>
       </div>
 
       <div className="ft-bottom">
-        <span>© {CURRENT_YEAR} Aarti S Ravikumar</span>
-        <span>Built for curious, careful inquiry.</span>
+        <div className="ft-bottom-copy">
+          <span>© {CURRENT_YEAR} Aarti S Ravikumar</span>
+          <span>Built for curious, careful inquiry.</span>
+        </div>
         <AnalyticsPreference />
       </div>
     </footer>

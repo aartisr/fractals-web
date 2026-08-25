@@ -6484,17 +6484,22 @@ textarea:focus {
 .tb-hamburger { margin: 0; }
 
 .site-footer { margin-top: 2rem; background: #f4f8fb; box-shadow: none; }
-.ft-inner { grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(9rem, 0.65fr)); gap: clamp(1.5rem, 6vw, 5rem); padding: 2rem clamp(1rem, 3vw, 2rem); max-width: 1280px; }
+.ft-inner { grid-template-columns: minmax(16rem, 1.4fr) repeat(2, minmax(9rem, 0.65fr)); gap: clamp(1.5rem, 6vw, 5rem); padding: 2.25rem clamp(1rem, 3vw, 2rem) 2rem; max-width: 1280px; }
 .ft-brand-link { margin-bottom: 0.4rem; }
 .ft-brand-name { font-size: 0.92rem; }
 .ft-brand-desc { margin-bottom: 0.55rem; max-width: 34ch; }
 .ft-safety-note { max-width: 46ch; margin: 0; color: var(--ink-600); font-size: 0.7rem; line-height: 1.45; }
-.ft-nav-block { gap: 0.42rem; }
-.ft-nav-block > a { width: fit-content; color: var(--ink-700); font-size: 0.76rem; text-decoration: none; }
+.ft-primary-link { display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; min-height: 2.5rem; margin-top: 1rem; padding: 0.55rem 0.8rem; border-radius: 0.35rem; background: var(--ink-950); color: #fff; font: 700 0.72rem/1 var(--font-ui); text-decoration: none; transition: background 0.18s ease, transform 0.18s ease; }
+.ft-primary-link:hover { background: var(--signal-deep); transform: translateY(-1px); }
+.ft-primary-link span { font-size: 1rem; line-height: 0; }
+.ft-nav-block { gap: 0.18rem; }
+.ft-nav-block > a { display: inline-flex; align-items: center; width: fit-content; min-height: 2rem; color: var(--ink-700); font-size: 0.76rem; text-decoration: none; }
 .ft-nav-block > a:hover { color: var(--signal-deep); text-decoration: underline; text-underline-offset: 0.18rem; }
-.ft-bottom { justify-content: space-between; max-width: 1280px; padding: 0.75rem clamp(1rem, 3vw, 2rem); color: var(--ink-500); font-size: 0.7rem; }
-.ft-analytics-choice { display: inline-flex; align-items: center; gap: 0.38rem; color: var(--ink-600); cursor: pointer; }
-.ft-analytics-choice input { accent-color: var(--signal-deep); }
+.ft-bottom { justify-content: space-between; max-width: 1280px; padding: 0.9rem clamp(1rem, 3vw, 2rem); border-top: 1px solid rgba(10, 40, 60, 0.1); color: var(--ink-500); font-size: 0.7rem; }
+.ft-bottom-copy { display: inline-flex; align-items: center; gap: 1rem; }
+.ft-analytics-choice { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.25rem; padding: 0.32rem 0.5rem; border-radius: 0.35rem; color: var(--ink-600); cursor: pointer; }
+.ft-analytics-choice:hover { background: rgba(3, 93, 141, 0.06); }
+.ft-analytics-choice input { width: 1rem; height: 1rem; margin: 0; accent-color: var(--signal-deep); }
 
 @media (max-width: 780px) {
   .topbar { padding: 0.5rem 0.85rem; }
@@ -6504,16 +6509,22 @@ textarea:focus {
   .tb-site-share--drawer { display: inline-flex; justify-self: start; margin: 0.35rem 0.3rem 0.1rem; }
   .tb-hamburger { display: flex; }
   .tb-drawer { margin: 0.55rem auto 0; max-width: 1280px; }
-  .ft-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .ft-inner { grid-template-columns: 1fr 1fr; gap: 1.75rem 1.5rem; }
   .ft-brand-block { grid-column: 1 / -1; }
 }
 
 @media (max-width: 520px) {
   .tb-brand-sub { display: none; }
   .tb-classroom-toggle { padding-inline: 0.52rem; }
-  .ft-inner { grid-template-columns: 1fr; gap: 1.2rem; }
-  .ft-brand-block { grid-column: auto; }
-  .ft-bottom { align-items: flex-start; }
+  .ft-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.35rem 1rem; padding-block: 1.75rem 1.4rem; }
+  .ft-brand-block { grid-column: 1 / -1; }
+  .ft-brand-desc { margin-bottom: 0.45rem; }
+  .ft-primary-link { min-height: 2.75rem; margin-top: 0.9rem; padding-inline: 0.9rem; }
+  .ft-nav-block { gap: 0.12rem; }
+  .ft-nav-block > a { min-height: 2.35rem; font-size: 0.72rem; line-height: 1.25; }
+  .ft-bottom { display: grid; gap: 0.5rem; padding-block: 0.75rem calc(0.75rem + env(safe-area-inset-bottom)); }
+  .ft-bottom-copy { display: grid; gap: 0.22rem; }
+  .ft-analytics-choice { width: fit-content; min-height: 2.5rem; padding: 0.38rem 0.55rem; border: 1px solid rgba(10, 40, 60, 0.12); background: rgba(255, 255, 255, 0.55); }
 }
 
 @media (max-width: 720px) {
