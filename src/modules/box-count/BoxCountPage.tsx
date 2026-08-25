@@ -23,6 +23,7 @@ import {
 } from '../../core/services/researchWorkbench'
 import { BoxCountControls } from './BoxCountControls'
 import { BoxCountResultPanel } from './BoxCountResultPanel'
+import { VolumetricBoxCountPanel } from './VolumetricBoxCountPanel'
 import { useBoxCountController } from './useBoxCountController'
 import type { RunSummary } from '../../core/services/contracts'
 
@@ -267,6 +268,10 @@ export function BoxCountPage() {
           onCommitRoiDraft={commitRoiDraft}
           onClearRoiDraft={clearRoiDraft}
         />
+      </Panel>
+
+      <Panel title="3D Volumetric Box Counter" subtitle="Measure spatial complexity in meshes and DICOM volumes.">
+        <VolumetricBoxCountPanel />
       </Panel>
 
       {boxCountShareCard ? (

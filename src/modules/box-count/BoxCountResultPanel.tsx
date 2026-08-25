@@ -658,6 +658,10 @@ export function BoxCountResultPanel({
         <span>Count Trend Points: {result ? result.boxCounts.length : 0}</span>
       </div>
 
+      {result?.gridOptimization?.enabled ? (
+        <p className="muted">Grid-offset optimization active: each scale averages {result.gridOptimization.offsetsPerScale} translated grid positions to reduce boundary-alignment artifacts.</p>
+      ) : null}
+
       {insight ? (
         <div className="insight-grid">
           <div className={`insight-card insight-${insight.complexityBand}`}>

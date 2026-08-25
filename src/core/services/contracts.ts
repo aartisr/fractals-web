@@ -36,6 +36,11 @@ export interface BoxCountResult {
   }
   boxCounts: Array<{ size: number; count: number }>
   previewUrl: string
+  gridOptimization?: {
+    enabled: boolean
+    offsetsPerScale: number
+    method: string
+  }
 }
 
 export interface CompareResult {

@@ -502,6 +502,33 @@ const makeBinary = (data: ImageData, roi = { x: 0, y: 0, width: data.width, heig
   return { binary, width, height }
 }
 
+const countBoxesAtOffset = (binary: Uint8Array, width: number, height: number, size: number, offsetX: number, offsetY: number) => {
+  let count = 0
+  // Start before the ROI so the translated lattice covers both boundaries.
+  for (let y = -offsetY; y < height; y += size) {
+    for (let x = -offsetX; x < width; x += size) {
+      let occupied = false
+      for (let yy = Math.max(0, y); yy < Math.min(height, y + size) && !occupied; yy += 1) {
+        for (let xx = Math.max(0, x); xx < Math.min(width, x + size); xx += 1) {
+          if (binary[yy * width + xx]) {
+            occupied = true
+            break
+          }
+        }
+      }
+      if (occupied) count += 1
+    }
+  }
+  return count
+}
+
+const gridOffsets = (size: number) => {
+  if (size <= 2) return [[0, 0]]
+  const half = Math.floor(size / 2)
+  // Four evenly distributed phases make estimates substantially less sensitive to the ROI origin.
+  return [[0, 0], [half, 0], [0, half], [half, half]]
+}
+
 const countBoxes = (binary: Uint8Array, width: number, height: number) => {
   const maxBox = Math.max(2, Math.floor(Math.min(width, height) / 4))
   const sizes: number[] = []
@@ -516,24 +543,9 @@ const countBoxes = (binary: Uint8Array, width: number, height: number) => {
     })
   }
   return sizes.sort((a, b) => a - b).map((size) => {
-    let count = 0
-    for (let y = 0; y < height; y += size) {
-      for (let x = 0; x < width; x += size) {
-        let occupied = false
-        for (let yy = y; yy < Math.min(height, y + size) && !occupied; yy += 1) {
-          for (let xx = x; xx < Math.min(width, x + size); xx += 1) {
-            if (binary[yy * width + xx]) {
-              occupied = true
-              break
-            }
-          }
-        }
-        if (occupied) {
-          count += 1
-        }
-      }
-    }
-    return { size, count: Math.max(1, count) }
+    const offsets = gridOffsets(size)
+    const meanCount = offsets.reduce((sum, [offsetX, offsetY]) => sum + countBoxesAtOffset(binary, width, height, size, offsetX, offsetY), 0) / offsets.length
+    return { size, count: Math.max(1, Number(meanCount.toFixed(4))) }
   })
 }
 
@@ -616,6 +628,7 @@ const localAnalyzeBoxCount = async (file: File, roi: { x: number; y: number; siz
     roi: { x: analysis.roi.x, y: analysis.roi.y, size: Math.min(analysis.roi.width, analysis.roi.height) },
     boxCounts: analysis.boxCounts,
     previewUrl: analysis.canvas.toDataURL('image/png'),
+    gridOptimization: { enabled: true, offsetsPerScale: 4, method: 'four-phase translated-grid average' },
   }
 }
 
@@ -831,6 +844,8 @@ export const api = {
     formData.append('roi_x', String(roi.x))
     formData.append('roi_y', String(roi.y))
     formData.append('roi_size', String(roi.size))
+    formData.append('grid_shift_average', 'true')
+    formData.append('grid_offsets_per_scale', '4')
 
     let result: BoxCountResult
     try {
@@ -844,7 +859,10 @@ export const api = {
       const normalized = isJobAccepted(response)
         ? normalizeBoxResult(await pollJob<unknown>(jobId))
         : normalizeBoxResult(response)
-      result = isUsableBoxCountResult(normalized) ? normalized : await localAnalyzeBoxCount(file, roi)
+      // Do not silently present a single-origin server estimate as an optimized one.
+      result = isUsableBoxCountResult(normalized) && normalized.gridOptimization?.enabled
+        ? normalized
+        : await localAnalyzeBoxCount(file, roi)
     } catch {
       result = await localAnalyzeBoxCount(file, roi)
     }
