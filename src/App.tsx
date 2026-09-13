@@ -7,7 +7,7 @@ import { BoxCounterStudio } from './components/BoxCounterStudio';
 import { ImageCompareStudio } from './components/ImageCompareStudio';
 import { TumorMorphometryStudio } from './components/TumorMorphometryStudio';
 import { AppTab } from './types';
-import { Layers, Github, ExternalLink, ShieldCheck, Cpu } from 'lucide-react';
+import { Github, ExternalLink, ShieldCheck, Cpu } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<AppTab>('evaluation');

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { getSampleImages, sampleImageToFile } from '../utils/sampleImageLoader'
 import type { SampleImageItem } from '../types'
-import { CheckCircle2, AlertCircle, Database, BookOpen } from 'lucide-react'
+
 
 interface SampleImageSelectorProps {
   category: 'box-counting' | 'compare' | 'tumor'

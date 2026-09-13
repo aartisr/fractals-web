@@ -2,14 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Grid3X3, 
   Upload, 
-  Sparkles, 
-  Sliders, 
   TrendingUp, 
   CheckCircle2, 
-  RefreshCw, 
-  Eye, 
-  Maximize2,
-  HelpCircle,
   Database,
   ExternalLink
 } from 'lucide-react';
@@ -51,22 +45,88 @@ export const BoxCounterStudio: React.FC = () => {
   const rawImageRef = useRef<HTMLImageElement | null>(null);
   const grayscaleDataRef = useRef<Uint8Array | null>(null);
 
-  // Load selected image
-  const loadImage = useCallback((url: string) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      rawImageRef.current = img;
-      processNewImage(img);
-    };
-    img.src = url;
-  }, []);
+  const drawVisualViewport = useCallback((
+    w: number,
+    h: number,
+    t: number,
+    invert: boolean,
+    currentRoi: { x: number; y: number; width: number; height: number } | null
+  ) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !rawImageRef.current || !grayscaleDataRef.current) return;
+    const ctx = canvas.getContext('2d')!;
 
-  useEffect(() => {
-    loadImage(selectedItem.url);
-  }, [selectedItem, loadImage]);
+    // 1. Draw base image or binary mask
+    if (showBinaryMask) {
+      const imgData = ctx.createImageData(w, h);
+      const data = imgData.data;
+      const gray = grayscaleDataRef.current;
+      for (let i = 0; i < gray.length; i++) {
+        const val = gray[i];
+        let isForeground = val >= t;
+        if (invert) isForeground = !isForeground;
+        const color = isForeground ? 255 : 0;
+        const idx = i * 4;
+        data[idx] = color;
+        data[idx + 1] = color;
+        data[idx + 2] = color;
+        data[idx + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+    } else {
+      ctx.drawImage(rawImageRef.current, 0, 0, w, h);
+    }
 
-  const processNewImage = (img: HTMLImageElement) => {
+    // 2. Draw active grid overlay
+    if (showGridOverlay && activeVisualGridScale > 0) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+      ctx.lineWidth = 1;
+
+      const step = activeVisualGridScale;
+      for (let x = 0; x <= w; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= h; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 3. Draw ROI rectangle
+    if (currentRoi) {
+      ctx.save();
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(currentRoi.x, currentRoi.y, currentRoi.width, currentRoi.height);
+
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.15)';
+      ctx.fillRect(currentRoi.x, currentRoi.y, currentRoi.width, currentRoi.height);
+      ctx.restore();
+    }
+  }, [showBinaryMask, showGridOverlay, activeVisualGridScale]);
+
+  const runAnalysis = useCallback((
+    gray: Uint8Array,
+    width: number,
+    height: number,
+    t: number,
+    invert: boolean,
+    currentRoi: { x: number; y: number; width: number; height: number } | null
+  ) => {
+    const result = computeBoxCounting(gray, width, height, t, invert, currentRoi || undefined);
+    setBoxResult(result);
+    drawVisualViewport(width, height, t, invert, currentRoi);
+  }, [drawVisualViewport]);
+
+  const processNewImage = useCallback((img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
@@ -86,94 +146,22 @@ export const BoxCounterStudio: React.FC = () => {
 
     // Compute box count
     runAnalysis(gray, canvas.width, canvas.height, activeThresh, invertMask, roi);
-  };
+  }, [useOtsu, threshold, invertMask, roi, runAnalysis, setThreshold]);
 
-  const runAnalysis = (
-    gray: Uint8Array,
-    width: number,
-    height: number,
-    t: number,
-    invert: boolean,
-    currentRoi: { x: number; y: number; width: number; height: number } | null
-  ) => {
-    const result = computeBoxCounting(gray, width, height, t, invert, currentRoi || undefined);
-    setBoxResult(result);
-    drawVisualViewport(width, height, t, invert, currentRoi, result);
-  };
+  // Load selected image
+  const loadImage = useCallback((url: string) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      rawImageRef.current = img;
+      processNewImage(img);
+    };
+    img.src = url;
+  }, [processNewImage]);
 
-  const drawVisualViewport = (
-    w: number,
-    h: number,
-    t: number,
-    invert: boolean,
-    currentRoi: { x: number; y: number; width: number; height: number } | null,
-    res: BoxCountResult | null
-  ) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !rawImageRef.current || !grayscaleDataRef.current) return;
-    const ctx = canvas.getContext('2d')!;
-
-    // 1. Draw base image or binary mask
-    if (showBinaryMask) {
-      const imgData = ctx.createImageData(w, h);
-      const data = imgData.data;
-      const gray = grayscaleDataRef.current;
-      for (let i = 0; i < gray.length; i++) {
-        const val = gray[i];
-        const isFore = invert ? val <= t : val >= t;
-        const idx = i * 4;
-        data[idx] = isFore ? 56 : 15;
-        data[idx + 1] = isFore ? 189 : 23;
-        data[idx + 2] = isFore ? 248 : 42;
-        data[idx + 3] = 255;
-      }
-      ctx.putImageData(imgData, 0, 0);
-    } else {
-      ctx.drawImage(rawImageRef.current, 0, 0, w, h);
-    }
-
-    // 2. Draw active box counting grid overlay
-    if (showGridOverlay && activeVisualGridScale > 0) {
-      const s = activeVisualGridScale;
-      const rx = currentRoi ? currentRoi.x : 0;
-      const ry = currentRoi ? currentRoi.y : 0;
-      const rw = currentRoi ? currentRoi.width : w;
-      const rh = currentRoi ? currentRoi.height : h;
-
-      ctx.save();
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-      ctx.lineWidth = 1;
-
-      // Draw vertical and horizontal grid lines
-      for (let x = rx; x <= rx + rw; x += s) {
-        ctx.beginPath();
-        ctx.moveTo(x, ry);
-        ctx.lineTo(x, ry + rh);
-        ctx.stroke();
-      }
-      for (let y = ry; y <= ry + rh; y += s) {
-        ctx.beginPath();
-        ctx.moveTo(rx, y);
-        ctx.lineTo(rx + rw, y);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    // 3. Draw ROI boundary if active
-    if (currentRoi) {
-      ctx.save();
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 4]);
-      ctx.strokeRect(currentRoi.x, currentRoi.y, currentRoi.width, currentRoi.height);
-
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = '10px monospace';
-      ctx.fillText(`ROI ${currentRoi.width}x${currentRoi.height}`, currentRoi.x + 4, Math.max(14, currentRoi.y - 4));
-      ctx.restore();
-    }
-  };
+  useEffect(() => {
+    loadImage(selectedItem.url);
+  }, [selectedItem, loadImage]);
 
   // Re-run analysis on parameter adjustments
   const handleParamChange = (newThresh: number, newInvert: boolean, newRoi = roi) => {
@@ -383,7 +371,7 @@ export const BoxCounterStudio: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-200">{selectedItem.title}</span>
                 <span className="text-[10px] font-mono text-slate-400">
-                  {canvasRef.current?.width || 512}x{canvasRef.current?.height || 512} px
+                  512x512 px
                 </span>
               </div>
 
@@ -391,7 +379,7 @@ export const BoxCounterStudio: React.FC = () => {
                 <button
                   onClick={() => {
                     setShowBinaryMask(!showBinaryMask);
-                    setTimeout(() => drawVisualViewport(canvasRef.current?.width || 512, canvasRef.current?.height || 512, threshold, invertMask, roi, boxResult), 50);
+                    setTimeout(() => drawVisualViewport(canvasRef.current?.width || 512, canvasRef.current?.height || 512, threshold, invertMask, roi), 50);
                   }}
                   className={`px-2.5 py-1 rounded font-mono text-xs border ${
                     showBinaryMask
@@ -404,7 +392,7 @@ export const BoxCounterStudio: React.FC = () => {
                 <button
                   onClick={() => {
                     setShowGridOverlay(!showGridOverlay);
-                    setTimeout(() => drawVisualViewport(canvasRef.current?.width || 512, canvasRef.current?.height || 512, threshold, invertMask, roi, boxResult), 50);
+                    setTimeout(() => drawVisualViewport(canvasRef.current?.width || 512, canvasRef.current?.height || 512, threshold, invertMask, roi), 50);
                   }}
                   className={`px-2.5 py-1 rounded font-mono text-xs border ${
                     showGridOverlay
@@ -627,7 +615,7 @@ export const BoxCounterStudio: React.FC = () => {
                       key={sz}
                       onClick={() => {
                         setActiveVisualGridScale(sz);
-                        setTimeout(() => drawVisualViewport(canvasRef.current?.width || 512, canvasRef.current?.height || 512, threshold, invertMask, roi, boxResult), 50);
+                        setTimeout(() => drawVisualViewport(canvasRef.current?.width || 512, canvasRef.current?.height || 512, threshold, invertMask, roi), 50);
                       }}
                       className={`px-1.5 py-0.5 rounded ${
                         activeVisualGridScale === sz

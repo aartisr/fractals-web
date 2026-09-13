@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Activity, 
   Upload, 
-  Layers, 
   ShieldAlert, 
   TrendingUp, 
   Sliders,
@@ -38,35 +37,7 @@ export const TumorMorphometryStudio: React.FC = () => {
   const rawScanImgRef = useRef<HTMLImageElement | null>(null);
   const maskImgRef = useRef<HTMLImageElement | null>(null);
 
-  const loadScanAndMask = useCallback((scanUrl: string, maskUrl?: string) => {
-    const scanImg = new Image();
-    scanImg.crossOrigin = 'anonymous';
-
-    scanImg.onload = () => {
-      rawScanImgRef.current = scanImg;
-      if (maskUrl) {
-        const maskImg = new Image();
-        maskImg.crossOrigin = 'anonymous';
-        maskImg.onload = () => {
-          maskImgRef.current = maskImg;
-          renderAndAnalyze();
-        };
-        maskImg.src = maskUrl;
-      } else {
-        maskImgRef.current = null;
-        renderAndAnalyze();
-      }
-    };
-    scanImg.src = scanUrl;
-  }, []);
-
-  useEffect(() => {
-    if (selectedScan) {
-      loadScanAndMask(selectedScan.url, selectedScan.secondUrl);
-    }
-  }, [selectedScan, loadScanAndMask]);
-
-  const renderAndAnalyze = () => {
+  const renderAndAnalyze = useCallback(() => {
     const canvas = canvasRef.current;
     const scanImg = rawScanImgRef.current;
     if (!canvas || !scanImg) return;
@@ -94,7 +65,7 @@ export const TumorMorphometryStudio: React.FC = () => {
     const high = lev + win / 2;
 
     for (let i = 0; i < data.length; i += 4) {
-      let luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      const luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
       let val = ((luma - low) / (high - low)) * 255;
       val = Math.max(0, Math.min(255, val));
       data[i] = val;
@@ -152,11 +123,39 @@ export const TumorMorphometryStudio: React.FC = () => {
     } else {
       setBoundaryResult(null);
     }
-  };
+  }, [showOverlay, showEdges, windowLevelPreset, overlayOpacity]);
+
+  const loadScanAndMask = useCallback((scanUrl: string, maskUrl?: string) => {
+    const scanImg = new Image();
+    scanImg.crossOrigin = 'anonymous';
+
+    scanImg.onload = () => {
+      rawScanImgRef.current = scanImg;
+      if (maskUrl) {
+        const maskImg = new Image();
+        maskImg.crossOrigin = 'anonymous';
+        maskImg.onload = () => {
+          maskImgRef.current = maskImg;
+          renderAndAnalyze();
+        };
+        maskImg.src = maskUrl;
+      } else {
+        maskImgRef.current = null;
+        renderAndAnalyze();
+      }
+    };
+    scanImg.src = scanUrl;
+  }, [renderAndAnalyze]);
+
+  useEffect(() => {
+    if (selectedScan) {
+      loadScanAndMask(selectedScan.url, selectedScan.secondUrl);
+    }
+  }, [selectedScan, loadScanAndMask]);
 
   useEffect(() => {
     renderAndAnalyze();
-  }, [showOverlay, showEdges, windowLevelPreset, overlayOpacity]);
+  }, [renderAndAnalyze]);
 
   const handleCustomScanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

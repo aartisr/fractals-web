@@ -183,8 +183,8 @@ function createBotanicalFern(): string {
 
   for (let i = 0; i < 90000; i++) {
     const r = Math.random();
-    let nextX = 0;
-    let nextY = 0;
+    let nextX: number;
+    let nextY: number;
 
     if (r < 0.01) {
       nextX = 0;
@@ -291,7 +291,7 @@ function drawTumorShape(ctx: CanvasRenderingContext2D, size: number, plane: stri
   ctx.fill();
 }
 
-function drawTumorAnatomy(ctx: CanvasRenderingContext2D, size: number, plane: string, type: string, postContrast = false) {
+export function drawTumorAnatomy(ctx: CanvasRenderingContext2D, size: number, plane: string, type: string, postContrast = false) {
   let tx = plane === 'sagittal' ? size * 0.52 : size * 0.65;
   let ty = size * 0.44;
 

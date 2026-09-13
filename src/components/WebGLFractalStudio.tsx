@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { 
-  Play, 
   RotateCcw, 
   Download, 
   Code2, 
   ZoomIn, 
   ZoomOut, 
-  Compass, 
-  Layers, 
   Palette, 
   Sliders, 
   Activity 
@@ -256,7 +253,7 @@ export const WebGLFractalStudio: React.FC = () => {
               <label className="text-xs text-slate-300 font-medium">Mathematical Model</label>
               <select
                 value={fractalType}
-                onChange={(e) => setFractalType(e.target.value as any)}
+                onChange={(e) => setFractalType(e.target.value as 'mandelbrot' | 'julia' | 'burningship' | 'newton')}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:border-cyan-500 focus:outline-none"
               >
                 <option value="mandelbrot">Mandelbrot (z_{'{n+1}'} = z_n² + c)</option>

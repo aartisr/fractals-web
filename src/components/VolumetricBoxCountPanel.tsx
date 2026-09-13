@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Box, Layers, Upload, TrendingUp, Cpu, CheckCircle2, AlertCircle, FileCode } from 'lucide-react';
+import { Box, Layers, CheckCircle2, AlertCircle, FileCode } from 'lucide-react';
 import { analyzeMeshVolume, analyzeDicomStack, VolumeBoxCountResult } from '../services/volumeAnalysis';
 
 export const VolumetricBoxCountPanel: React.FC = () => {
@@ -19,8 +19,8 @@ export const VolumetricBoxCountPanel: React.FC = () => {
     try {
       const res = await analyzeMeshVolume(file);
       setResult(res);
-    } catch (err: any) {
-      setError(err.message || 'Failed to analyze 3D mesh volume.');
+    } catch (err) {
+      setError((err as Error).message || 'Failed to analyze 3D mesh volume.');
     } finally {
       setIsLoading(false);
     }
@@ -38,8 +38,8 @@ export const VolumetricBoxCountPanel: React.FC = () => {
     try {
       const res = await analyzeDicomStack(files);
       setResult(res);
-    } catch (err: any) {
-      setError(err.message || 'Failed to analyze DICOM stack volume.');
+    } catch (err) {
+      setError((err as Error).message || 'Failed to analyze DICOM stack volume.');
     } finally {
       setIsLoading(false);
     }

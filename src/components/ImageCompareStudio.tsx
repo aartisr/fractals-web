@@ -4,12 +4,10 @@ import {
   Upload, 
   Layers, 
   Flame, 
-  Sliders, 
   Activity, 
   Eye, 
   ArrowLeftRight, 
   CheckCircle2, 
-  Compass,
   Database,
   ExternalLink
 } from 'lucide-react';
@@ -48,39 +46,75 @@ export const ImageCompareStudio: React.FC = () => {
   const fileInputARef = useRef<HTMLInputElement>(null);
   const fileInputBRef = useRef<HTMLInputElement>(null);
 
-  // Load both images
-  const loadPair = useCallback((urlA: string, urlB: string) => {
-    let loadedCount = 0;
-    const imgA = new Image();
-    const imgB = new Image();
-    imgA.crossOrigin = 'anonymous';
-    imgB.crossOrigin = 'anonymous';
+  const renderCanvas = useCallback((
+    pos: number,
+    alpha: number,
+    gain: number,
+    mode: 'split' | 'diff' | 'edge' | 'blend'
+  ) => {
+    const canvas = canvasRef.current;
+    const imgA = imageARef.current;
+    const imgB = imageBRef.current;
+    if (!canvas || !imgA || !imgB) return;
+    const ctx = canvas.getContext('2d')!;
+    const width = 512;
+    const height = 512;
 
-    const onComplete = () => {
-      loadedCount++;
-      if (loadedCount === 2) {
-        imageARef.current = imgA;
-        imageBRef.current = imgB;
-        processImages(imgA, imgB);
+    if (mode === 'split') {
+      ctx.drawImage(imgA, 0, 0, width, height);
+      const splitX = Math.round(width * pos);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(splitX, 0, width - splitX, height);
+      ctx.clip();
+      ctx.drawImage(imgB, 0, 0, width, height);
+      ctx.restore();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(splitX, 0);
+      ctx.lineTo(splitX, height);
+      ctx.stroke();
+    } else if (mode === 'blend') {
+      ctx.globalAlpha = 1.0;
+      ctx.drawImage(imgA, 0, 0, width, height);
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(imgB, 0, 0, width, height);
+      ctx.globalAlpha = 1.0;
+    } else if (mode === 'diff') {
+      const gA = grayARef.current;
+      const gB = grayBRef.current;
+      if (gA && gB) {
+        const heatImg = generateDiffHeatmap(gA, gB, width, height, gain);
+        ctx.putImageData(heatImg, 0, 0);
       }
-    };
+    } else if (mode === 'edge') {
+      const gA = grayARef.current;
+      const gB = grayBRef.current;
+      if (gA && gB) {
+        const edgeA = computeSobelEdges(gA, width, height);
+        const edgeB = computeSobelEdges(gB, width, height);
 
-    imgA.onload = onComplete;
-    imgB.onload = onComplete;
-    imgA.src = urlA;
-    imgB.src = urlB;
+        const edgeImg = ctx.createImageData(width, height);
+        const data = edgeImg.data;
+        for (let i = 0; i < width * height; i++) {
+          const valA = edgeA[i];
+          const valB = edgeB[i];
+          const idx = i * 4;
+          data[idx] = valA;
+          data[idx + 1] = valB;
+          data[idx + 2] = Math.min(255, valA + valB);
+          data[idx + 3] = 255;
+        }
+        ctx.putImageData(edgeImg, 0, 0);
+      }
+    }
   }, []);
 
-  useEffect(() => {
-    if (selectedPair && selectedPair.secondUrl) {
-      loadPair(selectedPair.url, selectedPair.secondUrl);
-    }
-  }, [selectedPair, loadPair]);
-
-  const processImages = (imgA: HTMLImageElement, imgB: HTMLImageElement) => {
+  const processImages = useCallback((imgA: HTMLImageElement, imgB: HTMLImageElement) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
 
     const width = 512;
     const height = 512;
@@ -112,94 +146,36 @@ export const ImageCompareStudio: React.FC = () => {
     setMetrics(calcMetrics);
 
     renderCanvas(splitPos, blendAlpha, diffGain, compareMode);
-  };
+  }, [splitPos, blendAlpha, diffGain, compareMode, renderCanvas]);
 
-  const renderCanvas = (
-    pos: number,
-    alpha: number,
-    gain: number,
-    mode: 'split' | 'diff' | 'edge' | 'blend'
-  ) => {
-    const canvas = canvasRef.current;
-    const imgA = imageARef.current;
-    const imgB = imageBRef.current;
-    const grayA = grayARef.current;
-    const grayB = grayBRef.current;
-    if (!canvas || !imgA || !imgB || !grayA || !grayB) return;
-    const ctx = canvas.getContext('2d')!;
-    const w = canvas.width;
-    const h = canvas.height;
+  // Load both images
+  const loadPair = useCallback((urlA: string, urlB: string) => {
+    let loadedCount = 0;
+    const imgA = new Image();
+    const imgB = new Image();
+    imgA.crossOrigin = 'anonymous';
+    imgB.crossOrigin = 'anonymous';
 
-    ctx.clearRect(0, 0, w, h);
-
-    if (mode === 'split') {
-      // Draw image A on full canvas
-      ctx.drawImage(imgA, 0, 0, w, h);
-
-      // Clip and draw image B on right half
-      const splitX = Math.round(pos * w);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(splitX, 0, w - splitX, h);
-      ctx.clip();
-      ctx.drawImage(imgB, 0, 0, w, h);
-      ctx.restore();
-
-      // Draw vertical divider bar
-      ctx.save();
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(splitX, 0);
-      ctx.lineTo(splitX, h);
-      ctx.stroke();
-
-      // Grab handle
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(splitX, h / 2, 16, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.fillStyle = '#38bdf8';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('◄►', splitX, h / 2);
-      ctx.restore();
-    } else if (mode === 'diff') {
-      // Differential heatmap
-      const heat = generateDiffHeatmap(grayA, grayB, w, h, gain);
-      ctx.drawImage(imgA, 0, 0, w, h);
-      ctx.putImageData(heat, 0, 0);
-    } else if (mode === 'edge') {
-      // Edge overlay
-      ctx.drawImage(imgA, 0, 0, w, h);
-      const edgesB = computeSobelEdges(grayB, w, h);
-      const edgeImg = ctx.createImageData(w, h);
-      const data = edgeImg.data;
-      for (let i = 0; i < edgesB.length; i++) {
-        const val = edgesB[i];
-        if (val > 40) {
-          const idx = i * 4;
-          data[idx] = 244; // R
-          data[idx + 1] = 63; // G
-          data[idx + 2] = 94; // B (hot pink edge)
-          data[idx + 3] = Math.min(255, val * 2);
-        }
+    const onComplete = () => {
+      loadedCount++;
+      if (loadedCount === 2) {
+        imageARef.current = imgA;
+        imageBRef.current = imgB;
+        processImages(imgA, imgB);
       }
-      ctx.putImageData(edgeImg, 0, 0);
-    } else {
-      // Opacity blend
-      ctx.drawImage(imgA, 0, 0, w, h);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(imgB, 0, 0, w, h);
-      ctx.restore();
+    };
+
+    imgA.onload = onComplete;
+    imgB.onload = onComplete;
+    imgA.src = urlA;
+    imgB.src = urlB;
+  }, [processImages]);
+
+  useEffect(() => {
+    if (selectedPair && selectedPair.secondUrl) {
+      loadPair(selectedPair.url, selectedPair.secondUrl);
     }
-  };
+  }, [selectedPair, loadPair]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (compareMode !== 'split') return;
@@ -229,7 +205,7 @@ export const ImageCompareStudio: React.FC = () => {
   // Re-render when parameters change
   useEffect(() => {
     renderCanvas(splitPos, blendAlpha, diffGain, compareMode);
-  }, [compareMode, splitPos, blendAlpha, diffGain]);
+  }, [compareMode, splitPos, blendAlpha, diffGain, renderCanvas]);
 
   const handleCustomUploadA = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

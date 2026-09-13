@@ -5,11 +5,9 @@ import {
   CheckCircle2, 
   Terminal, 
   Zap, 
-  Flame, 
   Gauge, 
   TrendingUp, 
-  Activity, 
-  Layers 
+  Activity 
 } from 'lucide-react';
 import { WEBGL_OPTIMIZATION_ROADMAP } from '../data/optimizationRoadmap';
 import { WebGLFractalRenderer } from '../services/webglEngine';
