@@ -14,12 +14,12 @@ export interface AuditCategory {
   summary: string;
   strengths: string[];
   vulnerabilities: string[];
-  nobelCadreRecommendation: string;
+  benchmarkRecommendation: string;
   codeSnippetRefactor?: {
     title: string;
     description: string;
     currentCode: string;
-    nobelCode: string;
+    refactoredCode: string;
   };
 }
 

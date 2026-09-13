@@ -1,4 +1,4 @@
-export type ModuleId = 'fractals' | 'discover' | 'box-count' | 'compare' | 'tumor-detection' | 'runs'
+export type ModuleId = 'fractals' | 'discover' | 'box-count' | 'compare' | 'tumor-detection' | 'runs' | 'evaluation'
 
 export interface ModuleRouteVisual {
   asset: string

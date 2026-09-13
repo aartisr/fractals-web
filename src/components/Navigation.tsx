@@ -18,7 +18,7 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ currentTab, onSelectTab }) => {
   const tabs: { id: AppTab; label: string; icon: React.ReactNode; badge?: string }[] = [
-    { id: 'evaluation', label: 'Architectural Audit', icon: <BarChart3 className="w-4 h-4" />, badge: 'Nobel Cadre' },
+    { id: 'evaluation', label: 'Architectural Audit', icon: <BarChart3 className="w-4 h-4" />, badge: 'Gold Standard' },
     { id: 'roadmap', label: 'WebGL Throughput Roadmap', icon: <Cpu className="w-4 h-4" />, badge: '5 Phases' },
     { id: 'fractals', label: 'WebGL Fractal Engine', icon: <Sparkles className="w-4 h-4" />, badge: 'GPU 60fps' },
     { id: 'box-counter', label: 'Box-Counting Studio', icon: <Grid3X3 className="w-4 h-4" />, badge: 'D-Calc' },
@@ -41,7 +41,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentTab, onSelectTab 
                   Fractals Precision Platform
                 </span>
                 <span className="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Nobel Cadre
+                  Gold Standard
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">

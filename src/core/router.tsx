@@ -68,6 +68,12 @@ const runDetailRoute = createRoute({
   component: lazyRouteComponent(() => import('../modules/runs/RunDetailPage').then((mod) => ({ default: mod.RunDetailPage }))),
 })
 
+const evaluationRoute = createRoute({
+  getParentRoute: () => workbenchRoute,
+  path: 'evaluation',
+  component: lazyRouteComponent(() => import('../components/EvaluationAudit').then((mod) => ({ default: mod.EvaluationAudit }))),
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   workbenchRoute.addChildren([
@@ -79,6 +85,7 @@ const routeTree = rootRoute.addChildren([
     tumorRoute,
     runsRoute,
     runDetailRoute,
+    evaluationRoute,
   ]),
 ])
 

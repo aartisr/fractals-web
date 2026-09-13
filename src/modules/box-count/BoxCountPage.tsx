@@ -25,6 +25,7 @@ import { BoxCountControls } from './BoxCountControls'
 import { BoxCountResultPanel } from './BoxCountResultPanel'
 import { VolumetricBoxCountPanel } from './VolumetricBoxCountPanel'
 import { BatchBoxCountPanel } from './BatchBoxCountPanel'
+import { SampleImageSelector } from '../../components/SampleImageSelector'
 import { useBoxCountController } from './useBoxCountController'
 import type { RunSummary } from '../../core/services/contracts'
 
@@ -228,6 +229,12 @@ export function BoxCountPage() {
   return (
     <div className="tool-grid">
       <Panel title="Box Counter" subtitle="Quantify surface complexity and roughness patterns in images.">
+        <SampleImageSelector
+          category="box-counting"
+          onSelect={(_sample, selectedFile) => {
+            onFileChange(selectedFile)
+          }}
+        />
         <BoxCountControls
           file={file}
           roi={roi}

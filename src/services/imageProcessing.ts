@@ -1,7 +1,7 @@
 import { BoxCountResult, CompareMetrics } from '../types';
 
 /**
- * Nobel-Grade Image Processing & Morphological Mathematics Library.
+ * Gold-Standard Image Processing & Morphological Mathematics Library.
  * Pure deterministic algorithms for Otsu thresholding, Box-Counting dimension,
  * Lacunarity analysis, SSIM structural similarity, and tumor boundary metrics.
  */
@@ -165,18 +165,12 @@ export function computeBoxCounting(
   const n = logScales.length;
   let sumX = 0;
   let sumY = 0;
-  let sumXY = 0;
-  let sumXX = 0;
-  let sumYY = 0;
 
   for (let i = 0; i < n; i++) {
     const x = logScales[i];
     const y = logCounts[i];
     sumX += x;
     sumY += y;
-    sumXY += x * y;
-    sumXX += x * x;
-    sumYY += y * y;
   }
 
   const meanX = sumX / n;

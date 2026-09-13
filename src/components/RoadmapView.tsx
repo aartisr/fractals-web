@@ -97,7 +97,7 @@ export const RoadmapView: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 flex items-center gap-1.5">
                 <Cpu className="w-3.5 h-3.5" />
-                Nobel-Cadre Performance Specification
+                Gold-Standard Performance Specification
               </span>
               <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                 Target: 60-120 FPS

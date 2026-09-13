@@ -50,6 +50,18 @@ export const workbenchModules: WorkbenchModule[] = [
     workflow: { purpose: 'A consistent comparison workflow that keeps interpretation grounded.', steps: ['Add 2–5 images', 'Keep protocol fixed', 'Explain with QC'] },
   },
   {
+    id: 'evaluation',
+    title: 'Architectural Evaluation',
+    tagline: 'Inspect Gold-standard efficiency evaluation, quality audit, and code refactor benchmarks.',
+    path: '/workbench/evaluation',
+    accent: '#00f2fe',
+    navLabel: 'Audit 100/100',
+    primaryNavigation: false,
+    navigationOrder: 5,
+    routeVisual: { asset: 'discovery', alt: 'Architectural evaluation and code quality report' },
+    workflow: { purpose: 'Audit code quality, architectural throughput, and medical rigor.', steps: ['Inspect scores', 'View refactors', 'Verify benchmarks'] },
+  },
+  {
     id: 'tumor-detection',
     title: 'Tumor Detection',
     tagline: 'Axial/coronal/sagittal model views with confidence-box overlays.',

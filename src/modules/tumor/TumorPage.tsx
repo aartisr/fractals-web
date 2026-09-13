@@ -30,6 +30,7 @@ import {
 import { TumorComparisonPanel } from './TumorComparisonPanel'
 import { TumorComplexityEvidencePanel } from './TumorComplexityEvidencePanel'
 import { TumorStatusCard } from './TumorStatusCard'
+import { SampleImageSelector } from '../../components/SampleImageSelector'
 import { formatConfidence, summarizeConfidence } from './tumorDisplay'
 import { useTumorFractalEvidence } from './useTumorFractalEvidence'
 import { buildTumorEvidenceSummary, tumorFractalEvidenceSources } from './tumorEvidence'
@@ -298,6 +299,12 @@ export function TumorPage() {
   return (
     <div className="tool-grid tumor-tool-grid">
       <Panel title="Tumor Detection" subtitle="Load a scan, choose the anatomical view, and review the candidate region summary.">
+        <SampleImageSelector
+          category="tumor"
+          onSelect={(_sample, selectedFile) => {
+            setFile(selectedFile)
+          }}
+        />
         <div className="tumor-control-grid">
           <div className="form-grid">
             <FilePicker label="MRI/Scan Image" onChange={setFile} />

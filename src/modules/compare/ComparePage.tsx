@@ -30,6 +30,7 @@ import {
 } from '../../core/services/researchWorkbench'
 import type { RunSummary } from '../../core/services/contracts'
 import { buildCompareImageVisuals } from './compareVisuals'
+import { SampleImageSelector } from '../../components/SampleImageSelector'
 import {
   buildInterpretation,
   buildStageTwoTemplate,
@@ -816,6 +817,13 @@ export function ComparePage() {
       <div className="compare-column compare-column-left">
         <div className="compare-step compare-step-1">
           <Panel title="Step 1: Load and align" subtitle="Use matched images so the comparison measures structure, not capture drift.">
+            <SampleImageSelector
+              category="compare"
+              onSelect={(_sample, primaryFile, secondaryFile) => {
+                if (primaryFile) setFileAt(0, primaryFile)
+                if (secondaryFile) setFileAt(1, secondaryFile)
+              }}
+            />
             <div className="compare-step1-layout">
               <div className="compare-step1-left">
                 <div className="compare-upload-stack">

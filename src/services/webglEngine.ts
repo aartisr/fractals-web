@@ -274,7 +274,10 @@ export class WebGLFractalRenderer {
   private currentFps = 60;
   private lastFpsUpdate = performance.now();
 
-  constructor(private canvas: HTMLCanvasElement) {
+  private canvas: HTMLCanvasElement;
+
+  constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
     this.initGL();
   }
 
